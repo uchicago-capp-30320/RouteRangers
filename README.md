@@ -14,8 +14,6 @@ We pulled data from various city open data portals, City APIs, and scraped live 
 
 Interested in hearing more? Learn more about the App Architecture and Project Goals here
 
-![image](https://github.com/uchicago-capp-30320/RouteRangers/assets/114889806/5cebe05c-34a8-4ac4-9a23-7f0e009dff4e)
-
 
 ## Project Structure
 
