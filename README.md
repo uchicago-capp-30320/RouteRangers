@@ -15,4 +15,6 @@ The Route Rangers project consists of two main components:
 
 ## Coding Practices
 
+The following manual outlines the steps required to get started:
+
 - [Check out our coding practices!](./documentation/code-standards.md)
