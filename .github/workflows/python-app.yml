@@ -40,4 +40,5 @@ jobs:
     - name: Test with pytest
       run: |
         cd backend
-        pytest
+        pip list
+        python -m pytest
