@@ -9,10 +9,7 @@ This tool will help City Planners and Locals alike as they:
 
 Go to _____
 
-How was this data collected?
-We pulled data from various city open data portals, City APIs, and scraped live GTFS data to create a robust picture of local transit. 
 
-Interested in hearing more? Learn more about the App Architecture and Project Goals here
 
 
 ## Project Structure
@@ -24,6 +21,11 @@ Interested in hearing more? Learn more about the App Architecture and Project Go
 - frontend: Houses all frontend code for user interface and client-side functionalities.
 
 - database: Contains scripts, configurations, and files for the project's database setup, management, and interactions.
+
+## How was this data collected?
+We pulled data from various city open data portals, City APIs, and scraped live GTFS data to create a robust picture of local transit. 
+
+**Interested in hearing more?** Learn more about the App Architecture and Project Goals here
 
 ## Authors
 
