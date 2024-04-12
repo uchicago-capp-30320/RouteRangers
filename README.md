@@ -18,3 +18,23 @@ The Route Rangers project consists of two main components:
 The following manual outlines the steps required to get started:
 
 - [Check out our coding practices!](./documentation/code-standards.md)
+
+## Project Structure
+
+- documentation: Contains relevant project information.
+
+- backend: Includes server-side scripts, API extraction scripts, and other backend-related scripts.
+
+- frontend: Houses all frontend code for user interface and client-side functionalities.
+
+- database: Contains scripts, configurations, and files for the project's database setup, management, and interactions.
+
+## Authors
+
+- Megan Moore
+- Benjamin Leiva
+- Lisette Solís
+- JP Martínez
+- Katherine Dumais
+- Matt Jackson
+- Jimena Salinas
