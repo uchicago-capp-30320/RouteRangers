@@ -1,7 +1,5 @@
 # Route Rangers
 
-Our Solution:
-
 The Route Rangers project seeks to provide an innovative solution to bridge the gap between policy makers and the public across the US, enabling urban transit policy makers to utilize data analytics while incorporating public feedback in transit planning. The purpose of our planning tool is to revitalize public interest and participation in transit, driving increased ridership and creating more efficient networks that meet urban community needs.
 
 The Route Rangers project consists of two main components:
