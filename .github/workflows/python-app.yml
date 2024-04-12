@@ -29,6 +29,7 @@ jobs:
         pip install poetry==1.8.2
         cd backend
         if [ -f pyproject.toml ]; then poetry install; fi
+        pip list
     - name: Lint with black
       run: |
         # stop the build if there are Python syntax errors or undefined names
@@ -40,5 +41,5 @@ jobs:
     - name: Test with pytest
       run: |
         cd backend
-        pip list
-        python -m pytest
+        poetry install pytest
+        pytest
