@@ -1,18 +1,21 @@
-# Route Rangers
+# Welcome to Our Community Planning Tool! 
+The transit planning tool aims to revitalize public interest and participation in transit, driving increased ridership and creating more efficient networks that meet urban community needs. Learn about the City Transit Ecosystem! Show us routes that you would like in your neighborhood! Currently, we are working in New York, Chicago and Portland.
+This tool will help City Planners and Locals alike as they:
+•	Utilize data analytics to help facilitate a data informed transit planning process.
+•	Collect feedback to gain insights into rider preferences.
+•	Provide increased transparency in the route planning process.
 
-The Route Rangers project seeks to provide an innovative solution to bridge the gap between policy makers and the public across the US, enabling urban transit policy makers to utilize data analytics while incorporating public feedback in transit planning. The purpose of our planning tool is to revitalize public interest and participation in transit, driving increased ridership and creating more efficient networks that meet urban community needs.
+## How to run the App?
 
-The Route Rangers project consists of two main components:
+Go to _____
 
-1. A dashboard for policymakers from different cities to obtain information about the transit ecosystem.
-    
-2. A platform for transit users to provide feedback to transit authorities. 
+How was this data collected?
+We pulled data from various city open data portals, City APIs, and scraped live GTFS data to create a robust picture of local transit. 
 
-## Coding Practices
+Interested in hearing more? Learn more about the App Architecture and Project Goals here
 
-The following manual outlines the steps required to get started:
+![image](https://github.com/uchicago-capp-30320/RouteRangers/assets/114889806/5cebe05c-34a8-4ac4-9a23-7f0e009dff4e)
 
-- [Check out our coding practices!](./documentation/code-standards.md)
 
 ## Project Structure
 
