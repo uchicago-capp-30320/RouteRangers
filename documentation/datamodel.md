@@ -1,8 +1,6 @@
 # Datamodel prototype 
 
-The datamodel prototype can be found in the following link: 
-
-https://lucid.app/lucidchart/acedfe58-359d-42ba-8dc9-b9421517ead9/edit?invitationId=inv_a9fee266-b5b0-4243-bfa8-ccf7f44afd22&referringApp=slack&page=0_0#
+The datamodel prototype can be found in the following [lucidchart link](https://lucid.app/lucidchart/acedfe58-359d-42ba-8dc9-b9421517ead9/edit?invitationId=inv_a9fee266-b5b0-4243-bfa8-ccf7f44afd22&referringApp=slack&page=0_0#)
 
 In the diagram, each table has three features, the first column, identifies if a variable is categorized as Primary Key, Foreign Key or none, the second column represent the variable in the table –and therefore one column on the database–, and the third column represents the datatype.
 
