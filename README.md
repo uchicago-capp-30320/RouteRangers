@@ -1,17 +1,15 @@
-# Route Rangers
-The Route Rangers project seeks to provide an innovative solution to bridge the gap between policy makers and the public across the US, enabling urban transit policy makers to utilize data analytics while incorporating public feedback in transit planning. The purpose of our planning tool is to revitalize public interest and participation in transit, driving increased ridership and creating more efficient networks that meet urban community needs.
 
-The Route Rangers project consists of two main components:
+# Welcome to Our Community Planning Tool! 
+The transit planning tool aims to revitalize public interest and participation in transit, driving increased ridership and creating more efficient networks that meet urban community needs. Learn about the City Transit Ecosystem! Show us routes that you would like in your neighborhood! Currently, we are working in New York, Chicago and Portland.
 
-1. A dashboard for policymakers from different cities to obtain information about the transit ecosystem.
-    
-2. A platform for transit users to provide feedback to transit authorities. 
+This tool will help City Planners and Locals alike as they:
+-	Utilize data analytics to help facilitate a data informed transit planning process.
+-	Collect feedback to gain insights into rider preferences.
+-	Provide increased transparency in the route planning process.
 
-## Coding Practices
+## How to run the App?
 
-The following manual outlines the steps required to get started:
-
-- [Check out our coding practices!](./documentation/code-standards.md)
+Go to _____
 
 ## Project Structure
 
@@ -22,6 +20,17 @@ The following manual outlines the steps required to get started:
 - frontend: Houses all frontend code for user interface and client-side functionalities.
 
 - database: Contains scripts, configurations, and files for the project's database setup, management, and interactions.
+
+## Coding Practices
+
+The following manual outlines the steps required to get started:
+- [Check out our coding practices!](./documentation/code-standards.md)
+
+## How was this data collected?
+We pulled data from various city open data portals, City APIs, and scraped live GTFS data to create a robust picture of local transit. 
+
+**Interested in hearing more?** Learn more about the App Architecture and Project Goals  [here](www.example.com)
+
 
 ## Authors
 
