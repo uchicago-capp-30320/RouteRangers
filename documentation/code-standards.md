@@ -77,17 +77,27 @@ Linting will be a blocking problem in backend PR’s because unnecessary reforma
 
 For Python we will be using [black](https://pypi.org/project/black/) and [flake8](https://flake8.pycqa.org/en/latest/) linting tooling using all of the declared defaults (there are ways to create config files and declare certain linting rules but we will leave that out for now). 
 
-Setting up VSCode for linting. There are a lot of resources to set up vscode linting if you google around, I find it easiest to do the following things (TODO edit if you encounter other steps):
+Setting up VSCode for linting. There are a lot of resources to set up vscode linting if you google around, I find it easiest to do the following things:
 
-1. In settings turn on ‘format on save’ for user and workspace (idk the diff so covering all bases)
+1. In the Extensions tab (left-most column in VS Code, the symbol with the four blocks), install `Flake8`  and `Black Formatter`  extensions (both licensed by Microsoft)
+2. In main directory, create a folder named `.vscode`
+3. In `.vscode` folder, create a `settings.json`  file
+4. Paste the following inside the (empty) `settings.json` file:
 
-2. Search ‘black’ and update the ‘args’ with `--line-length=88` (use and workspace)
-
-3. Do the same for ‘flake8’ 
-
-4. Test by writing a really long line of python and saving and see it reformat beautifully!
-
-5. Or you can lint from the command line see the [black docs](https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html#usage)
+   ```
+   {
+    "editor.formatOnSave": true,
+    "black-formatter.args": [
+        "--line-length",
+        "88",
+    ],
+    "flake8.args": [
+        "--max-line-length",
+        "88",
+    ]
+   }
+   ```
+5. Done!
 
 #### For JavaScript 
 
