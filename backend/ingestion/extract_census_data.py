@@ -32,24 +32,24 @@ city_fips = {
 ########################################################################################
 
 
-def valid_command_args() -> str:
+def valid_command_line_arg(supported_cities: List[str]) -> str:
     """
     Validates command line use and extracts argument.
 
     Inputs:
-        None
+        available_cities (List[str]): List of cities that are valid inputs.
 
     Returns:
-      A string refering to the city to pull data from.
+      A string referring to the city to pull data from.
     """
     # Check syntax
     if len(sys.argv) != 2:
         sys.exit("Retype command as 'python3 extract_census_data.py <city_name>'")
     # Check city
     city = sys.argv[1]
-    if city not in city_fips:
+    if city not in supported_cities:
         sys.exit(
-            "Unrecognized city." + f"Available options: {', '.join(city_fips.keys())}"
+            "Unsupported city." + f" Available options: {', '.join(supported_cities)}"
         )
     return city
 
@@ -89,6 +89,36 @@ def get_census_data(
         return []
 
 
+# def store_census_data(data: List[Dict], city: str) -> None:
+#     """
+#     Stores retrieved data in csv file.
+
+#     Inputs:
+#         - data (list of dicts): output from get_census_data() function
+#         - city (str): city of analysis
+
+#     Returns csv file of requested city data, with proper variable names.
+#     """
+#     output_dir = os.path.join(os.getcwd(), f"{sys.argv[1]}_data.csv")
+#     if data:
+#         with open(output_dir, "w", newline="") as file:
+#             fieldnames = [
+#                 variable_ids.get(header, header.replace(" ", "_"))
+#                 for header in data[0].keys()
+#             ]
+#             if len(fieldnames) >= 4:
+#                 fieldnames = fieldnames[-4:] + fieldnames[:-4]
+#             writer = csv.DictWriter(file, fieldnames=fieldnames)
+#             writer.writeheader()
+#             for row in data:
+#                 row_renamed = {
+#                     variable_ids.get(k, k.replace(" ", "_")): v for k, v in row.items()
+#                 }
+#                 writer.writerow(row_renamed)
+#     else:
+#         logging.warning(f"No {city} data to store.")
+
+
 def store_census_data(data: List[Dict], city: str) -> None:
     """
     Stores retrieved data in csv file.
@@ -96,26 +126,26 @@ def store_census_data(data: List[Dict], city: str) -> None:
     Inputs:
         - data (list of dicts): output from get_census_data() function
         - city (str): city of analysis
+        - filename (str): filename for the output CSV
 
-    Returns csv file of requested city data, with proper variable names.
+    Stores csv file of requested city data, with proper variable names.
     """
-    output_dir = os.path.join(os.getcwd(), f"{sys.argv[1]}_data.csv")
-    if data:
-        with open(output_dir, "w", newline="") as file:
-            fieldnames = [
-                variable_ids.get(header, header.replace(" ", "_"))
-                for header in data[0].keys()
-            ]
-            fieldnames = fieldnames[-4:] + fieldnames[:-4]
-            writer = csv.DictWriter(file, fieldnames=fieldnames)
-            writer.writeheader()
-            for row in data:
-                row_renamed = {
-                    variable_ids.get(k, k.replace(" ", "_")): v for k, v in row.items()
-                }
-                writer.writerow(row_renamed)
-    else:
-        logging.warning(f"No {city} data to store.")
+    output_dir = os.path.join(os.getcwd(), f"{city}_data.csv")
+    data_keys = set().union(*(d.keys() for d in data))
+    all_possible_fields = set(variable_ids.keys()).union(data_keys)
+    fieldnames = [
+        variable_ids.get(header, header.replace(" ", "_"))
+        for header in all_possible_fields
+    ]
+
+    with open(output_dir, "w", newline="") as file:
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in data:
+            row_renamed = {
+                variable_ids.get(k, k.replace(" ", "_")): v for k, v in row.items()
+            }
+            writer.writerow(row_renamed)
 
 
 def main():
@@ -127,7 +157,7 @@ def main():
     Returns:
         A csv file located in same directory.
     """
-    city = valid_command_args()
+    city = valid_command_line_arg(list(city_fips.keys()))
     state_code = city_fips[city]["state_fips"]
     county_codes = city_fips[city]["county_fips"]
     for county_code in county_codes:
