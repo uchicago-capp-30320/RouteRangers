@@ -89,36 +89,6 @@ def get_census_data(
         return []
 
 
-# def store_census_data(data: List[Dict], city: str) -> None:
-#     """
-#     Stores retrieved data in csv file.
-
-#     Inputs:
-#         - data (list of dicts): output from get_census_data() function
-#         - city (str): city of analysis
-
-#     Returns csv file of requested city data, with proper variable names.
-#     """
-#     output_dir = os.path.join(os.getcwd(), f"{sys.argv[1]}_data.csv")
-#     if data:
-#         with open(output_dir, "w", newline="") as file:
-#             fieldnames = [
-#                 variable_ids.get(header, header.replace(" ", "_"))
-#                 for header in data[0].keys()
-#             ]
-#             if len(fieldnames) >= 4:
-#                 fieldnames = fieldnames[-4:] + fieldnames[:-4]
-#             writer = csv.DictWriter(file, fieldnames=fieldnames)
-#             writer.writeheader()
-#             for row in data:
-#                 row_renamed = {
-#                     variable_ids.get(k, k.replace(" ", "_")): v for k, v in row.items()
-#                 }
-#                 writer.writerow(row_renamed)
-#     else:
-#         logging.warning(f"No {city} data to store.")
-
-
 def store_census_data(data: List[Dict], city: str) -> None:
     """
     Stores retrieved data in csv file.
