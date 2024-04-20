@@ -174,7 +174,7 @@ def add_extra_columns(
     # Would this mess up gtfs_kit i.e. do underlying functions index to a column
     # position rather than a name?
     feed_component.loc[:, "city"] = feed_city
-    feed_component.log[:, "agency"] = feed_agency
+    feed_component.loc[:, "agency"] = feed_agency
     # TODO: decide whether we need a new primary key or just add city/agency to JOINs
     # after the fact.
     # If the former, figure out how to pass in the proper primary key column name given
@@ -201,6 +201,7 @@ def combine_different_feeds(
     feed_url_list: list[str], output_folder: None | str = None
 ) -> dict[pd.DataFrame | gpd.GeoDataFrame]:
     """
+    TODO: COMPLETE THIS
     Run the entire GTFS ingestion pipeline for multiple endpoint URLs.
 
     Optional parameter output_folder
@@ -263,8 +264,10 @@ def combine_different_feeds(
 if __name__ == "__main__":
     print(f"Getting feed from {METRA_URL}...")
     feed_city, feed_agency, feed = ingest_gtfs_feed(METRA_URL)
-    feed_dict = get_gtfs_component_dfs(feed_city, feed_agency, feed)
-    print(feed_dict)
+    print(add_extra_columns(feed_city, feed_agency, feed.routes))
+    # feed_dict = get_gtfs_component_dfs(feed_city, feed_agency, feed)
+    # print(feed_dict)
+
     # TODO: BUILD UP TO:
     # gtfs_data_for_postgres = combine_different_feeds(ALL_PILOT_CITY_URLS)
     # TODO: send this data into Postgres (or at least into thing that sends it
