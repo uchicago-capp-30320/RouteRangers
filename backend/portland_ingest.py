@@ -141,10 +141,10 @@ sorted_data.rename(columns={"ons": "riders"}, inplace=True)
 sorted_data["date"] = pd.to_datetime(sorted_data["date"])
 
 # modify location_id to include city code
-sorted_data["location_id"] = sorted_data["location_id"].apply(lambda x: f"PDX-{x}")
+sorted_data["location_id"] = sorted_data["location_id"].apply(lambda x: f"Portland-{x}")
 
 # export final data set in JSON format
-output_file = folder_path + "PDX_ridership.json"
+output_file = folder_path + "Portland_ridership.json"
 sorted_data.to_json(
     output_file,
     orient="records",
