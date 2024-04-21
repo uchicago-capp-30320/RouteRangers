@@ -5,7 +5,7 @@ import pytest
 @pytest.fixture
 def dataset():
 
-    file_path = "/Users/jimenasalinas/Library/CloudStorage/Box-Box/Route Rangers/Transit dataset exploration/Portland Ridership Data/portland_ridership/sorted_data.json"
+    file_path = "/Users/jimenasalinas/Library/CloudStorage/Box-Box/Route Rangers/Transit dataset exploration/Portland Ridership Data/portland_ridership/PDX_ridership.json"
 
     data = pd.read_json(file_path)
 
