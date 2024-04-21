@@ -10,6 +10,9 @@ python = "^3.11"
 pytest = "^8.1.1"
 black = "^24.3.0"
 flake8 = "^7.0.0"
+django = "^5.0.4"
+python-dotenv = "^1.0.1"
+psycopg2-binary = "^2.9.9"
 
 
 [build-system]
