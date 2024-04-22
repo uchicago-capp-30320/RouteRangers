@@ -42,4 +42,6 @@ jobs:
       run: |
         cd backend
         pip install pytest
+        pip install poetry==1.8.2
+        if [ -f pyproject.toml ]; then poetry install; fi
         pytest
