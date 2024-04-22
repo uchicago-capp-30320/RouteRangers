@@ -10,7 +10,7 @@ https://trimet.org/publicrecords/recordsrequest.htm
 The  Receipt ID for this Public Records Request is PRR 2024-254.
 
 VARIABLES:
-    - location_id: (str) combines the city abbreviation "PDX" with a given stop_id
+    - location_id: (str) combines the city "Portland" with a given stop_id
     - date: (datetime) represents a day in the format yyyy-mm-dd, only includes
     values for 2023
     - riders: (int) represents the average number of bus and light rail Tri Met
