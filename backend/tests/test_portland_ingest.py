@@ -1,11 +1,14 @@
 import pandas as pd
 import pytest
+import os
 
 
 @pytest.fixture
 def dataset():
 
-    file_path = "/Users/jimenasalinas/Library/CloudStorage/Box-Box/Route Rangers/Transit dataset exploration/Portland Ridership Data/portland_ridership/PDX_ridership.json"
+    file_path = os.path.join(
+        os.path.dirname(__file__), "..", "data", "pdx_ridership.json"
+    )
 
     data = pd.read_json(file_path)
 
