@@ -2,7 +2,7 @@ import os
 import sys
 import pytest
 from unittest.mock import patch, mock_open
-from ..backend.ingestion.extract_census_data import (
+from ingestion.extract_census_data import (
     valid_command_line_arg,
     get_census_data,
     store_census_data,
