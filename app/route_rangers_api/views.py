@@ -7,6 +7,13 @@ from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
 
+
+class MarkersMapView(generic.base.TemplateView):
+    template_name = "map.html"
+
+
 def index(request):
-    return HttpResponse("""This will be changed to a template for
-                         the routerangers index webpage""")
+    return HttpResponse(
+        """This will be changed to a template for
+                         the routerangers index webpage"""
+    )
