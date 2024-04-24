@@ -15,6 +15,7 @@ python-dotenv = "^1.0.1"
 psycopg2-binary = "^2.9.9"
 pandas = "^2.2.2"
 pytest-django = "^4.8.0"
+ruff = "^0.4.1"
 
 
 [build-system]
