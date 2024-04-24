@@ -5,6 +5,7 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import gtfs_kit as gk
 import re
+from datetime import datetime
 
 ### Constants
 
@@ -169,24 +170,51 @@ def add_extra_columns(
     live in the same table in Postgres irrespective of which city they came from
     originally, reducing the total number of tables required.
     """
-    print(feed_component.columns)
+    orig_columns = feed_component.columns
     # TODO: Question: can I force these to be the leftmost columns?
     # Would this mess up gtfs_kit i.e. do underlying functions index to a column
     # position rather than a name?
     feed_component.loc[:, "city"] = feed_city
     feed_component.loc[:, "agency"] = feed_agency
-    # TODO: decide whether we need a new primary key or just add city/agency to JOINs
-    # after the fact.
-    # If the former, figure out how to pass in the proper primary key column name given
-    # which component of GTFS feed the input GeoDataFrame came from.
-    # This may involve inference based on the full set of component columns,
-    # or referencing FILE_TO_PRIMARY_KEY above, or both
-    # For now, leaving it as is
+    # Add new unique primary key to prevent name collisions between cities.
+    # Includes city AND, if necessary, agency
+    # TODO: consider making this a helper function to make more DRY
+    # NOTE: Flake8 and black don't seem to be linting this to break up 88+ char lines
+    # routes
+    if "route_id" in orig_columns:
+        feed_component.loc[:, "uniq_route_id"] = (
+            f"{feed_city}_{feed_agency}_" + feed_component.loc[:, "route_id"]
+        )
+    # stops
+    if "stop_id" in orig_columns:
+        feed_component.loc[:, "uniq_stop_id"] = (
+            f"{feed_city}_{feed_agency}_" + feed_component.loc[:, "stop_id"]
+        )
+    # trips
+    if "trip_id" in orig_columns:
+        feed_component.loc[:, "uniq_stop_id"] = (
+            f"{feed_city}_{feed_agency}_" + feed_component.loc[:, "trip_id"]
+        )
+    # transfers
+    if "from_stop_id" in orig_columns:
+        feed_component.loc[:, "uniq_from_stop_id"] = (
+            f"{feed_city}_{feed_agency}_" + feed_component.loc[:, "from_stop_id"]
+        )
+        feed_component.loc[:, "uniq_to_stop_id"] = (
+            f"{feed_city}_{feed_agency}_" + feed_component.loc[:, "to_stop_id"]
+        )
+    # shapes
+    if "shape_id" in orig_columns:
+        feed_component.loc[:, "uniq_shape_id"] = (
+            f"{feed_city}_{feed_agency}_" + feed_component.loc[:, "shape_id"]
+        )
 
-    # TODO: feed_component.loc[:,"last_updated"] = datetime.now() in some format.
-    # In a "real" application,
-    # Perhaps call that from outside the function and pass it in so it's the
-    # same for all entries from a particular GTFS feed as it gets processed
+    # Static feeds may be scraped on a schedule; system should preserve for users
+    # how recent the data is
+    NOW = datetime.now()
+    feed_component.loc[:, "last_updated"] = NOW
+    # Perhaps pass NOW in from outside the function, so it's the same for all entries
+    # from a particular GTFS feed as it gets processed
 
     # TODO: convert lat/long columns to Django and Postgres-compatible Point() objects
     # if present

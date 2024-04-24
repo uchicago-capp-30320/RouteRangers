@@ -66,10 +66,10 @@ def test_get_gtfs_component_dfs_cta(cta_feed):
 
 
 def test_add_extra_columns(metra_feed):
-    # TODO: test whether city and unique_id columns are added properly
     feed_city, feed_agency, feed = metra_feed
     component = add_extra_columns(feed_city, feed_agency, feed.routes)
     assert len(component.loc[:, "city"].unique()) == 1
     assert len(component.loc[:, "agency"].unique()) == 1
     assert component.loc[:, "city"].unique()[0] == "Chicago"
     assert component.loc[:, "agency"].unique()[0] == "Metra"
+    assert component.loc[:, "uniq_route_id"].str.startswith("Chicago_Metra_").all()
