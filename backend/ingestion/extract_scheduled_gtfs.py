@@ -87,11 +87,7 @@ FILE_TO_PRIMARY_KEY = {
 
 ### Functions
 
-# TODO: write a test for every function as you write it
 
-
-# ingest_transit_data()
-# use gtfs_kit to read in feed URL as object or collection of DataFrames (can you store dataframes in a dict?)
 def ingest_gtfs_feed(feed_url: str) -> tuple:
     """
     Use gtfs_kit library to ingest the most up-to-date scheduled (static) GTFS
@@ -216,12 +212,10 @@ def add_extra_columns(
     # Perhaps pass NOW in from outside the function, so it's the same for all entries
     # from a particular GTFS feed as it gets processed
 
-    # TODO: convert lat/long columns to Django and Postgres-compatible Point() objects
-    # if present
-
     # TODO: miscellaneous cleanup (one thing: standardize CTA route names to
-    # standard English words for colors
-    # TODO: Consider adding a # sign to color column (or see if Postgres has a color data type)
+    # standard English words for colors)
+    # TODO: Consider adding a # sign to color column (or see if Postgres has a
+    # color data type)
     return feed_component
 
 
@@ -229,12 +223,14 @@ def combine_different_feeds(
     feed_url_list: list[str], output_folder: None | str = None
 ) -> dict[pd.DataFrame | gpd.GeoDataFrame]:
     """
-    TODO: COMPLETE THIS
     Run the entire GTFS ingestion pipeline for multiple endpoint URLs.
+    TODO: consider allowing this to take an arbitrary list of *args rather than
+    a list.
 
-    Optional parameter output_folder
+    Optional parameter output_folder allows for saving results to file storage.
     """
-    # TODO: initialize empty dataframes with the proper columns to concat to
+    # This doesn't seem to require initailizing empty dataframes with the proper
+    # columns to concat to -- it'll take those from the first dataframe processed
     all_routes = None
     all_trips = None
     all_stops = None
@@ -245,6 +241,7 @@ def combine_different_feeds(
 
     for this_url in feed_url_list:
         this_city, this_agency, this_feed = ingest_gtfs_feed(this_url)
+        print(f"{this_city} {this_agency} feed ingested")
         these_gtfs_dataframes = {
             name: add_extra_columns(this_city, this_agency, df)
             for name, df in get_gtfs_component_dfs(
@@ -252,22 +249,24 @@ def combine_different_feeds(
             ).items()
         }
 
-    for name, df in these_gtfs_dataframes.items():
-        # TODO: this in a  more programmatic way
-        if name == "routes":
-            all_routes = pd.concat(all_routes, df)
-        elif name == "trips":
-            all_trips = pd.concat(all_trips, df)
-        elif name == "stops":
-            all_stops = pd.concat(all_stops, df)
-        elif name == "stop_times":
-            all_stop_times = pd.concat(all_stop_times, df)
-        elif name == "shapes":
-            all_shapes = pd.concat(all_shapes, df)
-        elif name == "transfers":
-            all_transfers = pd.concat(all_transfers, df)
-        elif name == "shape_geometries":
-            all_shape_geometries = pd.concat(all_shape_geometries, df)
+        for name, df in these_gtfs_dataframes.items():
+            # TODO: this in a  more programmatic way
+            if name == "routes":
+                all_routes = pd.concat([all_routes, df])
+            elif name == "trips":
+                all_trips = pd.concat([all_trips, df])
+            elif name == "stops":
+                all_stops = pd.concat([all_stops, df])
+            elif name == "stop_times":
+                all_stop_times = pd.concat([all_stop_times, df])
+            elif name == "shapes":
+                all_shapes = pd.concat([all_shapes, df])
+            elif name == "transfers":
+                all_transfers = pd.concat([all_transfers, df])
+            elif name == "shape_geometries":
+                all_shape_geometries = pd.concat([all_shape_geometries, df])
+        print(f"{this_city} {this_agency} dataframes concatenated to whole")
+    # end for
 
     all_dfs = {
         "routes": all_routes,
@@ -279,6 +278,8 @@ def combine_different_feeds(
         "shape_geometries": all_shape_geometries,
     }
 
+    print(all_dfs)
+
     if output_folder is not None:
         for name, df in all_dfs.items():
             pd.to_csv(df, f"{output_folder}/{name}.csv")
@@ -286,20 +287,18 @@ def combine_different_feeds(
     return all_dfs
 
 
-# TODO: function for feeding data into Django and/or Postgres
+# TODO: function to convert lat/long and shapes.txt data into geometry objects.
+# May instead be done AFTER querying from backend depending on how much PostGIS
+# install cooperates.
+
+
+# TODO: function for feeding data into Django and/or Postgres (or at least into
+# thing that sends it into Postgres), CREATE-ing the relevant table if it doesn't
+# exist, and  UPDATE-ing it if not (if date feature enabled, keep old rows where
+# columns match with old data but overwrite with new date, rather than appending new)
 
 
 if __name__ == "__main__":
-    print(f"Getting feed from {METRA_URL}...")
-    feed_city, feed_agency, feed = ingest_gtfs_feed(METRA_URL)
-    print(add_extra_columns(feed_city, feed_agency, feed.routes))
-    # feed_dict = get_gtfs_component_dfs(feed_city, feed_agency, feed)
-    # print(feed_dict)
+    gtfs_data_for_postgres = combine_different_feeds(ALL_PILOT_CITY_URLS)
 
-    # TODO: BUILD UP TO:
-    # gtfs_data_for_postgres = combine_different_feeds(ALL_PILOT_CITY_URLS)
-    # TODO: send this data into Postgres (or at least into thing that sends it
-    # into Postgres), CREATE-ing the relevant table if it doesn't exist, and
-    # UPDATE-ing it if not
-    # (if data feature enabled, overwrite rows where some number of keys match
-    # with new data and new date, rather than appending new)
+    # TODO: send this data into Postgres

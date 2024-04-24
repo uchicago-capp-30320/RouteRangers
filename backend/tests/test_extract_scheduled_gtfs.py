@@ -6,6 +6,7 @@ from ingestion.extract_scheduled_gtfs import (
     METRA_URL,
     get_gtfs_component_dfs,
     add_extra_columns,
+    combine_different_feeds,
 )
 
 
@@ -73,3 +74,17 @@ def test_add_extra_columns(metra_feed):
     assert component.loc[:, "city"].unique()[0] == "Chicago"
     assert component.loc[:, "agency"].unique()[0] == "Metra"
     assert component.loc[:, "uniq_route_id"].str.startswith("Chicago_Metra_").all()
+
+
+def test_combine_different_feeds(cta_feed, metra_feed):
+    # TODO: consider making this a fixture
+    chicago_combined_dfs = combine_different_feeds([CTA_URL, METRA_URL])
+    assert "routes" in chicago_combined_dfs
+    assert "shapes" in chicago_combined_dfs
+    assert "trips" in chicago_combined_dfs
+    assert "stops" in chicago_combined_dfs
+    assert "stop_times" in chicago_combined_dfs
+    assert "transfers" in chicago_combined_dfs
+    # TODO: more detailed testing to make sure "Chicago_CTA_" and "Chicago_Metra_"
+    # are represented in the uniq_id column for each sub-sheet (for now, that
+    # seems minimally tested by test above this one)
