@@ -16,6 +16,7 @@ psycopg2-binary = "^2.9.9"
 pandas = "^2.2.2"
 pytest-django = "^4.8.0"
 ruff = "^0.4.1"
+requests = "^2.31.0"
 
 
 [build-system]
