@@ -41,5 +41,9 @@ jobs:
     - name: Test with pytest
       run: |
         cd backend
+        pip install poetry==1.8.2
         pip install pytest
+        pip install pandas
+        if [ -f pyproject.toml ]; then poetry install; fi
+        pip list
         pytest
