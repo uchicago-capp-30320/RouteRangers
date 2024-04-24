@@ -121,15 +121,21 @@ def create_daily_df(
     # Filter columns
     start_date, _ = build_start_end_date_str(date)
     daily_df["date"] = start_date
+
     daily_df["ridership"] = daily_df["ridership"].astype(float)
     daily_df["transfers"] = daily_df["transfers"].astype(float)
 
     # Group by to obtain ridership per station/route
     ridership = (
         daily_df.loc[:, DATASETS[dataset]["COLS_TO_KEEP"]]
-        .groupby(DATASETS[dataset]["GROUP_BY"])
+        .groupby(DATASETS[dataset]["GROUP_BY"],as_index=False)
         .agg("sum")
     )
+
+    if date.weekday() < 5:
+        ridership["weekday"] = 1
+    else:
+        ridership["weekday"] = 0
 
     return ridership
 
@@ -180,9 +186,12 @@ def crawl(start_date: datetime.date, end_date: datetime.date, dataset: str) -> N
         # TO DO: INGEST INTO DATABASE
         date += time_delta
 
+    return date_df
+
 
 if __name__ == "__main__":
-
-    start_date = datetime.datetime(2023, 3, 2)
-    end_date = datetime.datetime(2023, 3, 3)
-    crawl(start_date, end_date, "SUBWAY_RIDERSHIP")
+    date = datetime.datetime(2023,12,2)
+    resp = extract_daily_data(DATASETS["BUS_RIDERSHIP"]["URL"],date)
+    df = create_daily_df(resp,date,"BUS_RIDERSHIP")
+    for row in df.itertuples():
+        print(row.bus_route)

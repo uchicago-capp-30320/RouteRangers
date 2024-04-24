@@ -10,6 +10,9 @@ python = "^3.11"
 pytest = "^8.1.1"
 black = "^24.3.0"
 flake8 = "^7.0.0"
+requests = "^2.31.0"
+pandas = "^2.2.2"
+sodapy = "^2.2.0"
 
 
 [build-system]
