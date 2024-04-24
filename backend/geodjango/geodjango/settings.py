@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    #"django.contrib.gis",
+    # "django.contrib.gis",
 ]
 
 MIDDLEWARE = [
@@ -86,16 +86,16 @@ WSGI_APPLICATION = "geodjango.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-#GDAL_LIBRARY_PATH = "~/opt/homebrew/Cellar/gdal/3.8.5_1/lib/libgdal.dylib"
+# GDAL_LIBRARY_PATH = "~/opt/homebrew/Cellar/gdal/3.8.5_1/lib/libgdal.dylib"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": "django.contrib.gis.db.backends.postgis",  # "django.db.backends.postgresql",
         "NAME": DB_NAME,
         "USER": DB_USER,
-        "PASSWORD" : DB_PASS,
-        "PORT" : DB_PORT,
-        "HOST" : DB_HOST
+        "PASSWORD": DB_PASS,
+        "PORT": DB_PORT,
+        "HOST": DB_HOST,
     },
 }
 
