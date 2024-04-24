@@ -39,6 +39,6 @@ jobs:
       run: poetry install
       if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
     - name: Lint with black
-      run: poetry run black .
+      run: poetry run black . --check
     - name: Test with pytest
       run: poetry run pytest
