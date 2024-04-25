@@ -98,6 +98,7 @@ Setting up VSCode for linting. There are a lot of resources to set up vscode lin
    }
    ```
 5. Done!
+An alternative method is to just do it on the command line by running `black backend/` or whatever `black <filepath_with_python_code>` to automatically lint all changed files for you. 
 
 #### For JavaScript 
 

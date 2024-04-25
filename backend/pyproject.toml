@@ -13,6 +13,9 @@ flake8 = "^7.0.0"
 pandas = "^2.2.2"
 geopandas = "^0.14.3"
 gtfs-kit = "^6.1.0"
+django = "^5.0.4"
+python-dotenv = "^1.0.1"
+psycopg2-binary = "^2.9.9"
 
 
 [build-system]
