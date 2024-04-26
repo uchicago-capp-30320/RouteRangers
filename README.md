@@ -18,6 +18,7 @@ See [Architecture and Deployment](./documentation/architecture-and-deployment.md
     - [Frontend Design](./documentation/design.md)
     - [Endpoint Design](./documentation/endpoints.md)
     - [Architecture and Deployment](./documentation/architecture-and-deployment.md)
+    - [Data Sources](./documentation/data-sources.md)
 
 - `app/`: Contains the django app which is composed of
     - `app/geodjango` is the web app orchestration where settings and app orchestration is done
