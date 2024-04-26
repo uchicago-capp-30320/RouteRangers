@@ -51,17 +51,11 @@ Portland:
 
 The demographic data ingestion scripts utilize data from the following sources:
 
-- Census 2020:
+- Census 2020: Provides data at the state, county, and census tract levels.
 
-Provides data at the state, county, and census tract levels.
+- ACS 2022 5-Year Estimates: Provodes data at the state, county, census tract, and block group levels.
 
-- ACS 2022 5-Year Estimates:
-
-Provodes data at the state, county, census tract, and block group levels.
-
-- PDB 2022:
-
-Provides data at the state, county, census tract, and block group levels.
+- PDB 2022: Provides data at the state, county, census tract, and block group levels.
 
 #### Variables
 
@@ -82,7 +76,7 @@ The demographic data ingestion script extracts the following key variables:
 
 Unlike GTFS, ridership data is not standardized across different transit authorities, and the level of granularity and format varies across cities.
 
-- New York City:
+#### New York City:
 
 Ridership data from the MTA is pulled from the New York State Data Portal from two different sources (i) Bus Ridership dataset and (ii) Subway Ridership dataset which are extracted using the State of New York API.
 
@@ -91,7 +85,7 @@ Each row of the MTA Bus Ridership dataset counts the total number of people who 
 Each observation of the MTA Subway Ridership dataset counts the total number of people who enters a station at the hour level disaggregating by the different kinds of fares. To fit into the data model the data is aggregated at the daily level to obtain the total number of riders at the daily level on the subway station. The information publicly available on this dataset dates back to February 2022.
 
 
-- Chicago:
+#### Chicago:
 
 Ridership data for CTA buses and trains (last updated: Jan. 25, 2024) is accessible via point-and-click download on the City of Chicago Open Data Portal, or via API endpoint with valid API key (which we have yet to set up).
 
@@ -102,9 +96,9 @@ Each row of data for CTA train stations counts the total number of people who ta
 As far as we know, daily Metra ridership data on a per-stop basis is not readily available; total ridership of each line per year is available here, and it may be possible to obtain monthly ridership figures by line with some complicated web scraping (e.g. of pages like this one). The latest per-station boarding data we could find is from 2018 (i.e. a pre-COVID year, when ridership was much higher and thus unreliable for present-day use) and would need to be web scraped or extracted from PDF. Given the effort-to-reward ratio of getting Metra data of any quality, doing so is a lower priority for us.
 
 
-- Portland:
+#### Portland:
 
-The ridership data for Portland is not openly available through an API. In order to obtain ridership data, our team reached out to the TriMet Public Records department. The department answered our request, PRR 2024-254, with a set of 6 csv files with ridership data aggregated at the Saturday, Sunday, Weekday level by season for 2023 for each route. However, the department only provided records for spring and summer. For future inquiries, the TriMet public records department can be reached using this link: https://trimet.org/publicrecords/recordsrequest.htm
+The ridership data for Portland is not openly available through an API. In order to obtain ridership data, our team reached out to the TriMet Public Records department. The department answered our request, PRR 2024-254, with a set of 6 csv files with ridership data aggregated at the Saturday, Sunday, Weekday level by season for 2023 for each route. However, the department only provided records for spring and summer. For future inquiries, the TriMet public records department can be reached using this link: https://trimet.org/publicrecords/recordsrequest.htm. In a follow-up request the Public Records department provided the remaining seasons: fall and winter 2023.
 
 In order to match the data model, the aggregated data sets were reformatted to expand the data aggregated at the Saturday, Sunday, Weekday level by season for 2023 into data at the date and route level.
 
