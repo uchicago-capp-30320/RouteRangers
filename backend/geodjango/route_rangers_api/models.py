@@ -21,7 +21,7 @@ class Demographics(models.Model):
     )  # Check if it's worth to keep or if we should add a method
     county = models.CharField(max_length=15)  # Same as above
     population = models.IntegerField()
-    age = models.IntegerField()
+    #age = models.IntegerField()
     median_income = models.IntegerField()
     transportation_to_work = models.CharField(
         verbose_name="Means of Transportation to Work"
@@ -59,7 +59,8 @@ class BikeStation(models.Model):
 class BikeRidership(models.Model):
     station = models.ForeignKey(BikeStation, on_delete=models.PROTECT)
     date = models.DateField()
-    ridership = models.IntegerField()
+    n_started = models.IntegerField()
+    n_ended = models.IntegerField()
 
 #################################
 ######## SURVEY MODELS ##########
