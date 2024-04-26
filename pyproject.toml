@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "api"
+name = "app"
 version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
@@ -17,8 +17,9 @@ django = "^5.0.4"
 python-dotenv = "^1.0.1"
 psycopg2-binary = "^2.9.9"
 matplotlib = "^3.8.4"
-
-
+pytest-django = "^4.8.0"
+ruff = "^0.4.1"
+requests = "^2.31.0"
 
 [build-system]
 requires = ["poetry-core"]

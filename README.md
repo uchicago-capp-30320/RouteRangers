@@ -13,13 +13,25 @@ Go to _____
 
 ## Project Structure
 
-- documentation: Contains relevant project information.
+- `documentation/`: Contains relevant project implementation standards, design and planning information.
+    - [coding standards](./documentation/code-standards.md)
+    - [data model](./documentation/datamodel.md)
+    - [frontend design](./documentation/design.md)
+    - [endpoints](./documentation/endpoints.md)
 
-- backend: Includes server-side scripts, API extraction scripts, and other backend-related scripts.
+- `app/`: Contains the django app which is composed of
+    - `app/geodjango` is the web app orchestration where settings and app orchestration is done
+    - `app/route_rangers_api` is the primary space for django app work
+        - `app/route_rangers_api/models.py` defines the db table schemas and creates an ORM for ingestion and views to interact with
+        - `app/route_rangers_api/views.py` define ways that the data is pulled from the tables and prepped for frontend visibility
+        - `app/route_rangers_api/templates/` html templates for frontend pages
+        - `app/route_rangers_api/static/` folder for frontend css and javascript files 
+        - `app/route_rangers_api/tests.py`tests for testing the database, models, views (django stuff)
+        - `app/route_rangers_api/urls.py` defined routes from the route rangers app that get put under the banner of `<weburl>:<port>/app/` so for example, if the route `/map` is defined within this file, then it would be called `<weburl>:<port>/app/map`
 
-- frontend: Houses all frontend code for user interface and client-side functionalities.
+- `ingestion`: python scripts to pull transit and demographic data to prep db loading
+- `tests`: pytests, primarily for testing ingestion
 
-- database: Contains scripts, configurations, and files for the project's database setup, management, and interactions.
 
 ## Coding Practices
 
