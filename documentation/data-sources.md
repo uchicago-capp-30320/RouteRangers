@@ -71,6 +71,16 @@ The demographic data ingestion script extracts the following key variables:
 
 - Disability: Represents data related to individuals with disabilities.
 
+- Toatl People, Transportation for work:	Total number of people considered for mean of transportation to work question
+
+- Total Transportation for work (car):	Number of people that use cars as mean of transportation to work
+
+- Total Transportation for work (public transportation): Number of people that use public transportation as mean of transportation to work
+  
+- Work Communiting Time:	Average time for work commute in census tract
+  
+- Vehicles Available:	Number of vehicles available in census tract
+
 
 ### Ridership Data Overview
 
