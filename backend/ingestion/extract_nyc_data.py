@@ -7,7 +7,9 @@ import time
 import pandas as pd
 import datetime
 import os
+import pytz
 from dotenv import load_dotenv
+
 
 #########################
 # Load and define variables
@@ -35,6 +37,8 @@ DATASETS = {
         "GROUP_BY": ["date", "station_complex_id"],
     },
 }
+
+NY_TZ = pytz.timezone("America/New_York")
 
 
 # This function should be moved to a utils.py file
@@ -91,7 +95,7 @@ def extract_daily_data(
         elif (
             resp.status_code == 202
         ):  # API docs indicate that OK Status Codes are 200 and 202
-            break  ##TO DO: Add retry functionality
+            break  ##TODO: Add retry functionality
         else:
             break
 
@@ -128,7 +132,7 @@ def create_daily_df(
     # Group by to obtain ridership per station/route
     ridership = (
         daily_df.loc[:, DATASETS[dataset]["COLS_TO_KEEP"]]
-        .groupby(DATASETS[dataset]["GROUP_BY"],as_index=False)
+        .groupby(DATASETS[dataset]["GROUP_BY"], as_index=False)
         .agg("sum")
     )
 
@@ -161,9 +165,10 @@ def build_start_end_date_str(date: datetime.datetime) -> Tuple[str, str]:
     Creates two strings to pass as filters on the query for
     a request to the NYC Portal
     """
+    start_date = date.astimezone(NY_TZ)
     time_delta = datetime.timedelta(days=1)
-    end_date = date + time_delta
-    start_date = date.strftime("%Y-%m-%d")
+    end_date = start_date + time_delta
+    start_date = start_date.strftime("%Y-%m-%d")
     end_date = end_date.strftime("%Y-%m-%d")
 
     return start_date, end_date
@@ -183,15 +188,14 @@ def crawl(start_date: datetime.date, end_date: datetime.date, dataset: str) -> N
         print(f"Obtaining information for {date.strftime('%Y-%m-%d')} for {dataset}")
         responses = extract_daily_data(url=url, date=date, session=session)
         date_df = create_daily_df(responses, date, dataset)
-        # TO DO: INGEST INTO DATABASE
+        # TODO: INGEST INTO DATABASE
         date += time_delta
 
     return date_df
 
-
 if __name__ == "__main__":
-    date = datetime.datetime(2023,12,2)
-    resp = extract_daily_data(DATASETS["BUS_RIDERSHIP"]["URL"],date)
-    df = create_daily_df(resp,date,"BUS_RIDERSHIP")
+    date = datetime.datetime(2023, 9, 7, tzinfo=NY_TZ)
+    resp = extract_daily_data(DATASETS["BUS_RIDERSHIP"]["URL"], date)
+    df = create_daily_df(resp, date, "BUS_RIDERSHIP")
     for row in df.itertuples():
         print(row.bus_route)
