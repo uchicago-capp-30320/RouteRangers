@@ -65,7 +65,9 @@ class TransitRidership(models.Model):
     Class that represent subway and bus ridership
     """
 
-    station = models.CharField(max_length=30)
+    ridership_unit = models.CharField(
+        max_length=30, verbose_name="Bus route / subway station"
+    )
     date = models.DateField()
     ridership = models.IntegerField()
 
