@@ -1,15 +1,7 @@
 from django.contrib.gis.db import models
 
-##TODO: Update function that can extract the census tract from the location
-## using the Census API
-
-
-def get_census_tract(location) -> str:
-    pass
-
-
 #################################
-######## TRANSIT MODELS #########
+###### DEMOGRAPHIC MODELS #######
 #################################
 
 
@@ -17,7 +9,6 @@ class Demographics(models.Model):
     """
     Class to represent demographic data pulled from the ACS Survey
     """
-
     census_tract = models.CharField(
         max_length=15
     )  # Check length of census tract if its uniform to enforce it here
@@ -35,39 +26,66 @@ class Demographics(models.Model):
         verbose_name="Number of people with disability"
     )
 
-
-class TransitStation(models.Model):
-    """
-    Class that represent subway stations and bus stops
-    """
-
-    station_id = models.CharField(max_length=30, primary_key=True)
-    route = models.ForeignKey(TransitRoute, on_delete=models.PROTECT)
-    location = models.PointField()
-    census_tract = models.CharField(max_length=30, null=True)
-
-    def get_census_tract(self):
-        self.census_tract = get_census_tract(self.location)
+#################################
+######## TRANSIT MODELS #########
+#################################
 
 
 class TransitRoute(models.Model):
     """
     Class that represent subway lines and bus routes
     """
-
-    route_id = models.CharField(max_length=30, primary_key=True)
+    city = models.CharField(max_length=30)
+    route_id = models.CharField(max_length=30)
     geo_representation = models.LineStringField()
-    mode = models.CharField(max_length=10)
+    mode = models.CharField(verbose_name="Mode of transportation", max_length=10)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["city","route_id"],name="city route id")
+        ]
 
 
-class TransitRidership(models.Model):
+class TransitStation(models.Model):
     """
-    Class that represent subway and bus ridership
+    Class that represents bus stops and station complex
+    (i.e. CTA - Roosevelt)
     """
+    city = models.CharField(max_length=30)
+    station = models.CharField(max_length=30)
+    location = models.PointField()
 
-    ridership_unit = models.CharField(
-        max_length=30, verbose_name="Bus route / subway station"
-    )
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["city","station"],name="city station")
+        ]
+
+
+class StationRouteRelation(models.Model):
+    """
+    Class that represent relationship between Bus Stops/Subway Stations
+    and the routes it serve.
+    (i.e. row 1: CTA Roosevelt - Green Line
+     row 2: CTA Roosevelt - Red Line)
+    """
+    station = models.ForeignKey(TransitStation, on_delete=models.PROTECT)
+    route = models.ForeignKey(TransitRoute, on_delete=models.PROTECT)
+
+
+class RidershipRoute(models.Model):
+    """
+    Class that represent ridership at the route level
+    """
+    route = models.ForeignKey(TransitRoute, on_delete=models.PROTECT)
+    date = models.DateField()
+    ridership = models.IntegerField()
+
+
+class RidershipStation(models.Model):
+    """
+    Class that represent ridership at the station level
+    """
+    station = models.ForeignKey(TransitStation, on_delete=models.PROTECT)
     date = models.DateField()
     ridership = models.IntegerField()
 
@@ -76,20 +94,15 @@ class BikeStation(models.Model):
     """
     Class that represent bike sharing docking stations
     """
-
     station_id = models.CharField(max_length=30, primary_key=True)
     location = models.PointField()
     census_tract = models.CharField(max_length=30, null=True)
-
-    def get_census_tract(self):
-        self.census_tract = get_census_tract(self.location)
 
 
 class BikeRidership(models.Model):
     """
     Class that represent bike sharing ridership
     """
-
     station = models.ForeignKey(BikeStation, on_delete=models.PROTECT)
     date = models.DateField()
     n_started = models.IntegerField()
@@ -105,7 +118,6 @@ class Survey(models.Model):
     """
     Class that represents surveys deployed
     """
-
     name = models.CharField(max_length=30)
     created_at = models.DateTimeField("Created at", auto_now_add=True)
     questionnaire = models.JSONField()
@@ -115,7 +127,6 @@ class SurveyAnswer(models.Model):
     """
     Class that represents answers to surveys
     """
-
     user_id = models.CharField(max_length=30)
     response_date = models.DateTimeField("Survey response date", auto_now_add=True)
     city = models.CharField(max_length=30)
@@ -127,7 +138,6 @@ class PlannedRoute(models.Model):
     """
     Class that represents answers to 'Plan your route' feature
     """
-
     user_id = models.CharField(max_length=30)
     response_date = models.DateTimeField("Survey response date", auto_now_add=True)
     route = models.LineStringField()
