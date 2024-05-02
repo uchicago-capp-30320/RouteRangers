@@ -1,7 +1,6 @@
 from django.contrib.gis.db import models
 
 CITIES_CHOICES = {"CHI": "Chicago", "NYC": "New York", "PDX": "Portland"}
-
 #################################
 ###### DEMOGRAPHIC MODELS #######
 #################################
@@ -51,16 +50,29 @@ class TransitRoute(models.Model):
     """
     Class that represent subway lines and bus routes
     """
+    class TransitModes(models.IntegerChoices):
+        LIGHT_RAIL = 0, "Tram, Streetcar, Light rail."
+        SUBWAY = 1, "Subway, Metro"
+        RAIL = 2, "Rail"
+        BUS = 3, "Bus"
+        FERRY = 4, "Ferry"
+        CABLE_TRAM = 5, "Cable car"
+        AERIAL_LIFT = 6, " Aerial lift, suspended cable car"
+        FUNICULAR = 7, "Funicular"
+        TROLLEYBUS = 11, "Trolleybus"
+        MONORAIL = 12, "Monorail"
 
     city = models.CharField(max_length=30, choices=CITIES_CHOICES)
     route_id = models.CharField(max_length=30)
+    route_name = models.CharField(max_length=30)
+    color = models.CharField(max_length=30,null=True)
     geo_representation = models.LineStringField()
-    mode = models.CharField(verbose_name="Mode of transportation", max_length=10)
+    mode = models.IntegerField(verbose_name="Mode of transportation", choices=TransitModes.choices)
 
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=["city", "route_id"], name="city route id")
-        ]
+        ]    
 
 
 class TransitStation(models.Model):
@@ -70,12 +82,13 @@ class TransitStation(models.Model):
     """
 
     city = models.CharField(max_length=30, choices=CITIES_CHOICES)
-    station = models.CharField(max_length=30)
+    station_id = models.CharField(max_length=30)
+    station_name = models.CharField(max_length=30)
     location = models.PointField(null=True)
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["city", "station"], name="city station")
+            models.UniqueConstraint(fields=["city", "station_id"], name="city station")
         ]
 
 
