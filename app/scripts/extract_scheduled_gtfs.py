@@ -7,6 +7,12 @@ import gtfs_kit as gk
 import re
 from datetime import datetime
 
+import pdb
+
+
+from django.contrib.gis.geos import GEOSGeometry, LineString, Point
+
+
 ### Constants
 
 # Each of these links contains a static (scheduled) GTFS feed for its relevant
@@ -176,6 +182,8 @@ def add_extra_columns(
     # Includes city AND, if necessary, agency
     # TODO: consider making this a helper function to make more DRY
     # NOTE: Flake8 and black don't seem to be linting this to break up 88+ char lines
+
+    # TODO: Most of this does not match the data model and should be discarded
     # routes
     if "route_id" in orig_columns:
         feed_component.loc[:, "uniq_route_id"] = (
@@ -292,13 +300,32 @@ def combine_different_feeds(
 # install cooperates.
 
 
+def convert_stops_to_points(
+    stops: pd.DataFrame | gpd.GeoDataFrame,
+) -> pd.DataFrame | gpd.GeoDataFrame:
+    """Give the stops dataframe a GeoJSON-compliant format for lat/long info."""
+    pass
+
+
 # TODO: function for feeding data into Django and/or Postgres (or at least into
 # thing that sends it into Postgres), CREATE-ing the relevant table if it doesn't
 # exist, and  UPDATE-ing it if not (if date feature enabled, keep old rows where
 # columns match with old data but overwrite with new date, rather than appending new)
 
 
-if __name__ == "__main__":
-    gtfs_data_for_postgres = combine_different_feeds(ALL_PILOT_CITY_URLS)
+def run():
+    # pdb.set_trace()
+    feed_city, feed_agency, feed = ingest_gtfs_feed(METRA_URL)
+    gtfs_dataframe_dict = get_gtfs_component_dfs(feed_city, feed_agency, feed)
+    stops = gtfs_dataframe_dict["stops"]
+    print(stops)
 
-    # TODO: send this data into Postgres
+
+# if __name__ == "__main__":
+#     feed_city, feed_agency, feed = ingest_gtfs_feed(METRA_URL)
+#     gtfs_dataframe_dict = get_gtfs_component_dfs(feed_city, feed_agency, feed)
+#     stops = gtfs_dataframe_dict["stops"]
+#     # pdb.set_trace()
+#     print(stops)
+
+# gtfs_data_for_postgres = combine_different_feeds(ALL_PILOT_CITY_URLS)
