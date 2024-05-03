@@ -9,6 +9,12 @@ import datetime
 import os
 import pytz
 from dotenv import load_dotenv
+from app.route_rangers_api.models import (
+    TransitRoute,
+    RouteRidership,
+    TransitStation,
+    StationRidership,
+)
 
 ###########################
 # Load and define variables
@@ -21,6 +27,10 @@ REQUEST_DELAY = 0.2
 RESULTS_PER_PAGE = 50000  # Max number of results for API
 TIMEOUT = 30
 
+CHI_TZ = pytz.timezone("America/Chicago")
+START_DATE = datetime.datetime(2023, 1, 1, tzinfo=CHI_TZ)
+END_DATE = datetime.datetime(2024, 1, 1, tzinfo=CHI_TZ)
+
 DATASETS = {
     "BUS_RIDERSHIP": {
         "URL": "https://data.cityofchicago.org/resource/jyb9-n7fm.json",
@@ -31,9 +41,6 @@ DATASETS = {
         "ORDER_BY": "stationname",
     },
 }
-
-CHI_TZ = pytz.timezone("America/Chicago")
-
 
 ###########################
 # Data extraction
@@ -127,12 +134,75 @@ def build_start_end_date_str(date: datetime.datetime) -> Tuple[str, str]:
     return start_date, end_date
 
 
+#####################
+# Data Ingestion
+#####################
+
+
+def ingest_bus_ridership(
+    start_date: datetime.date = START_DATE, end_date: datetime.date = END_DATE
+) -> None:
+    """
+    Ingest the Chicago bus ridership data to the RouteRidership table
+    starting from start_date and ending at end_date (inclusive)
+    """
+    session = requests.Session()
+    url = DATASETS["BUS_RIDERSHIP"]["URL"]
+    date = start_date
+    time_delta = datetime.timedelta(days=1)
+    while date <= end_date:
+        date_ridership = extract_daily_data(
+            url, date, order_by="routename", session=session
+        )
+        ingest_daily_bus_ridership(date_ridership)
+        date += time_delta
+
+
+def ingest_daily_bus_ridership(daily_bus_json, date: datetime.date) -> None:
+    """
+    Ingest Chicago bus data into the RouteRidership table. It ingests the data for one
+    day of ridership
+    """
+    for row in daily_bus_json:
+        obs_route = TransitRoute.objects.filter(city="CHI", route_id=row["route"])[0]
+        obs = RouteRidership(route=obs_route, date=date, ridership=row["ridership"])
+        obs.save()
+
+
+def ingest_subway_ridership(start_date: datetime.date, end_date: datetime.date) -> None:
+    """
+    Ingest the Chicago subway ridership data to the RouteRidership table
+    starting from start_date and ending at end_date (inclusive)
+    """
+    session = requests.Session()
+    url = DATASETS["SUBWAY_RIDERSHIP"]["URL"]
+    date = start_date
+    time_delta = datetime.timedelta(days=1)
+    while date <= end_date:
+        date_ridership = extract_daily_data(
+            url, date, order_by="stationname", session=session
+        )
+        ingest_daily_subway_ridership(date_ridership, date)
+        date += time_delta
+
+
+def ingest_daily_subway_ridership(daily_subway_json, date: datetime.date) -> None:
+    """
+    Ingest Chicago subway data into the StationsRidership table. It ingests the data for one
+    day of ridership
+    """
+    for row in daily_subway_json:
+        obs_route = TransitStation.objects.filter(
+            city="CHI", station_id=row["stationname"]
+        )[0]
+        obs = StationRidership(route=obs_route, date=date, ridership=row["ridership"])
+        obs.save()
+
+
+def main():
+    ingest_bus_ridership()
+    ingest_subway_ridership()
+
+
 if __name__ == "__main__":
-    date = datetime.datetime(2023, 2, 28)
-    resp = extract_daily_data(
-        DATASETS["SUBWAY_RIDERSHIP"]["URL"],
-        date,
-        order_by=DATASETS["SUBWAY_RIDERSHIP"]["ORDER_BY"],
-    )
-    print(resp)
-    print(len(resp))
+    main()
