@@ -22,7 +22,9 @@ DB_USER = os.getenv("DB_USER")
 DB_NAME = os.getenv("DB_NAME")
 DB_PASS = os.getenv("DB_PASS")
 GEODJANGO_SECRET_KEY = os.getenv("GEODJANGO_SECRET_KEY")
-
+# Uncomment the next two lines if you need to specify GDAL and GEOS
+# GDAL_PATH = os.getenv("GDAL_PATH")
+# GEOS_PATH = os.getenv("GEOS_PATH")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -87,7 +89,11 @@ WSGI_APPLICATION = "geodjango.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-# GDAL_LIBRARY_PATH = "~/opt/homebrew/Cellar/gdal/3.8.5_1/lib/libgdal.dylib"
+# UNCOMMENT THE NEXT TWO LINES IF YOU NEED TO SPECIFY THE PATHS FOR
+# GEOS AND GDAL
+
+# GDAL_LIBRARY_PATH = GDAL_PATH
+# GEOS_LIBRARY_PATH = GEOS_PATH
 
 DATABASES = {
     "default": {
