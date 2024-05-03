@@ -1,6 +1,6 @@
 import pytest
 
-from ingestion.extract_scheduled_gtfs import (
+from app.scripts.extract_scheduled_gtfs import (
     ingest_gtfs_feed,
     CTA_URL,
     METRA_URL,
