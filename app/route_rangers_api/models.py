@@ -1,10 +1,10 @@
 from django.contrib.gis.db import models
 
 CITIES_CHOICES = {"CHI": "Chicago", "NYC": "New York", "PDX": "Portland"}
+
 #################################
 ###### DEMOGRAPHIC MODELS #######
 #################################
-
 
 class Demographics(models.Model):
     """
@@ -45,13 +45,7 @@ class Demographics(models.Model):
 ######## TRANSIT MODELS #########
 #################################
 
-
-class TransitRoute(models.Model):
-    """
-    Class that represent subway lines and bus routes
-    """
-
-    class TransitModes(models.IntegerChoices):
+class TransitModes(models.IntegerChoices):
         LIGHT_RAIL = 0, "Tram, Streetcar, Light rail."
         SUBWAY = 1, "Subway, Metro"
         RAIL = 2, "Rail"
@@ -62,6 +56,11 @@ class TransitRoute(models.Model):
         FUNICULAR = 7, "Funicular"
         TROLLEYBUS = 11, "Trolleybus"
         MONORAIL = 12, "Monorail"
+
+class TransitRoute(models.Model):
+    """
+    Class that represent subway lines and bus routes
+    """    
 
     city = models.CharField(max_length=30, choices=CITIES_CHOICES)
     route_id = models.CharField(max_length=30)
@@ -88,6 +87,9 @@ class TransitStation(models.Model):
     station_id = models.CharField(max_length=30)
     station_name = models.CharField(max_length=30)
     location = models.PointField(null=True)
+    mode = models.IntegerField(
+        verbose_name="Mode of transportation", choices=TransitModes.choices
+    )
 
     class Meta:
         constraints = [
