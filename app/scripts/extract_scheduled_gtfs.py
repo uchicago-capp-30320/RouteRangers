@@ -11,6 +11,7 @@ import pdb
 
 
 from django.contrib.gis.geos import GEOSGeometry, LineString, Point
+from route_rangers_api.models import TransitStation
 
 
 ### Constants
@@ -63,10 +64,10 @@ ALL_PILOT_CITY_URLS = [
 ]
 
 URL_TO_CITY = {
-    "https://www.transitchicago.com/": {"City": "Chicago", "Agency": "CTA"},
-    "https://schedules.metrarail.com/": {"City": "Chicago", "Agency": "Metra"},
-    "http://web.mta.info/": {"City": "New York", "Agency": "MTA"},
-    "http://developer.trimet.org/": {"City": "Portland", "Agency": "Trimet"},
+    "https://www.transitchicago.com/": {"City": "CHI", "Agency": "CTA"},
+    "https://schedules.metrarail.com/": {"City": "CHI", "Agency": "Metra"},
+    "http://web.mta.info/": {"City": "NYC", "Agency": "MTA"},
+    "http://developer.trimet.org/": {"City": "PDX", "Agency": "Trimet"},
 }
 
 FILE_TO_PRIMARY_KEY = {
@@ -300,25 +301,64 @@ def combine_different_feeds(
 # install cooperates.
 
 
-def convert_stops_to_points(
-    stops: pd.DataFrame | gpd.GeoDataFrame,
-) -> pd.DataFrame | gpd.GeoDataFrame:
-    """Give the stops dataframe a GeoJSON-compliant format for lat/long info."""
-    pass
+# def pointify_stops(
+#     stops: pd.DataFrame | gpd.GeoDataFrame,
+# ) -> pd.DataFrame | gpd.GeoDataFrame:
+#     """Give the stops dataframe a GeoJSON-compliant format for lat/long info."""
+#     """Actually this doesn't work, ignore"""
+#     stops = gpd.GeoDataFrame(stops)
+#     stops.loc[:, "location"] = pd.Series(
+#         [
+#             Point(stops.loc[i, "stop_lat"], stops.loc[i, "stop_lon"])
+#             for i in range(len(stops))
+#         ]
+#     )
+#     print(stops.dtypes)
+#     return stops
 
 
-# TODO: function for feeding data into Django and/or Postgres (or at least into
-# thing that sends it into Postgres), CREATE-ing the relevant table if it doesn't
-# exist, and  UPDATE-ing it if not (if date feature enabled, keep old rows where
-# columns match with old data but overwrite with new date, rather than appending new)
+def ingest_transit_stations(
+    stops: pd.DataFrame | gpd.GeoDataFrame, date=datetime.date
+) -> None:
+    """Feed a DataFrame of stops into Postgres as TransitStation objects"""
+    for i, row in stops.iterrows():
+        print(f"Now ingesting row {i}...")
+
+        print(row["stop_name"])
+        print(row["stop_lat"])
+        print(row["stop_lon"])
+        obs = TransitStation(
+            city=row["city"],
+            station_id=row["stop_id"],
+            station_name=row["stop_name"],
+            location=Point(row["stop_lat"], row["stop_lon"], srid=4326),
+        )
+        print(
+            f'Observation created: {row["city"]}, {row["stop_id"]}, '
+            '{row["stop_name"]}, Point({row["stop_lat"]},{row["stop_lon"]})'
+        )
+        print(obs)
+        try:
+            obs.save()
+            print(f"Observation {i} saved to PostGIS")
+        except Exception as e:  # TODO: make this more specific
+            print(e)
+            print("Skipping import of this observation\n")
+    print("Ingestion complete")
 
 
 def run():
     # pdb.set_trace()
-    feed_city, feed_agency, feed = ingest_gtfs_feed(METRA_URL)
-    gtfs_dataframe_dict = get_gtfs_component_dfs(feed_city, feed_agency, feed)
+    CHI, _, feed = ingest_gtfs_feed(METRA_URL)
+    gtfs_dataframe_dict = get_gtfs_component_dfs(CHI, _, feed)
     stops = gtfs_dataframe_dict["stops"]
-    print(stops)
+    stops.loc[:, "city"] = CHI
+    # print(stops.columns)
+    print("Starting test ingestion of METRA_URL...")
+    ingest_transit_stations(stops)
+    # stops_pointified = pointify_stops(stops)
+    # print(stops_pointified)
+    # print(stops_pointified.columns)
 
 
 # if __name__ == "__main__":
