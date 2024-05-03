@@ -1,7 +1,6 @@
 from django.contrib.gis.db import models
 
 CITIES_CHOICES = {"CHI": "Chicago", "NYC": "New York", "PDX": "Portland"}
-
 #################################
 ###### DEMOGRAPHIC MODELS #######
 #################################

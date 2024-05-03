@@ -7,6 +7,13 @@ import gtfs_kit as gk
 import re
 from datetime import datetime
 
+import pdb
+
+
+from django.contrib.gis.geos import GEOSGeometry, LineString, Point
+from route_rangers_api.models import TransitStation
+
+
 ### Constants
 
 # Each of these links contains a static (scheduled) GTFS feed for its relevant
@@ -57,10 +64,10 @@ ALL_PILOT_CITY_URLS = [
 ]
 
 URL_TO_CITY = {
-    "https://www.transitchicago.com/": {"City": "Chicago", "Agency": "CTA"},
-    "https://schedules.metrarail.com/": {"City": "Chicago", "Agency": "Metra"},
-    "http://web.mta.info/": {"City": "New York", "Agency": "MTA"},
-    "http://developer.trimet.org/": {"City": "Portland", "Agency": "Trimet"},
+    "https://www.transitchicago.com/": {"City": "CHI", "Agency": "CTA"},
+    "https://schedules.metrarail.com/": {"City": "CHI", "Agency": "Metra"},
+    "http://web.mta.info/": {"City": "NYC", "Agency": "MTA"},
+    "http://developer.trimet.org/": {"City": "PDX", "Agency": "TRIMET"},
 }
 
 FILE_TO_PRIMARY_KEY = {
@@ -105,10 +112,10 @@ def ingest_gtfs_feed(feed_url: str) -> tuple:
 
 # give each DataFrame a city_id column and a system_route_id column (to disambiguate routes named "1" for example)
 def get_gtfs_component_dfs(
-    feed_city: str, feed_agency: str, feed
+    feed_city: str, feed
 ) -> dict[pd.DataFrame | gpd.GeoDataFrame]:
     """
-    Take in a city name, an agency name, and the results of reading in a GTFS
+    Take in a city name and the results of reading in a GTFS
     feed with gtfs_kit. Isolate each component of the feed as its own GeoDataFrame.
     Add extra columns to each component object
 
@@ -136,7 +143,7 @@ def get_gtfs_component_dfs(
         print(
             # Question: if we only need feed city and agency for these warnings,
             # do we strictly need to pass it in here, or should we not bother?
-            f"Warning: {feed_city} {feed_agency} GTFS feed has no transfers.txt file."
+            f"Warning: this {feed_city} GTFS feed has no transfers.txt file."
         )
 
     # The gtfs_kit library's geometrize_routes() method breaks on some of our feeds.
@@ -147,7 +154,7 @@ def get_gtfs_component_dfs(
         gtfs_dataframe_dict["shape_geometries"] = shape_geometries
     except:
         print(
-            f"Warning: gtfs_kit library failed to geometrize {feed_city} {feed_agency} feed shapes.txt"
+            f"Warning: gtfs_kit library failed to geometrize this {feed_city} feed shapes.txt"
         )
         print(
             "Consider running a function to generate those linestrings from shapes.txt table in Postgres"
@@ -157,54 +164,14 @@ def get_gtfs_component_dfs(
 
 
 def add_extra_columns(
-    feed_city: str, feed_agency: str, feed_component: pd.DataFrame | gpd.GeoDataFrame
+    feed_city: str, feed_component: pd.DataFrame | gpd.GeoDataFrame
 ) -> pd.DataFrame | gpd.GeoDataFrame:
     """
-    Add additional columns to disambiguate city and agency in case there are any
-    duplicate names for routes, stops, etc. in multiple cities. This will ensure
-    that all rows of data for a particular kind of feature (row, stop, etc.) can
-    live in the same table in Postgres irrespective of which city they came from
-    originally, reducing the total number of tables required.
+    Add additional columns city and time of update in case there are any
+    duplicates for routes, stops, etc. in multiple cities.
     """
     orig_columns = feed_component.columns
-    # TODO: Question: can I force these to be the leftmost columns?
-    # Would this mess up gtfs_kit i.e. do underlying functions index to a column
-    # position rather than a name?
     feed_component.loc[:, "city"] = feed_city
-    feed_component.loc[:, "agency"] = feed_agency
-    # Add new unique primary key to prevent name collisions between cities.
-    # Includes city AND, if necessary, agency
-    # TODO: consider making this a helper function to make more DRY
-    # NOTE: Flake8 and black don't seem to be linting this to break up 88+ char lines
-    # routes
-    if "route_id" in orig_columns:
-        feed_component.loc[:, "uniq_route_id"] = (
-            f"{feed_city}_{feed_agency}_" + feed_component.loc[:, "route_id"]
-        )
-    # stops
-    if "stop_id" in orig_columns:
-        feed_component.loc[:, "uniq_stop_id"] = (
-            f"{feed_city}_{feed_agency}_" + feed_component.loc[:, "stop_id"]
-        )
-    # trips
-    if "trip_id" in orig_columns:
-        feed_component.loc[:, "uniq_stop_id"] = (
-            f"{feed_city}_{feed_agency}_" + feed_component.loc[:, "trip_id"]
-        )
-    # transfers
-    if "from_stop_id" in orig_columns:
-        feed_component.loc[:, "uniq_from_stop_id"] = (
-            f"{feed_city}_{feed_agency}_" + feed_component.loc[:, "from_stop_id"]
-        )
-        feed_component.loc[:, "uniq_to_stop_id"] = (
-            f"{feed_city}_{feed_agency}_" + feed_component.loc[:, "to_stop_id"]
-        )
-    # shapes
-    if "shape_id" in orig_columns:
-        feed_component.loc[:, "uniq_shape_id"] = (
-            f"{feed_city}_{feed_agency}_" + feed_component.loc[:, "shape_id"]
-        )
-
     # Static feeds may be scraped on a schedule; system should preserve for users
     # how recent the data is
     NOW = datetime.now()
@@ -243,10 +210,8 @@ def combine_different_feeds(
         this_city, this_agency, this_feed = ingest_gtfs_feed(this_url)
         print(f"{this_city} {this_agency} feed ingested")
         these_gtfs_dataframes = {
-            name: add_extra_columns(this_city, this_agency, df)
-            for name, df in get_gtfs_component_dfs(
-                this_city, this_agency, this_feed
-            ).items()
+            name: add_extra_columns(this_city, df)
+            for name, df in get_gtfs_component_dfs(this_city, this_feed).items()
         }
 
         for name, df in these_gtfs_dataframes.items():
@@ -287,18 +252,58 @@ def combine_different_feeds(
     return all_dfs
 
 
-# TODO: function to convert lat/long and shapes.txt data into geometry objects.
-# May instead be done AFTER querying from backend depending on how much PostGIS
-# install cooperates.
+def ingest_transit_stations(
+    stops: pd.DataFrame | gpd.GeoDataFrame, date=datetime.date
+) -> None:
+    """Feed a DataFrame of stops into Postgres as TransitStation objects"""
+    for i, row in stops.iterrows():
+        print(f"Now ingesting row {i}...")
+
+        print(row["stop_name"])
+        print(row["stop_lat"])
+        print(row["stop_lon"])
+        obs = TransitStation(
+            city=row["city"],
+            station_id=row["stop_id"],
+            station_name=row["stop_name"],
+            location=Point(row["stop_lat"], row["stop_lon"], srid=4326),
+            mode=2,  # TODO: Undo hard-code -- should be 2 for Metra
+            # 0 for Trimet streetcar, 1 for subway train, and 3 for bus
+        )
+        print(
+            f'Observation created: {row["city"]}, {row["stop_id"]}, '
+            f'{row["stop_name"]}, Point({row["stop_lat"]},{row["stop_lon"]})'
+            f", mode {obs.mode}"
+        )
+        print(obs)
+        try:
+            obs.save()
+            print(f"Observation {i} saved to PostGIS")
+        except Exception as e:  # TODO: make this more specific
+            print(e)
+            print("Skipping import of this observation\n")
+    print("Ingestion complete")
 
 
-# TODO: function for feeding data into Django and/or Postgres (or at least into
-# thing that sends it into Postgres), CREATE-ing the relevant table if it doesn't
-# exist, and  UPDATE-ing it if not (if date feature enabled, keep old rows where
-# columns match with old data but overwrite with new date, rather than appending new)
+def run():
+    # pdb.set_trace()
+    CHI, _, feed = ingest_gtfs_feed(METRA_URL)
+    gtfs_dataframe_dict = get_gtfs_component_dfs(CHI, feed)
+    stops = gtfs_dataframe_dict["stops"]
+    stops.loc[:, "city"] = CHI
+    # print(stops.columns)
+    print("Starting test ingestion of METRA_URL...")
+    ingest_transit_stations(stops)
+    # stops_pointified = pointify_stops(stops)
+    # print(stops_pointified)
+    # print(stops_pointified.columns)
 
 
-if __name__ == "__main__":
-    gtfs_data_for_postgres = combine_different_feeds(ALL_PILOT_CITY_URLS)
+# if __name__ == "__main__":
+# feed_city, feed_agency, feed = ingest_gtfs_feed(METRA_URL)
+# gtfs_dataframe_dict = get_gtfs_component_dfs(feed_city, feed_agency, feed)
+# stops = gtfs_dataframe_dict["stops"]
+# # pdb.set_trace()
+# print(stops)
 
-    # TODO: send this data into Postgres
+# gtfs_data_for_postgres = combine_different_feeds(ALL_PILOT_CITY_URLS)
