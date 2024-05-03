@@ -6,6 +6,7 @@ CITIES_CHOICES = {"CHI": "Chicago", "NYC": "New York", "PDX": "Portland"}
 ###### DEMOGRAPHIC MODELS #######
 #################################
 
+
 class Demographics(models.Model):
     """
     Class to represent demographic data pulled from the ACS Survey
@@ -45,22 +46,24 @@ class Demographics(models.Model):
 ######## TRANSIT MODELS #########
 #################################
 
+
 class TransitModes(models.IntegerChoices):
-        LIGHT_RAIL = 0, "Tram, Streetcar, Light rail."
-        SUBWAY = 1, "Subway, Metro"
-        RAIL = 2, "Rail"
-        BUS = 3, "Bus"
-        FERRY = 4, "Ferry"
-        CABLE_TRAM = 5, "Cable car"
-        AERIAL_LIFT = 6, " Aerial lift, suspended cable car"
-        FUNICULAR = 7, "Funicular"
-        TROLLEYBUS = 11, "Trolleybus"
-        MONORAIL = 12, "Monorail"
+    LIGHT_RAIL = 0, "Tram, Streetcar, Light rail."
+    SUBWAY = 1, "Subway, Metro"
+    RAIL = 2, "Rail"
+    BUS = 3, "Bus"
+    FERRY = 4, "Ferry"
+    CABLE_TRAM = 5, "Cable car"
+    AERIAL_LIFT = 6, " Aerial lift, suspended cable car"
+    FUNICULAR = 7, "Funicular"
+    TROLLEYBUS = 11, "Trolleybus"
+    MONORAIL = 12, "Monorail"
+
 
 class TransitRoute(models.Model):
     """
     Class that represent subway lines and bus routes
-    """    
+    """
 
     city = models.CharField(max_length=30, choices=CITIES_CHOICES)
     route_id = models.CharField(max_length=30)
