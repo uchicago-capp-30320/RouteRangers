@@ -359,6 +359,20 @@ argon2 = ["argon2-cffi (>=19.1.0)"]
 bcrypt = ["bcrypt"]
 
 [[package]]
+name = "django-extensions"
+version = "3.2.3"
+description = "Extensions for Django"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "django-extensions-3.2.3.tar.gz", hash = "sha256:44d27919d04e23b3f40231c4ab7af4e61ce832ef46d610cc650d53e68328410a"},
+    {file = "django_extensions-3.2.3-py3-none-any.whl", hash = "sha256:9600b7562f79a92cbf1fde6403c04fee314608fefbb595502e34383ae8203401"},
+]
+
+[package.dependencies]
+Django = ">=3.2"
+
+[[package]]
 name = "fiona"
 version = "1.9.6"
 description = "Fiona reads and writes spatial data files"
@@ -1549,4 +1563,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "40be57df071336dc3a764fce5a399851b283392b326755f529d9f1fc3848d2e8"
+content-hash = "682bd01407bbfe95cd2ff0a93fca26b6ed3cbc457c7a9ac95e3f2460d1fb1aac"

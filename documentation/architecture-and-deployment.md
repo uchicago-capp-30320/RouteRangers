@@ -28,6 +28,15 @@ $ python -m manage migrate
 ```
 5. Database tables should be established, you can double check by logging into the database using postico or some other postgres login tool
 
+### Ingestion
+Ingestion scripts are not finalized.
+
+To get data from cities' GTFS and ingest it to PostGIS database backend, navigate to the
+`app` folder and run `python -m manage runscript extract_scheduled_gtfs`.
+As of now, it is only a "test" script that runs a process to ingest the transit
+stations from Chicago's Metra system; it will be expanded out to ingest more kinds
+of data in the coming days.
+
 ### Frontend
 To run the webserver (again make sure you have dependencies installed and `.env` up to date)
 
