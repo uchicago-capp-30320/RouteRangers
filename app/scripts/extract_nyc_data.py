@@ -4,12 +4,15 @@ from requests.models import Response
 from collections.abc import Callable
 import requests
 import time
-import pandas as pd
 import datetime
-import os
 import pytz
 from dotenv import load_dotenv
-
+from app.route_rangers_api.models import (
+    TransitRoute,
+    RidershipRoute,
+    TransitStation,
+    RidershipStation,
+)
 
 #########################
 # Load and define variables
@@ -63,7 +66,7 @@ def make_request(url: str, params: Dict, session: Callable = None) -> Response:
 
 def extract_daily_data(
     dataset: str, date: datetime.datetime, app_token=DATA_PORTAL_APP_TOKEN
-):
+) -> List:
 
     # 1. Extract parameters
     url = DATASETS[dataset]["URL"]
@@ -76,7 +79,7 @@ def extract_daily_data(
 
     # Create datetime objects for date query filter
     start_date, end_date = build_start_end_date_str(date)
-    order_clause = "bus_route"
+    order_clause = f"{obs_level}"
 
     # 3. Define parameters to pass into the request:
     where_clause = (
@@ -146,7 +149,8 @@ def ingest_daily_bus_ridership(daily_bus_json, date: datetime.date) -> None:
         obs_route = TransitRoute.objects.filter(city="NYC", route_id=row["bus_route"])[
             0
         ]
-        obs = RidershipRoute(route=obs_route, date=date, ridership=row["ridership"])
+        ridership = int(float(row["total_ridership"]))
+        obs = RidershipRoute(route=obs_route, date=date, ridership=ridership)
         obs.save()
 
 
@@ -176,21 +180,20 @@ def ingest_daily_subway_ridership(daily_subway_json, date: datetime.date) -> Non
         obs_route = TransitStation.objects.filter(
             city="NYC", station_id=row["station_complex_id"]
         )[0]
-        obs = RidershipStation(route=obs_route, date=date, ridership=row["ridership"])
+        ridership = int(float(row["total_ridership"]))
+        obs = RidershipStation(route=obs_route, date=date, ridership=ridership)
         obs.save()
 
+
 def run():
+
     print("Ingesting bus ridership data into RidershipRoute")
     ingest_bus_ridership()
     print("Ingesting subway ridership data into RidershipStation")
     ingest_subway_ridership()
 
+
 if __name__ == "__main__":
-    # date = datetime.datetime(2023, 9, 7, tzinfo=NY_TZ)
-    # resp = extract_daily_data(DATASETS["BUS_RIDERSHIP"]["URL"], date)
-    # df = create_daily_df(resp, date, "BUS_RIDERSHIP")
-    # for row in df.itertuples():
-    #     print(row.bus_route)
-    date = datetime.datetime(2023, 9, 7, tzinfo=NY_TZ)
-    results = extract_daily_data("BUS_RIDERSHIP", date)
+    date = datetime.datetime(2023, 9, 7)
+    results = extract_daily_data("SUBWAY_RIDERSHIP", date)
     print(results)
