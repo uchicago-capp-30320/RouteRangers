@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 #########################
 load_dotenv()
 
-NYC_DATA_PORTAL_APP_TOKEN = os.getenv("NYC_DATA_PORTAL_APP_TOKEN")
+DATA_PORTAL_APP_TOKEN = os.getenv("DATA_PORTAL_APP_TOKEN")
 TEST_DATA_DIR = os.getenv("TEST_DATA_DIR")
 
 REQUEST_DELAY = 0.2
@@ -28,17 +28,20 @@ COLS_TO_KEEP = {"BUS_RIDERSHIP": [], "SUBWAY_RIDERSHIP": []}
 DATASETS = {
     "BUS_RIDERSHIP": {
         "URL": "https://data.ny.gov/resource/kv7t-n8in.json?",
-        "COLS_TO_KEEP": ["date", "bus_route", "ridership", "transfers"],
-        "GROUP_BY": ["date", "bus_route"],
+        "GROUP_BY": "date, bus_route",
+        "OBS_LEVEL": "bus_route",
     },
     "SUBWAY_RIDERSHIP": {
         "URL": "https://data.ny.gov/resource/wujg-7c2s.json?",
         "COLS_TO_KEEP": ["date", "station_complex_id", "ridership", "transfers"],
-        "GROUP_BY": ["date", "station_complex_id"],
+        "GROUP_BY": "date, station_complex_id",
+        "OBS_LEVEL": "station_complex_id",
     },
 }
 
 NY_TZ = pytz.timezone("America/New_York")
+START_DATE = datetime.datetime(2023, 1, 1, tzinfo=NY_TZ)
+END_DATE = datetime.datetime(2024, 1, 1, tzinfo=NY_TZ)
 
 
 # This function should be moved to a utils.py file
@@ -59,105 +62,46 @@ def make_request(url: str, params: Dict, session: Callable = None) -> Response:
 
 
 def extract_daily_data(
-    url: str,
-    date: datetime.datetime,
-    results_limit=None,
-    app_token=NYC_DATA_PORTAL_APP_TOKEN,
-    limit=RESULTS_PER_PAGE,
-    session: Callable = None,
-) -> List:
-    """
-    Extract daily data from a NYC Subway or Subway ridership endpoint
-    storing it in a list with partial responses subject to the limit parameter.
-    One item in the list has up to "limit" items
-    """
+    dataset: str, date: datetime.datetime, app_token=DATA_PORTAL_APP_TOKEN
+):
+
+    # 1. Extract parameters
+    url = DATASETS[dataset]["URL"]
+    obs_level = DATASETS[dataset]["OBS_LEVEL"]
+
+    # 2. Create SQL query clauses
+    select_clause = f"""{obs_level}, date_trunc_ymd(transit_timestamp) AS date,
+      SUM(ridership) AS total_ridership"""
+    group_clause = f"{obs_level}, date"
+
     # Create datetime objects for date query filter
     start_date, end_date = build_start_end_date_str(date)
+    order_clause = "bus_route"
 
-    # Define parameters to pass into the request:
+    # 3. Define parameters to pass into the request:
     where_clause = (
         f"transit_timestamp >= '{start_date}' AND transit_timestamp < '{end_date}'"
     )
-
-    # Make requests
-    offset = 0
-    n_results = 1
-    responses = []
-
-    while n_results > 0:
-        # Build parameters and make request
-        params = build_parameters(app_token, limit, offset, where_clause)
-        resp = make_request(url, params, session)
-
-        # Status code handling
-        if resp.status_code == 200:
-            pass
-        elif (
-            resp.status_code == 202
-        ):  # API docs indicate that OK Status Codes are 200 and 202
-            break  ##TODO: Add retry functionality
-        else:
-            break
-
-        resp_list = resp.json()  # Returns a list of dictionaries
-        offset += limit
-        n_results = len(resp_list)
-
-        if n_results != 0:
-            responses.append(resp_list)
-
-    return responses
-
-
-def create_daily_df(
-    responses: List, date: datetime.datetime, dataset: str
-) -> pd.DataFrame:
-    """
-    Create dataframe for one daily response
-    """
-    # Append dataframes
-    daily_df = pd.DataFrame.from_dict(responses[0])
-
-    for resp in responses[1:]:
-        aux_df = pd.DataFrame.from_dict(resp)
-        daily_df = pd.concat([daily_df, aux_df])
-
-    # Filter columns
-    start_date, _ = build_start_end_date_str(date)
-    daily_df["date"] = start_date
-
-    daily_df["ridership"] = daily_df["ridership"].astype(float)
-    daily_df["transfers"] = daily_df["transfers"].astype(float)
-
-    # Group by to obtain ridership per station/route
-    ridership = (
-        daily_df.loc[:, DATASETS[dataset]["COLS_TO_KEEP"]]
-        .groupby(DATASETS[dataset]["GROUP_BY"], as_index=False)
-        .agg("sum")
-    )
-
-    if date.weekday() < 5:
-        ridership["weekday"] = 1
-    else:
-        ridership["weekday"] = 0
-
-    return ridership
-
-
-def build_parameters(
-    app_token: str, limit: int, offset: int, where_clause: str
-) -> Dict:
-    """
-    Build parameters to be passsed into the request call
-    """
     params = {
         "$$APP_TOKEN": app_token,
-        "$limit": limit,
-        "$offset": offset,
-        "$order": "transit_timestamp",
+        "$select": select_clause,
+        "$group": group_clause,
         "$where": where_clause,
+        "$order": order_clause,
     }
-    return params
+    # 4. Obtain results
+    resp = make_request(url, params)
+    if resp.status_code == 200:
+        pass
+    elif (
+        resp.status_code == 202
+    ):  # API docs indicate that OK Status Codes are 200 and 202
+        pass  ##TODO: Add retry functionality
+    else:
+        pass
+
+    results = resp.json()
+    return results
 
 
 def build_start_end_date_str(date: datetime.datetime) -> Tuple[str, str]:
@@ -174,28 +118,79 @@ def build_start_end_date_str(date: datetime.datetime) -> Tuple[str, str]:
     return start_date, end_date
 
 
-def crawl(start_date: datetime.date, end_date: datetime.date, dataset: str) -> None:
+def ingest_bus_ridership(
+    start_date: datetime.date = START_DATE, end_date: datetime.date = END_DATE
+) -> None:
     """
-    Crawl to obtain all the information from either the BUS_RIDERSHIP or
-    SUBWAY_RIDERSHIP data
+    Ingest the NYC bus ridership data to the RouteRidership table
+    starting from start_date and ending at end_date (inclusive)
     """
     session = requests.Session()
-    url = DATASETS[dataset]["URL"]
     date = start_date
     time_delta = datetime.timedelta(days=1)
-
     while date <= end_date:
-        print(f"Obtaining information for {date.strftime('%Y-%m-%d')} for {dataset}")
-        responses = extract_daily_data(url=url, date=date, session=session)
-        date_df = create_daily_df(responses, date, dataset)
-        # TODO: INGEST INTO DATABASE
+        date_ridership = extract_daily_data(dataset="BUS_RIDERSHIP", date=date)
+        ingest_daily_bus_ridership(date_ridership)
         date += time_delta
 
-    return date_df
+
+def ingest_daily_bus_ridership(daily_bus_json, date: datetime.date) -> None:
+    """
+    Ingest NYC bus data into the RouteRidership table. It ingests the data for one
+    day of ridership
+    """
+    for row in daily_bus_json:
+        print(
+            f"Ingesting ridership data for stations {row['bus_route']} - {row['date']}"
+        )
+        obs_route = TransitRoute.objects.filter(city="NYC", route_id=row["bus_route"])[
+            0
+        ]
+        obs = RidershipRoute(route=obs_route, date=date, ridership=row["ridership"])
+        obs.save()
+
+
+def ingest_subway_ridership(start_date: datetime.date, end_date: datetime.date) -> None:
+    """
+    Ingest the NYC subway ridership data to the RouteRidership table
+    starting from start_date and ending at end_date (inclusive)
+    """
+    session = requests.Session()
+    date = start_date
+    time_delta = datetime.timedelta(days=1)
+    while date <= end_date:
+        date_ridership = extract_daily_data(dataset="SUBWAY_RIDERSHIP", date=date)
+        ingest_daily_subway_ridership(date_ridership, date)
+        date += time_delta
+
+
+def ingest_daily_subway_ridership(daily_subway_json, date: datetime.date) -> None:
+    """
+    Ingest NYC subway data into the StationsRidership table. It ingests the data for one
+    day of ridership
+    """
+    for row in daily_subway_json:
+        print(
+            f"Ingesting ridership data for stations {row['stationname']} - {row['date']}"
+        )
+        obs_route = TransitStation.objects.filter(
+            city="NYC", station_id=row["station_complex_id"]
+        )[0]
+        obs = RidershipStation(route=obs_route, date=date, ridership=row["ridership"])
+        obs.save()
+
+def run():
+    print("Ingesting bus ridership data into RidershipRoute")
+    ingest_bus_ridership()
+    print("Ingesting subway ridership data into RidershipStation")
+    ingest_subway_ridership()
 
 if __name__ == "__main__":
+    # date = datetime.datetime(2023, 9, 7, tzinfo=NY_TZ)
+    # resp = extract_daily_data(DATASETS["BUS_RIDERSHIP"]["URL"], date)
+    # df = create_daily_df(resp, date, "BUS_RIDERSHIP")
+    # for row in df.itertuples():
+    #     print(row.bus_route)
     date = datetime.datetime(2023, 9, 7, tzinfo=NY_TZ)
-    resp = extract_daily_data(DATASETS["BUS_RIDERSHIP"]["URL"], date)
-    df = create_daily_df(resp, date, "BUS_RIDERSHIP")
-    for row in df.itertuples():
-        print(row.bus_route)
+    results = extract_daily_data("BUS_RIDERSHIP", date)
+    print(results)
