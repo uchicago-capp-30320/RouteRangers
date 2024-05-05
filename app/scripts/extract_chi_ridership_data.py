@@ -11,9 +11,9 @@ import pytz
 from dotenv import load_dotenv
 from app.route_rangers_api.models import (
     TransitRoute,
-    RouteRidership,
+    RidershipRoute,
     TransitStation,
-    StationRidership,
+    RidershipStation,
 )
 
 ###########################
@@ -164,8 +164,9 @@ def ingest_daily_bus_ridership(daily_bus_json, date: datetime.date) -> None:
     day of ridership
     """
     for row in daily_bus_json:
+        print(f"Ingesting ridership data for stations {row["route"]} - {row["date"]}")
         obs_route = TransitRoute.objects.filter(city="CHI", route_id=row["route"])[0]
-        obs = RouteRidership(route=obs_route, date=date, ridership=row["ridership"])
+        obs = RidershipRoute(route=obs_route, date=date, ridership=row["ridership"])
         obs.save()
 
 
@@ -192,17 +193,13 @@ def ingest_daily_subway_ridership(daily_subway_json, date: datetime.date) -> Non
     day of ridership
     """
     for row in daily_subway_json:
+        print(f"Ingesting ridership data for stations {row["stationname"]} - {row["date"]}")
         obs_route = TransitStation.objects.filter(
-            city="CHI", station_id=row["stationname"]
+            city="CHI", station_id=row["station_id"]
         )[0]
-        obs = StationRidership(route=obs_route, date=date, ridership=row["ridership"])
+        obs = RidershipStation(route=obs_route, date=date, ridership=row["ridership"])
         obs.save()
 
-
-def main():
+def run():
     ingest_bus_ridership()
     ingest_subway_ridership()
-
-
-if __name__ == "__main__":
-    main()
