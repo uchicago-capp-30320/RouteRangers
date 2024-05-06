@@ -301,46 +301,51 @@ def handroll_geometrize_routes(city: str, feed) -> gpd.GeoDataFrame:
     TODO: write test that establishes all needed fields are there for every city
     """
     geom_shapes = feed.geometrize_shapes()
-    geom_shapes.loc[:,"city"] = city
+    geom_shapes.loc[:, "city"] = city
+    geometries = geom_shapes.loc[:, "geometry"]
     gtfs_dict = get_gtfs_component_dfs(city, feed)
     routes = gtfs_dict["routes"]
     trips = gtfs_dict["trips"]
 
     # Conversion of shapely/Geopandas linestrings to GEOSGeometry/Django LineStrings
     # https://stackoverflow.com/questions/56299888/how-can-i-efficiently-save-data-from-geopandas-to-django-converting-from-shapel
-
-    geom_shapes = (
-        # To do this we need to take the shape_id field from shapes...
-        geom_shapes.merge(trips, how="left", on="shape_id")
-        # and join it to the route_id from routes
-        .merge(routes, how="left", on="route_id")
-        .loc[:,[
-            "shape_id", 
-            "geometry", 
-            "route_id", 
-            "service_id", 
+    # TODO: IMPORTANT: FIX PANDAS MERGE LOGIC SO THAT geometrize_shapes()
+    # GeoDataFrame has all route information about each shape's route in the
+    # relevant columns, instead of NaNs
+    geom_shapes = geom_shapes.merge(trips, how="right", on="shape_id")
+    geom_shapes.loc[:, "geometry"] = geometries
+    print(geom_shapes)
+    geom_shapes = geom_shapes.merge(routes, how="right", on="route_id")
+    print(geom_shapes.loc[:, ["geometry"]])
+    geom_shapes = geom_shapes.loc[
+        :,
+        [
+            "shape_id",
+            "geometry",
+            "route_id",
+            "service_id",
             "route_type",
-            "route_long_name", 
-            "route_color"
-            ]]
-        .drop_duplicates()
-    
+            "route_long_name",
+            "route_color",
+        ],
+    ].drop_duplicates()
+    geom_shapes.loc[:, "city"] = city
+    print(geom_shapes.loc[:, "geometry"])
     return geom_shapes
 
 
-def ingest_transit_routes(
-    geom_shapes: gpd.GeoDataFrame
-) -> None:
+def ingest_transit_routes(geom_shapes: gpd.GeoDataFrame) -> None:
     """Ingest routes and their shapes to Postgres database."""
     for i, row in geom_shapes.iterrows():
-        print(f"Now ingesting route {i}, {row["route_id"]}...")
+        print(f"Now ingesting route {i}...")
+        print(row["route_id"])
         obs = TransitRoute(
-            city = row["city"],
-            route_id = row["route_id"],
-            route_name = row["route_long_name"],
-            color = row["route_color"],
-            geo_representation = GEOSGeometry(row["geometry"]),
-            mode = row["route_type"]
+            city=row["city"],
+            route_id=row["route_id"],
+            route_name=row["route_long_name"],
+            color=row["route_color"],
+            geo_representation=GEOSGeometry(row["geometry"]),
+            mode=row["route_type"],
         )
         print(obs)
         try:
@@ -351,7 +356,6 @@ def ingest_transit_routes(
     print("Ingestion complete")
 
 
-
 def run():
     # pdb.set_trace()
     print("Getting Metra GTFS feed...")
@@ -359,11 +363,11 @@ def run():
     print("Preparing Metra GTFS feed for ingestion...")
     gtfs_dataframe_dict = get_gtfs_component_dfs(CHI, feed)
     stops = gtfs_dataframe_dict["stops"]
-    assert stops.loc[:, "city"] = CHI
+    stops.loc[:, "city"] = CHI
     geom_shapes = handroll_geometrize_routes(CHI, feed)
     # print(stops.columns)
-    print("Starting test ingestion of Metra stops...")
-    ingest_transit_stations(stops)
+    # print("Starting test ingestion of Metra stops...")
+    # ingest_transit_stations(stops)
     print("Starting test ingestion of Metra routes...")
     ingest_transit_routes(geom_shapes)
     # stops_pointified = pointify_stops(stops)
