@@ -45,6 +45,18 @@ def build_start_end_date_str(date: datetime.datetime,timezone:str) -> Tuple[str,
 ## Bike Ridership Utils
 #######################
 
+def extract_stations(url:str) -> List:
+    """
+    Extract bike station data from GTFS
+    """
+    resp = make_request(
+        url=url, params={}
+    )
+    results = resp.json()
+    stations = results["data"]["stations"]
+
+    return stations
+
 def process_daily_ridership_data(monthly_df)->pd.DataFrame:
     monthly_df["date"] = pd.to_datetime(monthly_df["started_at"]).dt.date
 
