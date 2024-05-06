@@ -95,9 +95,9 @@ FILE_TO_PRIMARY_KEY = {
 ### Functions
 
 
-def ingest_gtfs_feed(feed_url: str) -> tuple:
+def get_gtfs_feed(feed_url: str) -> tuple:
     """
-    Use gtfs_kit library to ingest the most up-to-date scheduled (static) GTFS
+    Use gtfs_kit library to obtain the most up-to-date scheduled (static) GTFS
     data from a particular URL, and return each component file as a GeoDataFrame.
     """
     url_base = re.findall(r"https?:\/\/[^\/]+\/", feed_url)[0]
@@ -119,7 +119,7 @@ def get_gtfs_component_dfs(
     feed with gtfs_kit. Isolate each component of the feed as its own GeoDataFrame.
     Add extra columns to each component object
 
-    Should be called directly on output of ingest_gtfs_feed() above.
+    Should be called directly on output of get_gtfs_feed() above.
     """
     routes = feed.routes
     trips = feed.trips
@@ -207,7 +207,7 @@ def combine_different_feeds(
     all_shape_geometries = None
 
     for this_url in feed_url_list:
-        this_city, this_agency, this_feed = ingest_gtfs_feed(this_url)
+        this_city, this_agency, this_feed = get_gtfs_feed(this_url)
         print(f"{this_city} {this_agency} feed ingested")
         these_gtfs_dataframes = {
             name: add_extra_columns(this_city, df)
@@ -287,7 +287,7 @@ def ingest_transit_stations(
 
 def run():
     # pdb.set_trace()
-    CHI, _, feed = ingest_gtfs_feed(METRA_URL)
+    CHI, _, feed = get_gtfs_feed(METRA_URL)
     gtfs_dataframe_dict = get_gtfs_component_dfs(CHI, feed)
     stops = gtfs_dataframe_dict["stops"]
     stops.loc[:, "city"] = CHI
@@ -300,7 +300,7 @@ def run():
 
 
 # if __name__ == "__main__":
-# feed_city, feed_agency, feed = ingest_gtfs_feed(METRA_URL)
+# feed_city, feed_agency, feed = get_gtfs_feed(METRA_URL)
 # gtfs_dataframe_dict = get_gtfs_component_dfs(feed_city, feed_agency, feed)
 # stops = gtfs_dataframe_dict["stops"]
 # # pdb.set_trace()
