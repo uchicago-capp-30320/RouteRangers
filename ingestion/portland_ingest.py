@@ -1,7 +1,7 @@
 """
 OBJECTIVE: Import and Format Portland Ridership data
 AUTHOR: Jimena Salinas
-DATE: 04/20/2024
+DATE: 04/30/2024
 
 SOURCES: the data sets were obtained by a direct request to the 
 TriMet Public Records department. This is the link to the form
@@ -20,132 +20,159 @@ VARIABLES:
 """
 
 import pandas as pd
+from typing import Dict, Tuple
+
 
 folder_path = ".../CloudStorage/Box-Box/Route Rangers/Transit dataset exploration/Portland Ridership Data/portland_ridership/"
 
-spring_sat = "2023 spring_saturday.xlsx"
-spring_weekday = "2023 spring_weekday.xlsx"
-spring_sunday = "2023 spring_sunday.xlsx"
 
-summer_sat = "2023 summer_saturday.xlsx"
-summer_weekday = "2023 summer_weekday.xlsx"
-summer_sunday = "2023 summer_sunday.xlsx"
-
-
-# load data sets
-def load_ridership_dasets():
-    """
-    import raw files with, and create standarized flags to
-    combine all individual sets into a single file
-    """
-    try:
-        # load data sets
-        spring_data_sat = pd.read_excel(folder_path + spring_sat)
-        spring_data_week = pd.read_excel(folder_path + spring_weekday)
-        spring_data_sun = pd.read_excel(folder_path + spring_sunday)
-
-        summer_data_sat = pd.read_excel(folder_path + summer_sat)
-        summer_data_week = pd.read_excel(folder_path + summer_weekday)
-        summer_data_sun = pd.read_excel(folder_path + summer_sunday)
-
-        # add flags to specify season and day of week, this will be helpful
-        # when converting the dataset from average by season to day level
-        spring_data_sat["day_type"] = "Saturday"
-        spring_data_week["day_type"] = "Weekday"
-        spring_data_sun["day_type"] = "Sunday"
-
-        summer_data_sat["day_type"] = "Saturday"
-        summer_data_week["day_type"] = "Weekday"
-        summer_data_sun["day_type"] = "Sunday"
-
-        spring_data_sat["season"] = "Spring"
-        spring_data_week["season"] = "Spring"
-        spring_data_sun["season"] = "Spring"
-
-        summer_data_sat["season"] = "Summer"
-        summer_data_week["season"] = "Summer"
-        summer_data_sun["season"] = "Summer"
-
-        # append into one data set
-        all_rider_data = pd.concat(
-            [
-                spring_data_sat,
-                spring_data_week,
-                spring_data_sun,
-                summer_data_sat,
-                summer_data_week,
-                summer_data_sun,
-            ],
-            ignore_index=True,
-        )
-
-        print("Data loaded and appended successfully.")
-
-    except FileNotFoundError:
-        print("Files not found. Check the file path and filename.")
-    except Exception as e:
-        print("An error occurred:", e)
+file_names = {
+    "spring_sat": "2023 spring_saturday.xlsx",
+    "spring_weekday": "2023 spring_weekday.xlsx",
+    "spring_sunday": "2023 spring_sunday.xlsx",
+    "summer_sat": "2023 summer_saturday.xlsx",
+    "summer_weekday": "2023 summer_weekday.xlsx",
+    "summer_sunday": "2023 summer_sunday.xlsx",
+    "fall_sat": "2023 fall_saturday.xlsx",
+    "fall_weekday": "2023 fall_weekday.xlsx",
+    "fall_sunday": "2023 fall_sunday.xlsx",
+    "winter_sat": "2023 winter_saturday.xlsx",
+    "winter_weekday": "2023 winter_weekday.xlsx",
+    "winter_sunday": "2023 winter_sunday.xlsx",
+}
 
 
-# load data sets
-all_rider_data = load_ridership_dasets()
-
-# format data sets
-all_rider_data.columns = all_rider_data.columns.str.lower().str.replace(" ", "_")
-
-all_rider_data = all_rider_data[["location_id", "ons", "day_type", "season"]]
-
-# Since the data is at the day type + season level,
-# create a df with all calendar days of 2023
+# date ranges for 2023
 start_date = "2023-01-01"
 end_date = "2023-12-31"
-calendar_dates = pd.date_range(start=start_date, end=end_date, freq="D")
 
-# flag days of 2023 to match day_type field
-calendar_df = pd.DataFrame(calendar_dates, columns=["date"])
+# data ranges for each season in 2023
+# this will be used to change the level of the data from aggreate at the
+# date type level into daily level (to match our data model)
+season_ranges = {
+    "Spring": (pd.to_datetime("2023-03-19"), pd.to_datetime("2023-06-20")),
+    "Summer": (pd.to_datetime("2023-06-20"), pd.to_datetime("2023-09-22")),
+    "Fall": (pd.to_datetime("2023-09-22"), pd.to_datetime("2023-12-21")),
+    "Winter": (pd.to_datetime("2023-12-21"), pd.to_datetime("2024-03-19")),
+}
 
-calendar_df["day_type"] = calendar_df["date"].dt.day_name()
 
-day_type_mapping = {"Saturday": "Saturday", "Sunday": "Sunday"}
+def load_data(file_path: str) -> pd.DataFrame:
+    """
+    reads and individual Excel file and returns an error
+    if the file path does not exist
+    """
+    try:
+        return pd.read_excel(file_path)
+    except FileNotFoundError:
+        print("File not found:", file_path)
+    except Exception as e:
+        print("An error occurred while loading data:", e)
 
-calendar_df["day_type"] = (
-    calendar_df["day_type"].map(day_type_mapping).fillna("Weekday")
-)
 
-# flag seasons, all days are flagged to Spring, except for summer months,
-# to differenciate for routes that only run during the summer months
-calendar_df["season"] = "Spring"
+def load_ridership_datasets(file_names: Dict[str, str]) -> Dict[str, pd.DataFrame]:
+    """
+    Takes a dictionary in the form key: season_day type
+    and value: file name, loads the corresponding ridership
+    data and creates a column with the corresponding
+    season value and day type (Saturday, Weekday, or Sunday),
+    and returns a dictionary with a key (season_day) and value
+    (the corresponding dataframe).
+    """
+    data_frames = {}
+    for key, value in file_names.items():
+        df = load_data(folder_path + value)
+        # get season from filename
+        if "spring" in value:
+            df["season"] = "Spring"
+        elif "summer" in value:
+            df["season"] = "Summer"
+        elif "fall" in value:
+            df["season"] = "Fall"
+        elif "winter" in value:
+            df["season"] = "Winter"
 
-# Summer 2023 date range
-summer_start = pd.to_datetime("2023-06-21")
-summer_end = pd.to_datetime("2023-09-22")
+        # get day_type from filename
+        if "sat" in value:
+            df["day_type"] = "Saturday"
+        elif "weekday" in value:
+            df["day_type"] = "Weekday"
+        elif "sunday" in value:
+            df["day_type"] = "Sunday"
+        data_frames[key] = df
+    return data_frames
 
-calendar_df.loc[
-    (calendar_df["date"] >= summer_start) & (calendar_df["date"] <= summer_end),
-    "season",
-] = "Summer"
 
-# combine Tri Met data with calendar dates in order to convert the data set
-# from day_type (sat, sun, or weekday) + season level into date level
+def format_data(all_rider_data: Dict[str, pd.DataFrame]) -> Dict[str, pd.DataFrame]:
+    """
+    standarize column formats and keep the relevant
+    data fields needed to match our data model, or
+    merge the data at the datetime level
+    """
+    for key, df in all_rider_data.items():
+        df.columns = df.columns.str.lower().str.replace(" ", "_")
+        all_rider_data[key] = df[["location_id", "ons", "day_type", "season"]]
+    return all_rider_data
 
-merged_data = pd.merge(
-    all_rider_data, calendar_df, on=["day_type", "season"], how="left"
-)
 
-sorted_data = merged_data.sort_values(by=["date", "day_type", "season"], ascending=True)
+def create_calendar_df(
+    start_date: str, end_date: str, season_ranges: Dict[str, Tuple[str, str]]
+) -> pd.DataFrame:
+    """
+    Create a dataframe with datetime values as well as
+    the corresponding season and day type associated with
+    each datetime, return a dataframe
+    """
+    calendar_dates = pd.date_range(start=start_date, end=end_date, freq="D")
+    calendar_df = pd.DataFrame(calendar_dates, columns=["date"])
+    calendar_df["day_type"] = calendar_df["date"].dt.day_name()
+    calendar_df["day_type"] = (
+        calendar_df["day_type"]
+        .map({"Saturday": "Saturday", "Sunday": "Sunday"})
+        .fillna("Weekday")
+    )
+    calendar_df["season"] = "Spring"
 
-sorted_data = sorted_data.reindex(columns=["location_id", "date", "ons"])
+    # label seasons based on date ranges
+    for season, (season_start, season_end) in season_ranges.items():
+        calendar_df.loc[
+            (calendar_df["date"] >= season_start) & (calendar_df["date"] < season_end),
+            "season",
+        ] = season
 
-sorted_data.rename(columns={"ons": "riders"}, inplace=True)
+    return calendar_df
 
-sorted_data["date"] = pd.to_datetime(sorted_data["date"])
 
-# modify location_id to include city code
-sorted_data["location_id"] = sorted_data["location_id"].apply(lambda x: f"Portland-{x}")
+def merge_data(all_rider_data: pd.DataFrame, calendar_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Combines two dataframes by day type and season value,
+    returns a dataframe with the columns from both data frames
+    """
+    merged_data = pd.merge(
+        all_rider_data, calendar_df, on=["day_type", "season"], how="left"
+    )
+    return merged_data.sort_values(by=["date", "day_type", "season"], ascending=True)
 
-# export final data set in JSON format
-output_file = folder_path + "Portland_ridership.json"
-sorted_data.to_json(
-    output_file,
-    orient="records",
-)
+
+def export_to_json(sorted_data: pd.DataFrame, output_file: str) -> None:
+    sorted_data.to_json(output_file, orient="records")
+
+
+def main() -> None:
+    all_rider_data = load_ridership_datasets(file_names)
+    formatted_data = format_data(all_rider_data)
+    all_data = pd.concat(formatted_data.values(), ignore_index=True)
+
+    calendar_df = create_calendar_df(start_date, end_date, season_ranges)
+    merged_data = merge_data(all_data, calendar_df)
+    merged_data.rename(columns={"ons": "ridership"}, inplace=True)
+    merged_data["date"] = pd.to_datetime(merged_data["date"])
+    merged_data["station_id"] = merged_data["location_id"]
+    output_file = folder_path + "Portland_ridership.json"
+    export_to_json(
+        merged_data.reindex(columns=["date", "ridership", "station_id"]), output_file
+    )
+
+
+if __name__ == "__main__":
+    main()
