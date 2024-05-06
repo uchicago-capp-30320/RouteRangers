@@ -48,13 +48,22 @@ STATEN_ISLAND_BUS_URL = (
 )
 MTA_BUS_CO_BUS_URL = "http://web.mta.info/developers/data/busco/google_transit.zip"
 
+BUS_URLS = [
+    BRONX_BUS_URL,
+    BROOKLYN_BUS_URL,
+    MANHATTAN_BUS_URL,
+    QUEENS_BUS_URL,
+    STATEN_ISLAND_BUS_URL,
+    MTA_BUS_CO_BUS_URL,
+]
+
 ## PORTLAND
 TRIMET_URL = "http://developer.trimet.org/schedule/gtfs.zip"
 
 
 ALL_PILOT_CITY_URLS = [
-    CTA_URL,
     METRA_URL,
+    CTA_URL,
     MTA_SUBWAY_URL,
     BRONX_BUS_URL,
     BROOKLYN_BUS_URL,
@@ -102,14 +111,12 @@ def get_gtfs_component_dfs(
     routes = feed.routes
     trips = feed.trips
     stops = feed.stops
-    stop_times = feed.stop_times
     shapes = feed.shapes
 
     gtfs_dataframe_dict = {
         "routes": routes,
         "trips": trips,
         "stops": stops,
-        # "stop_times": stop_times,
         "shapes": shapes,
     }
     # Some systems have a "transfers.txt" file; others don't.
@@ -133,8 +140,8 @@ def get_gtfs_component_dfs(
 
 def ingest_transit_stations(
     stops: pd.DataFrame | gpd.GeoDataFrame,
-    date=datetime.date,
-    transit_mode=2,  # TODO: Undo hard-code -- should be 2 for Metra
+    url: str,
+    # transit_mode=2,  # TODO: Undo hard-code -- should be 2 for Metra
     # 0 for Trimet streetcar, 1 for subway train, and 3 for bus
 ) -> None:
     """Feed a DataFrame of stops into Postgres as TransitStation objects"""
@@ -149,14 +156,13 @@ def ingest_transit_stations(
             station_id=row["stop_id"],
             station_name=row["stop_name"],
             location=Point(row["stop_lat"], row["stop_lon"], srid=4326),
-            mode=transit_mode,
+            mode=assign_mode(row, url),
         )
         print(
             f'Observation created: {row["city"]}, {row["stop_id"]}, '
             f'{row["stop_name"]}, Point({row["stop_lat"]},{row["stop_lon"]})'
             f", mode {obs.mode}"
         )
-        print(obs)
         try:
             obs.save()
             print(f"Observation {i} saved to PostGIS")
@@ -164,6 +170,45 @@ def ingest_transit_stations(
             print(e)
             print("Skipping import of this observation\n")
     print("Ingestion complete")
+
+
+def assign_mode(row, url: str) -> int:
+    """Take in data about a transit stop and assign it the proper mode per
+    GTFS standards (which isn't in the stops.txt). Is not super scalable
+    if more cities are added.
+
+    TODO: Think about how to redesign for easier scaling or perhaps redo with
+    some creative joins"""
+
+    LIGHT_RAIL = 0
+    SUBWAY = 1
+    RAIL = 2
+    BUS = 3
+    AERIAL_LIFT = 6
+
+    if url == METRA_URL:
+        return RAIL
+    elif url in BUS_URLS:
+        return BUS
+    elif url == MTA_SUBWAY_URL:
+        return SUBWAY
+    elif url == CTA_URL:
+        # stop_id is an integer. Bus stop_ids currently end at 18,709
+        # El stop_ids currently start at 30,000
+        # This may fail
+        if int(row["stop_id"]) > 30000:
+            return SUBWAY
+        else:
+            return BUS
+    elif url == TRIMET_URL:
+        if "MAX" in row["stop_name"]:
+            return LIGHT_RAIL
+        elif "WES" in row["stop_name"]:
+            return RAIL
+        elif "Tram Terminal" in row["stop_name"]:
+            return AERIAL_LIFT  # there's an aerial tram!!
+        else:
+            return BUS  # other routes are buses
 
 
 def handroll_multiline_routes(city: str, feed) -> gpd.GeoDataFrame:
@@ -276,12 +321,17 @@ def ingest_transit_routes(geom_shapes: gpd.GeoDataFrame) -> None:
         obs = TransitRoute(
             city=row["city"],
             route_id=row["route_id"],
-            route_name=row["route_long_name"],
+            route_name=row["route_long_name"],  # TODO: switch to short name or
+            # or truncate to 30 characters or raise 30 character max in PostGIS
             color=row["route_color"],
             geo_representation=GEOSGeometry(row["geometry"]),
             mode=row["route_type"],
         )
-        print(obs)
+        print(
+            f"Observation created: {obs.city}, {obs.route_id}, "
+            f"{obs.route_name}, color #{obs.color}), "
+            f", mode {obs.mode}"
+        )
         try:
             obs.save()
         except Exception as e:
@@ -297,27 +347,32 @@ def ingest_multiple_feeds(feed_url_list: list[str]) -> None:
     a list.
     """
 
-    for this_url in feed_url_list:
-        city, agency, feed = get_gtfs_feed(this_url)
+    for url in feed_url_list:
+        print(f"Getting static GTFS transit feed from {url}...")
+        city, agency, feed = get_gtfs_feed(url)
         print(f"{city} {agency} feed acquired from URL")
         gtfs_df_dict = get_gtfs_component_dfs(city, feed)
 
         stops = gtfs_df_dict["stops"]
         stops.loc[:, "city"] = city  # should be extraneous now
+        print("Preparing shapes of routes for upload... THIS COULD TAKE A FEW MINUTES.")
         geom_shapes = handroll_multiline_routes(city, feed)
         # geom_shapes = handroll_geometrize_routes(city, feed)
 
         print(f"Starting ingestion of {city} {agency} stops into PostGIS...")
-        ingest_transit_stations(stops)
+        ingest_transit_stations(stops, url)
 
-        print("Starting test ingestion of {city} {agency} routes into PostGIS...")
+        print(f"Starting test ingestion of {city} {agency} routes into PostGIS...")
         ingest_transit_routes(geom_shapes)
+
+        # TODO: Consider doing an ingestion of transfers.txt if it exists
+        # TODO: Consider reading out stdout to a log for inspection of ingestion errors
 
 
 def run():
     """TODO: Build out into a script that gets GTFS feed for
     all three cities (all ten GTFS feeds), and ingests stops and routes for each"""
-    ingest_multiple_feeds([METRA_URL])
+    ingest_multiple_feeds(ALL_PILOT_CITY_URLS)
 
 
 if __name__ == "__main__":
