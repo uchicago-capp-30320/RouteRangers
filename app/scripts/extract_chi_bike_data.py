@@ -30,7 +30,7 @@ TIMEOUT = 30
 CHI_TZ = pytz.timezone("America/Chicago")
 
 
-def extract_bike_stations(app_token=DATA_PORTAL_APP_TOKEN) -> List:
+def extract_bike_stations_api(app_token=DATA_PORTAL_APP_TOKEN) -> List:
     """
     Extract bike station data from Chicago API
     """
@@ -46,13 +46,14 @@ def ingest_bike_stations() -> None:
     """
     Ingest bike station data into BikeStation table
     """
-    bike_stations = extract_bike_stations()
+    bike_stations = extract_bike_stations_api()
     for station in bike_stations:
         obs = BikeStation(
             city = "CHI",
             station_id=station["id"],
             station_name=station["station_name"],
-            n_docks=station["total_docks"],
+            short_name = station["short_name"],
+            #n_docks=station["total_docks"],
             location=Point(station["location"]["coordinates"]),
         )
         obs.save()
@@ -91,8 +92,8 @@ def ingest_divvy_data():
 def run():
     ingest_bike_stations()
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-   stations = extract_bike_stations()
-   print(stations[0]["location"])
+#    stations = extract_bike_stations_api()
+#    print(stations)
 
