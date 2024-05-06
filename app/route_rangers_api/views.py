@@ -18,17 +18,22 @@ def index(request):
                          the routerangers index webpage"""
     )
 
+
 def home(request):
-    return render(request, 'Cities.html')
+    return render(request, "Cities.html")
+
 
 def about(request):
-    return render(request, 'about.html')
+    return render(request, "about.html")
 
-def Policy (request, context):
-    return render(request, 'PolicyMaker.html', context)
+
+def Policy(request, context):
+    return render(request, "PolicyMaker.html", context)
+
 
 def Survey(request, context):
-    return render(request, 'Survey.html', context)
+    return render(request, "Survey.html", context)
+
 
 def Feedback(request, context):
-    return render(request, 'Feedback.html', context)
+    return render(request, "Feedback.html", context)
