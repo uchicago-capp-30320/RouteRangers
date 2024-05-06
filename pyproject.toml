@@ -20,6 +20,7 @@ matplotlib = "^3.8.4"
 pytest-django = "^4.8.0"
 ruff = "^0.4.1"
 requests = "^2.31.0"
+django-extensions = "^3.2.3"
 
 [build-system]
 requires = ["poetry-core"]
