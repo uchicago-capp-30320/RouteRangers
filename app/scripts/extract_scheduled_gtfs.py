@@ -309,14 +309,16 @@ def handroll_geometrize_routes(city: str, feed) -> gpd.GeoDataFrame:
 
     # Conversion of shapely/Geopandas linestrings to GEOSGeometry/Django LineStrings
     # https://stackoverflow.com/questions/56299888/how-can-i-efficiently-save-data-from-geopandas-to-django-converting-from-shapel
+
+    routes_trips = trips.merge(routes, how="left", on="route_id").drop_duplicates(
+        ["route_id", "shape_id"]
+    )
+    # This is the merge that always fails
     # TODO: IMPORTANT: FIX PANDAS MERGE LOGIC SO THAT geometrize_shapes()
     # GeoDataFrame has all route information about each shape's route in the
     # relevant columns, instead of NaNs
-    geom_shapes = geom_shapes.merge(trips, how="right", on="shape_id")
-    geom_shapes.loc[:, "geometry"] = geometries
-    print(geom_shapes)
-    geom_shapes = geom_shapes.merge(routes, how="right", on="route_id")
-    print(geom_shapes.loc[:, ["geometry"]])
+    geom_shapes = geom_shapes.merge(routes_trips, how="left", on="shape_id")
+
     geom_shapes = geom_shapes.loc[
         :,
         [
@@ -330,7 +332,7 @@ def handroll_geometrize_routes(city: str, feed) -> gpd.GeoDataFrame:
         ],
     ].drop_duplicates()
     geom_shapes.loc[:, "city"] = city
-    print(geom_shapes.loc[:, "geometry"])
+    # print(geom_shapes)
     return geom_shapes
 
 
@@ -344,6 +346,8 @@ def ingest_transit_routes(geom_shapes: gpd.GeoDataFrame) -> None:
             route_id=row["route_id"],
             route_name=row["route_long_name"],
             color=row["route_color"],
+            # TODO: Get row["geometry"] converted to valid WKT string
+            # before doing GEOSGeometry() type convert
             geo_representation=GEOSGeometry(row["geometry"]),
             mode=row["route_type"],
         )
