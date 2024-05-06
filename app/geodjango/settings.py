@@ -87,7 +87,13 @@ WSGI_APPLICATION = "geodjango.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-# GDAL_LIBRARY_PATH = "~/opt/homebrew/Cellar/gdal/3.8.5_1/lib/libgdal.dylib"
+GDAL_LIBRARY_PATH = (
+    "/Users/jimenasalinas/anaconda3/pkgs/libgdal-3.6.2-h8be97c6_4/lib/libgdal.dylib"
+)
+
+# "~/opt/homebrew/Cellar/gdal/3.8.5_1/lib/libgdal.dylib"
+
+# /Users/jimenasalinas/anaconda3/pkgs/libgdal-3.6.2-h8be97c6_4/lib
 
 DATABASES = {
     "default": {
