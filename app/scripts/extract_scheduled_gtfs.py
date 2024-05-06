@@ -11,7 +11,7 @@ import pdb
 
 
 from django.contrib.gis.geos import GEOSGeometry, LineString, Point
-from route_rangers_api.models import TransitStation
+from route_rangers_api.models import TransitStation, TransitRoute
 
 
 ### Constants
@@ -253,7 +253,10 @@ def combine_different_feeds(
 
 
 def ingest_transit_stations(
-    stops: pd.DataFrame | gpd.GeoDataFrame, date=datetime.date
+    stops: pd.DataFrame | gpd.GeoDataFrame,
+    date=datetime.date,
+    transit_mode=2,  # TODO: Undo hard-code -- should be 2 for Metra
+    # 0 for Trimet streetcar, 1 for subway train, and 3 for bus
 ) -> None:
     """Feed a DataFrame of stops into Postgres as TransitStation objects"""
     for i, row in stops.iterrows():
@@ -267,8 +270,7 @@ def ingest_transit_stations(
             station_id=row["stop_id"],
             station_name=row["stop_name"],
             location=Point(row["stop_lat"], row["stop_lon"], srid=4326),
-            mode=2,  # TODO: Undo hard-code -- should be 2 for Metra
-            # 0 for Trimet streetcar, 1 for subway train, and 3 for bus
+            mode=transit_mode,
         )
         print(
             f'Observation created: {row["city"]}, {row["stop_id"]}, '
@@ -285,15 +287,85 @@ def ingest_transit_stations(
     print("Ingestion complete")
 
 
+def handroll_geometrize_routes(city: str, feed) -> gpd.GeoDataFrame:
+    """Associate each route and its properties with an appropriate GEOS LineString.
+    Handrolls a simplified version of the gtfs_kit library's geometrize_routes()
+    method, which broke on some transit feeds with which we tried it.
+    Results in one shape per route, irrespective of direction.
+
+    Warning: Some users may not be able to test this function in any way
+    other than running this script, due to the 'ImproperlyConfigured' error
+    in which attempts to import types from django.contrib.gis.geos fail to find
+    the path for GDAL.
+
+    TODO: write test that establishes all needed fields are there for every city
+    """
+    geom_shapes = feed.geometrize_shapes()
+    geom_shapes.loc[:,"city"] = city
+    gtfs_dict = get_gtfs_component_dfs(city, feed)
+    routes = gtfs_dict["routes"]
+    trips = gtfs_dict["trips"]
+
+    # Conversion of shapely/Geopandas linestrings to GEOSGeometry/Django LineStrings
+    # https://stackoverflow.com/questions/56299888/how-can-i-efficiently-save-data-from-geopandas-to-django-converting-from-shapel
+
+    geom_shapes = (
+        # To do this we need to take the shape_id field from shapes...
+        geom_shapes.merge(trips, how="left", on="shape_id")
+        # and join it to the route_id from routes
+        .merge(routes, how="left", on="route_id")
+        .loc[:,[
+            "shape_id", 
+            "geometry", 
+            "route_id", 
+            "service_id", 
+            "route_type",
+            "route_long_name", 
+            "route_color"
+            ]]
+        .drop_duplicates()
+    
+    return geom_shapes
+
+
+def ingest_transit_routes(
+    geom_shapes: gpd.GeoDataFrame
+) -> None:
+    """Ingest routes and their shapes to Postgres database."""
+    for i, row in geom_shapes.iterrows():
+        print(f"Now ingesting route {i}, {row["route_id"]}...")
+        obs = TransitRoute(
+            city = row["city"],
+            route_id = row["route_id"],
+            route_name = row["route_long_name"],
+            color = row["route_color"],
+            geo_representation = GEOSGeometry(row["geometry"]),
+            mode = row["route_type"]
+        )
+        print(obs)
+        try:
+            obs.save()
+        except Exception as e:
+            print(e)
+            print("Skipping ingestion of this observation")
+    print("Ingestion complete")
+
+
+
 def run():
     # pdb.set_trace()
+    print("Getting Metra GTFS feed...")
     CHI, _, feed = get_gtfs_feed(METRA_URL)
+    print("Preparing Metra GTFS feed for ingestion...")
     gtfs_dataframe_dict = get_gtfs_component_dfs(CHI, feed)
     stops = gtfs_dataframe_dict["stops"]
-    stops.loc[:, "city"] = CHI
+    assert stops.loc[:, "city"] = CHI
+    geom_shapes = handroll_geometrize_routes(CHI, feed)
     # print(stops.columns)
-    print("Starting test ingestion of METRA_URL...")
+    print("Starting test ingestion of Metra stops...")
     ingest_transit_stations(stops)
+    print("Starting test ingestion of Metra routes...")
+    ingest_transit_routes(geom_shapes)
     # stops_pointified = pointify_stops(stops)
     # print(stops_pointified)
     # print(stops_pointified.columns)
