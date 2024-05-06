@@ -20,6 +20,7 @@ VARIABLES:
 """
 
 import pandas as pd
+from typing import Dict
 
 
 folder_path = ".../CloudStorage/Box-Box/Route Rangers/Transit dataset exploration/Portland Ridership Data/portland_ridership/"
@@ -40,6 +41,7 @@ file_names = {
     "winter_sunday": "2023 winter_sunday.xlsx",
 }
 
+
 # date ranges for 2023
 start_date = "2023-01-01"
 end_date = "2023-12-31"
@@ -48,14 +50,14 @@ end_date = "2023-12-31"
 # this will be used to change the level of the data from aggreate at the
 # date type level into daily level (to match our data model)
 season_ranges = {
-    "Spring": (pd.to_datetime("2023-03-20"), pd.to_datetime("2023-06-21")),
-    "Summer": (pd.to_datetime("2023-06-21"), pd.to_datetime("2023-09-23")),
-    "Fall": (pd.to_datetime("2023-09-23"), pd.to_datetime("2023-12-22")),
-    "Winter": (pd.to_datetime("2023-12-22"), pd.to_datetime("2024-03-20")),
+    "Spring": (pd.to_datetime("2023-03-19"), pd.to_datetime("2023-06-20")),
+    "Summer": (pd.to_datetime("2023-06-20"), pd.to_datetime("2023-09-22")),
+    "Fall": (pd.to_datetime("2023-09-22"), pd.to_datetime("2023-12-21")),
+    "Winter": (pd.to_datetime("2023-12-21"), pd.to_datetime("2024-03-19")),
 }
 
 
-def load_data(file_path):
+def load_data(file_path: str) -> pd.DataFrame:
     """
     reads and individual Excel file and returns an error
     if the file path does not exist
@@ -68,7 +70,7 @@ def load_data(file_path):
         print("An error occurred while loading data:", e)
 
 
-def load_ridership_datasets(file_names):
+def load_ridership_datasets(file_names: Dict[str, str]) -> Dict[str, pd.DataFrame]:
     """
     Takes a dictionary in the form key: season_day type
     and value: file name, loads the corresponding ridership
@@ -101,7 +103,7 @@ def load_ridership_datasets(file_names):
     return data_frames
 
 
-def format_data(all_rider_data):
+def format_data(all_rider_data: Dict[str, pd.DataFrame]) -> Dict[str, pd.DataFrame]:
     """
     standarize column formats and keep the relevant
     data fields needed to match our data model, or
@@ -113,7 +115,9 @@ def format_data(all_rider_data):
     return all_rider_data
 
 
-def create_calendar_df(start_date, end_date, season_ranges):
+def create_calendar_df(
+    start_date: str, end_date: str, season_ranges: Dict[str, Tuple[str, str]]
+) -> pd.DataFrame:
     """
     Create a dataframe with datetime values as well as
     the corresponding season and day type associated with
@@ -139,7 +143,7 @@ def create_calendar_df(start_date, end_date, season_ranges):
     return calendar_df
 
 
-def merge_data(all_rider_data, calendar_df):
+def merge_data(all_rider_data: pd.DataFrame, calendar_df: pd.DataFrame) -> pd.DataFrame:
     """
     Combines two dataframes by day type and season value,
     returns a dataframe with the columns from both data frames
@@ -150,33 +154,23 @@ def merge_data(all_rider_data, calendar_df):
     return merged_data.sort_values(by=["date", "day_type", "season"], ascending=True)
 
 
-def preprocess_location_id(location_id):
-    """
-    Add a city prefix to make the location id more specific
-    for our data model
-    """
-    return f"Portland-{location_id}"
-
-
-def export_to_json(sorted_data, output_file):
+def export_to_json(sorted_data: pd.DataFrame, output_file: str) -> None:
     sorted_data.to_json(output_file, orient="records")
 
 
-def main():
+def main() -> None:
     all_rider_data = load_ridership_datasets(file_names)
     formatted_data = format_data(all_rider_data)
     all_data = pd.concat(formatted_data.values(), ignore_index=True)
 
     calendar_df = create_calendar_df(start_date, end_date, season_ranges)
     merged_data = merge_data(all_data, calendar_df)
-    merged_data.rename(columns={"ons": "riders"}, inplace=True)
+    merged_data.rename(columns={"ons": "ridership"}, inplace=True)
     merged_data["date"] = pd.to_datetime(merged_data["date"])
-    merged_data["location_id"] = merged_data["location_id"].apply(
-        preprocess_location_id
-    )
+    merged_data["station_id"] = merged_data["location_id"]
     output_file = folder_path + "Portland_ridership.json"
     export_to_json(
-        merged_data.reindex(columns=["location_id", "date", "riders"]), output_file
+        merged_data.reindex(columns=["date", "ridership", "station_id"]), output_file
     )
 
 
