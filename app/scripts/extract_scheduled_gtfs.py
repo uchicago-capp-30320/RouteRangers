@@ -12,6 +12,9 @@ import pdb
 from django.contrib.gis.geos import GEOSGeometry, LineString, Point, MultiLineString
 from route_rangers_api.models import TransitStation, TransitRoute
 
+# to avoid a namespace conflict when creating shapely MultiLineStrings in geopandas
+# before they are turned into Django GEOS MultiLineStrings later
+from shapely.geometry import MultiLineString as shapely_MLS
 
 ### Constants
 
@@ -163,6 +166,56 @@ def ingest_transit_stations(
     print("Ingestion complete")
 
 
+def handroll_multiline_routes(city: str, feed) -> gpd.GeoDataFrame:
+    """Associate each route and its properties with an appropriate GEOS
+    MultiLineString. Geometrizes all shapes, then uses pandas groupby
+    and type conversion to turn each set of LineStrings into a MultiLineString.
+
+    Note that this will not do anything to eliminate overlap between component
+    LineStrings, so a route that branches into two will have a MultiLineString
+    with four LineString components in it, for inbound and outbound directions
+    on each branch of the route."""
+    shapes = feed.geometrize_shapes()
+    shapes.loc[:, "city"] = city
+    gtfs_dict = get_gtfs_component_dfs(city, feed)
+    routes = gtfs_dict["routes"]
+    trips = gtfs_dict["trips"]
+
+    # eliminate whitespace issues
+    routes.loc[:, "route_id"] = routes.loc[:, "route_id"].str.strip()
+    trips.loc[:, "route_id"] = trips.loc[:, "route_id"].str.strip()
+    trips.loc[:, "shape_id"] = trips.loc[:, "shape_id"].str.strip()
+    shapes.loc[:, "shape_id"] = shapes.loc[:, "shape_id"].str.strip()
+
+    routes_trips = trips.merge(routes, how="left", on="route_id").drop_duplicates(
+        "shape_id"
+    )
+
+    # TODO: consider method-chaining more
+    shapes = shapes.merge(routes_trips, how="left", on="shape_id")
+
+    grouped = (
+        shapes.groupby("route_id", as_index=False)["geometry"].apply(list).reset_index()
+    )
+    gdf = gpd.GeoDataFrame(
+        grouped, geometry=grouped.loc[:, "geometry"].apply(shapely_MLS)
+    )
+    gdf = gdf.merge(routes, how="left", on="route_id")
+    gdf.loc[:, "city"] = city
+    gdf = gdf.loc[
+        :,
+        [
+            "geometry",
+            "route_id",
+            "route_type",
+            "route_long_name",
+            "route_color",
+            "city",
+        ],  # maybe do this earlier to reduce memory usage
+    ]
+    return gdf
+
+
 def handroll_geometrize_routes(city: str, feed) -> gpd.GeoDataFrame:
     """Associate each route and its properties with an appropriate GEOS LineString.
     Handrolls a simplified version of the gtfs_kit library's geometrize_routes()
@@ -185,6 +238,7 @@ def handroll_geometrize_routes(city: str, feed) -> gpd.GeoDataFrame:
     # Conversion of shapely/Geopandas linestrings to GEOSGeometry/Django LineStrings
     # https://stackoverflow.com/questions/56299888/how-can-i-efficiently-save-data-from-geopandas-to-django-converting-from-shapel
 
+    # this might cause NaNs - check that these merges should be "left" and not "right"
     routes_trips = trips.merge(routes, how="left", on="route_id").drop_duplicates(
         ["route_id", "shape_id"]
     )
@@ -250,7 +304,8 @@ def ingest_multiple_feeds(feed_url_list: list[str]) -> None:
 
         stops = gtfs_df_dict["stops"]
         stops.loc[:, "city"] = city  # should be extraneous now
-        geom_shapes = handroll_geometrize_routes(city, feed)
+        geom_shapes = handroll_multiline_routes(city, feed)
+        # geom_shapes = handroll_geometrize_routes(city, feed)
 
         print(f"Starting ingestion of {city} {agency} stops into PostGIS...")
         ingest_transit_stations(stops)
