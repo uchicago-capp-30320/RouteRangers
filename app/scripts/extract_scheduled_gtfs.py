@@ -9,8 +9,7 @@ from datetime import datetime
 
 import pdb
 
-
-from django.contrib.gis.geos import GEOSGeometry, LineString, Point
+from django.contrib.gis.geos import GEOSGeometry, LineString, Point, MultiLineString
 from route_rangers_api.models import TransitStation, TransitRoute
 
 
@@ -70,25 +69,6 @@ URL_TO_CITY = {
     "http://developer.trimet.org/": {"City": "PDX", "Agency": "TRIMET"},
 }
 
-FILE_TO_PRIMARY_KEY = {
-    # Primary keys as defined in GTFS standard guide
-    # https://gtfs.org/schedule/reference/#stopstxt
-    "routes": ("route_id"),
-    "trips": ("trip_id"),
-    "stops": ("stop_id"),
-    "stop_times": ("trip_id", "stop_sequence"),
-    "shapes": ("shape_id", "shape_pt_sequence"),
-    "transfers": (
-        "from_stop_id",
-        "to_stop_id",
-        "from_trip_id",
-        "to_trip_id",
-        "from_route_id",
-        "to_route_id",
-    ),
-    "shape_geometries": ("route_id"),  # speculative
-}
-
 ### Functions
 
 
@@ -101,13 +81,11 @@ def get_gtfs_feed(feed_url: str) -> tuple:
     feed_city = URL_TO_CITY[url_base]["City"]
     feed_agency = URL_TO_CITY[url_base]["Agency"]
     feed = gk.read_feed(feed_url, dist_units="ft")  # dist_units TBD
-    # feed.validate() <-- gives "TypeError: strptime() argument 1 must be str, not int"
-    # when called on METRA_URL. TODO: investigate/debug further
 
     return feed_city, feed_agency, feed
 
 
-# give each DataFrame a city_id column and a system_route_id column (to disambiguate routes named "1" for example)
+# give each DataFrame a city_id column (to disambiguate routes named "1" for example)
 def get_gtfs_component_dfs(
     feed_city: str, feed
 ) -> dict[pd.DataFrame | gpd.GeoDataFrame]:
@@ -128,7 +106,7 @@ def get_gtfs_component_dfs(
         "routes": routes,
         "trips": trips,
         "stops": stops,
-        "stop_times": stop_times,
+        # "stop_times": stop_times,
         "shapes": shapes,
     }
     # Some systems have a "transfers.txt" file; others don't.
@@ -140,113 +118,14 @@ def get_gtfs_component_dfs(
         print(
             # Question: if we only need feed city and agency for these warnings,
             # do we strictly need to pass it in here, or should we not bother?
-            f"Warning: this {feed_city} GTFS feed has no transfers.txt file."
+            f"This {feed_city} GTFS feed has no transfers.txt file."
         )
 
-    # The gtfs_kit library's geometrize_routes() method breaks on some of our feeds.
-    # That method is itself called by the map_routes() method that outputs a line map
-    # on Folium, so fixing the issue or finding an alternative may be a priority later.
-    try:
-        shape_geometries = gk.routes.geometrize_routes(feed)
-        gtfs_dataframe_dict["shape_geometries"] = shape_geometries
-    except:
-        print(
-            f"Warning: gtfs_kit library failed to geometrize this {feed_city} feed shapes.txt"
-        )
-        print(
-            "Consider running a function to generate those linestrings from shapes.txt table in Postgres"
-        )
+    # Add city column
+    for key in gtfs_dataframe_dict.keys():
+        gtfs_dataframe_dict[key].loc[:, "city"] = feed_city
 
     return gtfs_dataframe_dict
-
-
-def add_extra_columns(
-    feed_city: str, feed_component: pd.DataFrame | gpd.GeoDataFrame
-) -> pd.DataFrame | gpd.GeoDataFrame:
-    """
-    Add additional columns city and time of update in case there are any
-    duplicates for routes, stops, etc. in multiple cities.
-    """
-    orig_columns = feed_component.columns
-    feed_component.loc[:, "city"] = feed_city
-    # Static feeds may be scraped on a schedule; system should preserve for users
-    # how recent the data is
-    NOW = datetime.now()
-    feed_component.loc[:, "last_updated"] = NOW
-    # Perhaps pass NOW in from outside the function, so it's the same for all entries
-    # from a particular GTFS feed as it gets processed
-
-    # TODO: miscellaneous cleanup (one thing: standardize CTA route names to
-    # standard English words for colors)
-    # TODO: Consider adding a # sign to color column (or see if Postgres has a
-    # color data type)
-    return feed_component
-
-
-def combine_different_feeds(
-    feed_url_list: list[str], output_folder: None | str = None
-) -> dict[pd.DataFrame | gpd.GeoDataFrame]:
-    """
-    Run the entire GTFS ingestion pipeline for multiple endpoint URLs.
-    TODO: consider allowing this to take an arbitrary list of *args rather than
-    a list.
-
-    Optional parameter output_folder allows for saving results to file storage.
-    """
-    # This doesn't seem to require initailizing empty dataframes with the proper
-    # columns to concat to -- it'll take those from the first dataframe processed
-    all_routes = None
-    all_trips = None
-    all_stops = None
-    all_stop_times = None
-    all_shapes = None
-    all_transfers = None
-    all_shape_geometries = None
-
-    for this_url in feed_url_list:
-        this_city, this_agency, this_feed = get_gtfs_feed(this_url)
-        print(f"{this_city} {this_agency} feed ingested")
-        these_gtfs_dataframes = {
-            name: add_extra_columns(this_city, df)
-            for name, df in get_gtfs_component_dfs(this_city, this_feed).items()
-        }
-
-        for name, df in these_gtfs_dataframes.items():
-            # TODO: this in a  more programmatic way
-            if name == "routes":
-                all_routes = pd.concat([all_routes, df])
-            elif name == "trips":
-                all_trips = pd.concat([all_trips, df])
-            elif name == "stops":
-                all_stops = pd.concat([all_stops, df])
-            elif name == "stop_times":
-                all_stop_times = pd.concat([all_stop_times, df])
-            elif name == "shapes":
-                all_shapes = pd.concat([all_shapes, df])
-            elif name == "transfers":
-                all_transfers = pd.concat([all_transfers, df])
-            elif name == "shape_geometries":
-                all_shape_geometries = pd.concat([all_shape_geometries, df])
-        print(f"{this_city} {this_agency} dataframes concatenated to whole")
-    # end for
-
-    all_dfs = {
-        "routes": all_routes,
-        "trips": all_trips,
-        "stops": all_stops,
-        "stop_times": all_stop_times,
-        "shapes": all_shapes,
-        "transfers": all_transfers,
-        "shape_geometries": all_shape_geometries,
-    }
-
-    print(all_dfs)
-
-    if output_folder is not None:
-        for name, df in all_dfs.items():
-            pd.to_csv(df, f"{output_folder}/{name}.csv")
-
-    return all_dfs
 
 
 def ingest_transit_stations(
@@ -353,26 +232,37 @@ def ingest_transit_routes(geom_shapes: gpd.GeoDataFrame) -> None:
             obs.save()
         except Exception as e:
             print(e)
-            print("Skipping ingestion of this observation")
+            print("Skipping ingestion of this observation\n")
     print("Ingestion complete")
+
+
+def ingest_multiple_feeds(feed_url_list: list[str]) -> None:
+    """
+    Run the entire GTFS ingestion pipeline for multiple endpoint URLs.
+    TODO: consider allowing this to take an arbitrary list of *args rather than
+    a list.
+    """
+
+    for this_url in feed_url_list:
+        city, agency, feed = get_gtfs_feed(this_url)
+        print(f"{city} {agency} feed acquired from URL")
+        gtfs_df_dict = get_gtfs_component_dfs(city, feed)
+
+        stops = gtfs_df_dict["stops"]
+        stops.loc[:, "city"] = city  # should be extraneous now
+        geom_shapes = handroll_geometrize_routes(city, feed)
+
+        print(f"Starting ingestion of {city} {agency} stops into PostGIS...")
+        ingest_transit_stations(stops)
+
+        print("Starting test ingestion of {city} {agency} routes into PostGIS...")
+        ingest_transit_routes(geom_shapes)
 
 
 def run():
     """TODO: Build out into a script that gets GTFS feed for
     all three cities (all ten GTFS feeds), and ingests stops and routes for each"""
-    # pdb.set_trace()
-    print("Getting Metra GTFS feed...")
-    CHI, _, feed = get_gtfs_feed(METRA_URL)
-    print("Preparing Metra GTFS feed for ingestion...")
-    gtfs_dataframe_dict = get_gtfs_component_dfs(CHI, feed)
-    stops = gtfs_dataframe_dict["stops"]
-    stops.loc[:, "city"] = CHI
-    geom_shapes = handroll_geometrize_routes(CHI, feed)
-    print("Starting test ingestion of Metra stops...")
-    ingest_transit_stations(stops)
-
-    print("Starting test ingestion of Metra routes...")
-    ingest_transit_routes(geom_shapes)
+    ingest_multiple_feeds([METRA_URL])
 
 
 if __name__ == "__main__":
