@@ -1,6 +1,7 @@
 from django.contrib.gis.db import models
 
 CITIES_CHOICES = {"CHI": "Chicago", "NYC": "New York", "PDX": "Portland"}
+
 #################################
 ###### DEMOGRAPHIC MODELS #######
 #################################
@@ -40,7 +41,6 @@ class Demographics(models.Model):
         verbose_name="Number of people with disability"
     )
 
-
 #################################
 ######## TRANSIT MODELS #########
 #################################
@@ -68,7 +68,7 @@ class TransitRoute(models.Model):
     route_id = models.CharField(max_length=30)
     route_name = models.CharField(max_length=30)
     color = models.CharField(max_length=30, null=True)
-    geo_representation = models.LineStringField()
+    geo_representation = models.MultiLineStringField()
     mode = models.IntegerField(
         verbose_name="Mode of transportation", choices=TransitModes.choices
     )
@@ -135,16 +135,21 @@ class BikeStation(models.Model):
     """
     Class that represent bike sharing docking stations
     """
-
-    station_id = models.CharField(max_length=30, primary_key=True)
+    city = models.CharField(max_length=30, choices=CITIES_CHOICES)
+    station_id = models.CharField(max_length=30)
+    station_name = models.CharField(max_length=30)
+    short_name = models.CharField(max_length=30,null=True)
     location = models.PointField()
 
+    class Meta:
+            constraints = [
+                models.UniqueConstraint(fields=["city", "station_id"], name="city_station_bike")
+            ]
 
 class BikeRidership(models.Model):
     """
     Class that represent bike sharing ridership
     """
-
     station = models.ForeignKey(BikeStation, on_delete=models.PROTECT)
     date = models.DateField()
     n_started = models.IntegerField()
@@ -170,7 +175,6 @@ class SurveyAnswer(models.Model):
     """
     Class that represents answers to surveys
     """
-
     user_id = models.CharField(max_length=30)
     response_date = models.DateTimeField("Survey response date", auto_now_add=True)
     city = models.CharField(max_length=30)
