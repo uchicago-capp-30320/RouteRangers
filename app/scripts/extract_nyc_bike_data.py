@@ -12,11 +12,11 @@ from app.scripts.utils import (
     extract_stations,
 )
 
-# from route_rangers_api.models import (
-#    BikeRidership,
-#    BikeStation,
-# )
-# from django.contrib.gis.geos import Point
+from route_rangers_api.models import (
+   BikeRidership,
+   BikeStation,
+)
+from django.contrib.gis.geos import Point
 
 
 #########################
@@ -52,16 +52,28 @@ def extract_bike_stations_files() -> List:
     return stations
 
 
-def ingest_bike_stations_data() -> None:
-    stations_df = extract_bike_stations_files()
+# def ingest_bike_stations_data() -> None:
+#     stations_df = extract_bike_stations_files()
 
-    for row in stations_df.itertuples():
-        loc = Point(row.start_lat, row.start_lng)
+#     for row in stations_df.itertuples():
+#         loc = Point(row.start_lat, row.start_lng)
+#         obs = BikeStation(
+#             station_id=row.started_at_id, station_name=row.started_at_name, location=loc
+#         )
+#         obs.save()
+
+def ingest_bike_stations_data()-> None:
+    stations = extract_stations(BIKE_STATIONS_ENDPOINT)
+    for station in stations:
         obs = BikeStation(
-            station_id=row.started_at_id, station_name=row.started_at_name, location=loc
-        )
+                city = "NYC",
+                station_id=station["station_id"],
+                station_name=station["name"],
+                short_name = station["short_name"],
+                n_docks=station["capacity"],
+                location=Point(station["lon"],station["lat"]),
+            )
         obs.save()
-
 
 def create_daily_ridership_month(filepath: str) -> pd.DataFrame:
     """
@@ -94,7 +106,9 @@ def ingest_citibike_ridership_data():
             )
             ingest_monthly_data(monthly_df)
 
+def run():
+    ingest_bike_stations_data()
 
-if __name__ == "__main__":
-    stations = extract_stations(BIKE_STATIONS_ENDPOINT)
-    print(len(stations))
+# if __name__ == "__main__":
+#     stations = extract_stations(BIKE_STATIONS_ENDPOINT)
+#     print(len(stations))

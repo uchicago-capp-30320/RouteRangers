@@ -6,6 +6,8 @@ import pytz
 import pandas as pd
 from dotenv import load_dotenv
 import itertools
+import psycopg2
+
 
 from route_rangers_api.models import (
    BikeRidership,
@@ -48,16 +50,20 @@ def ingest_bike_stations() -> None:
     """
     bike_stations = extract_bike_stations_api()
     for station in bike_stations:
-        obs = BikeStation(
-            city = "CHI",
-            station_id=station["id"],
-            station_name=station["station_name"],
-            short_name = station["short_name"],
-            #n_docks=station["total_docks"],
-            location=Point(station["location"]["coordinates"]),
-        )
-        obs.save()
-
+        try:
+            print(f"ingesting {station['station_name']}")
+            obs = BikeStation(
+                city = "CHI",
+                station_id=station["id"],
+                station_name=station["station_name"],
+                short_name = station["short_name"],
+                n_docks=station["total_docks"],
+                location=Point(station["location"]["coordinates"]),
+            )
+            obs.save()
+        except:
+            print(f"Observation{station['station_name']} already ingested")
+        
 
 def create_daily_ridership_month(filepath: str) -> pd.DataFrame:
     """
@@ -92,8 +98,8 @@ def ingest_divvy_data():
 def run():
     ingest_bike_stations()
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
 
-#    stations = extract_bike_stations_api()
-#    print(stations)
+   stations = extract_bike_stations_api()
+   print(stations[0]["short_name"])
 

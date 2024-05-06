@@ -136,10 +136,11 @@ class BikeStation(models.Model):
     Class that represent bike sharing docking stations
     """
     city = models.CharField(max_length=30, choices=CITIES_CHOICES)
-    station_id = models.CharField(max_length=30)
+    station_id = models.CharField(max_length=50)
     station_name = models.CharField(max_length=30)
     short_name = models.CharField(max_length=30,null=True)
     location = models.PointField()
+    n_docks = models.IntegerField()
 
     class Meta:
             constraints = [
