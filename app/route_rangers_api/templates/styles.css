@@ -5,6 +5,25 @@
             padding: 0;
             margin: 0;
         }
+        :root {
+          /* Add these styles to your global stylesheet, which is used across all site pages. You only need to do this once. All elements in the library derive their variables and base styles from this central sheet, simplifying site-wide edits. For instance, if you want to modify how your h2's appear across the site, you just update it once in the global styles, and the changes apply everywhere. */
+          --primary: #ff6a3e;
+          --primaryLight: #ffba43;
+          --secondary: #ffba43;
+          --secondaryLight: #ffba43;
+          --headerColor: #000000;
+          --bodyTextColor: #000000;
+          --bodyTextColorWhite: #fafbfc;
+          /* 13px - 16px */
+          --topperFontSize: clamp(0.8125rem, 1.6vw, 1rem);
+          /* 31px - 49px */
+          --headerFontSize: clamp(1.9375rem, 3.9vw, 3.0625rem);
+          --bodyFontSize: 1rem;
+          /* 60px - 100px top and bottom */
+          --sectionPadding: clamp(3.75rem, 7.82vw, 6.25rem) 1rem;
+      }
+
+/* footer */
 
         #cs-footer {
           width: 100%;
@@ -42,6 +61,7 @@
           width: 100%; /* Expand the underline on hover */
           background-color: var(--primary); /* Change the color of the underline on hover */
       }
+/* Imagegrid */
         .image-grid img {
             max-width: 100%;
             height: auto;
@@ -51,31 +71,12 @@
           width: 70%;
           margin: 0 auto; /* Centers the container horizontally */
       }
-        
-        :root {
-            /* Add these styles to your global stylesheet, which is used across all site pages. You only need to do this once. All elements in the library derive their variables and base styles from this central sheet, simplifying site-wide edits. For instance, if you want to modify how your h2's appear across the site, you just update it once in the global styles, and the changes apply everywhere. */
-            --primary: #ff6a3e;
-            --primaryLight: #ffba43;
-            --secondary: #ffba43;
-            --secondaryLight: #ffba43;
-            --headerColor: #000000;
-            --bodyTextColor: #000000;
-            --bodyTextColorWhite: #fafbfc;
-            /* 13px - 16px */
-            --topperFontSize: clamp(0.8125rem, 1.6vw, 1rem);
-            /* 31px - 49px */
-            --headerFontSize: clamp(1.9375rem, 3.9vw, 3.0625rem);
-            --bodyFontSize: 1rem;
-            /* 60px - 100px top and bottom */
-            --sectionPadding: clamp(3.75rem, 7.82vw, 6.25rem) 1rem;
-        }
-
-
-
         *, *:before, *:after {
             /* prevents padding from affecting height and width */
             box-sizing: border-box;
         }
+
+/* Header  */
         .cs-topper {
             font-size: var(--topperFontSize);
             line-height: 1.2em;
@@ -490,6 +491,7 @@
 
 }
 
+/* Cards */
 .card:hover {
     transform: translateY(-5px);
 }
@@ -528,6 +530,8 @@
     display: flex;
     justify-content: space-between;
 }
+
+/* Standard Styles */
 
 .headers{
   margin: 4vw;
