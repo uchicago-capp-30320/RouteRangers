@@ -90,11 +90,6 @@ WSGI_APPLICATION = "geodjango.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-# UNCOMMENT THE NEXT TWO LINES IF YOU NEED TO SPECIFY THE PATHS FOR
-# GEOS AND GDAL
-
-# GDAL_LIBRARY_PATH = GDAL_PATH
-# GEOS_LIBRARY_PATH = GEOS_PATH
 
 DATABASES = {
     "default": {
