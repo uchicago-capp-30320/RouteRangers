@@ -73,9 +73,6 @@ URL_TO_CITY = {
 FILE_TO_PRIMARY_KEY = {
     # Primary keys as defined in GTFS standard guide
     # https://gtfs.org/schedule/reference/#stopstxt
-    # TODO: Question -- do we want to create a new primary key that concatenates
-    # city and agency information, or just do JOINs that add city and agency
-    # to the ON condition to make sure all JOINs are within a city-agency system?
     "routes": ("route_id"),
     "trips": ("trip_id"),
     "stops": ("stop_id"),
@@ -103,7 +100,7 @@ def get_gtfs_feed(feed_url: str) -> tuple:
     url_base = re.findall(r"https?:\/\/[^\/]+\/", feed_url)[0]
     feed_city = URL_TO_CITY[url_base]["City"]
     feed_agency = URL_TO_CITY[url_base]["Agency"]
-    feed = gk.read_feed(feed_url, dist_units="km")  # dist_units TBD
+    feed = gk.read_feed(feed_url, dist_units="ft")  # dist_units TBD
     # feed.validate() <-- gives "TypeError: strptime() argument 1 must be str, not int"
     # when called on METRA_URL. TODO: investigate/debug further
 
@@ -302,7 +299,6 @@ def handroll_geometrize_routes(city: str, feed) -> gpd.GeoDataFrame:
     """
     geom_shapes = feed.geometrize_shapes()
     geom_shapes.loc[:, "city"] = city
-    geometries = geom_shapes.loc[:, "geometry"]
     gtfs_dict = get_gtfs_component_dfs(city, feed)
     routes = gtfs_dict["routes"]
     trips = gtfs_dict["trips"]
@@ -317,13 +313,9 @@ def handroll_geometrize_routes(city: str, feed) -> gpd.GeoDataFrame:
     # tables. Remove all of it and merge should go through
     routes_trips.loc[:, "shape_id"] = routes_trips.loc[:, "shape_id"].str.strip()
     geom_shapes.loc[:, "shape_id"] = geom_shapes.loc[:, "shape_id"].str.strip()
+    # TODO: Consider adding an equality check here
 
-    # This is the merge that always fails
-    # TODO: IMPORTANT: FIX PANDAS MERGE LOGIC SO THAT geometrize_shapes()
-    # GeoDataFrame has all route information about each shape's route in the
-    # relevant columns, instead of NaNs
     geom_shapes = geom_shapes.merge(routes_trips, how="left", on="shape_id")
-
     geom_shapes = geom_shapes.loc[
         :,
         [
@@ -343,6 +335,7 @@ def handroll_geometrize_routes(city: str, feed) -> gpd.GeoDataFrame:
 
 def ingest_transit_routes(geom_shapes: gpd.GeoDataFrame) -> None:
     """Ingest routes and their shapes to Postgres database."""
+    # convert all geometries to a GEOS-compatible representation
     geom_shapes = geom_shapes.to_wkt()
     for i, row in geom_shapes.iterrows():
         print(f"Now ingesting route {i}...")
@@ -352,108 +345,7 @@ def ingest_transit_routes(geom_shapes: gpd.GeoDataFrame) -> None:
             route_id=row["route_id"],
             route_name=row["route_long_name"],
             color=row["route_color"],
-            # TODO: Get row["geometry"] converted to valid WKT string
-            # before doing GEOSGeometry() type convert
             geo_representation=GEOSGeometry(row["geometry"]),
-            mode=row["route_type"],
-        )
-        print(obs)
-        try:
-            obs.save()
-        except Exception as e:
-            print(e)
-            print("Skipping ingestion of this observation")
-    print("Ingestion complete")
-
-
-### ALTERNATE VERSION OF ROUTE INGESTION IF pd.merge() KEEPS FAILING ###
-
-
-def handroll_geometrize_routes_no_joins(city: str, feed) -> gpd.GeoDataFrame:
-    """Associate each route and its properties with an appropriate LineString
-    without using pd.merge() to attempt to get it all on one table
-    """
-    geom_shapes = feed.geometrize_shapes()
-    geom_shapes.loc[:, "city"] = city
-    geometries = geom_shapes.loc[:, "geometry"]
-    gtfs_dict = get_gtfs_component_dfs(city, feed)
-    routes = gtfs_dict["routes"]
-    trips = gtfs_dict["trips"]
-
-    # Conversion of shapely/Geopandas linestrings to GEOSGeometry/Django LineStrings
-    # https://stackoverflow.com/questions/56299888/how-can-i-efficiently-save-data-from-geopandas-to-django-converting-from-shapel
-
-    routes_trips = trips.merge(routes, how="left", on="route_id").drop_duplicates(
-        ["route_id", "shape_id"]
-    )
-    routes_trips = routes_trips.loc[
-        :,
-        [
-            "shape_id",
-            "route_id",
-            "service_id",
-            "route_type",
-            "route_long_name",
-            "route_color",
-        ],
-    ]
-    routes_trips.loc[:, "city"] = city
-
-    routes_trips.sort_values("shape_id", ascending=True, inplace=True)
-    routes_trips.reset_index(inplace=True)
-
-    geom_shapes.sort_values("shape_id", ascending=True, inplace=True)
-    geom_shapes.reset_index(inplace=True)
-
-    # print(routes_trips.loc[:, "shape_id"])
-    # print(geom_shapes.loc[:, "shape_id"])
-
-    # This check will fail because shapes dataframe doesn't always have a shape
-    # for every shape_id in routes+trips
-    # if routes_trips.loc[:, "shape_id"] != geom_shapes.loc[:, "shape_id"]:
-    #     raise Exception(
-    #         "shape_id column doesn't match between routes_trips and geom_shapes"
-    #     )
-
-    return routes_trips, geom_shapes
-
-
-def ingest_transit_routes_no_joins(
-    city: str, routes_trips: pd.DataFrame, geom_shapes: gpd.GeoDataFrame
-) -> None:
-    """Ingest routes and their shapes to Postgres database without joining
-    route and trip into to geometrized shapes first."""
-    geom_shapes = geom_shapes.to_wkt()
-    print(geom_shapes)
-    print(geom_shapes.columns)
-    print(geom_shapes.dtypes)
-    for i, row in routes_trips.iterrows():
-        # shapes dataframe doesn't always have a shape for every shape_id in routes+trips
-        # in Metra, the "NCS_IB2" shape has no row in routes_trips but all others do
-        print(row["shape_id"])
-        # length of row shape ID with and without spaces on sides
-        print(len(row["shape_id"]), len(row["shape_id"].strip()))
-        # length of geom table shape ID with and without spaces on sides
-        print(
-            len(geom_shapes.loc[:, "shape_id"][0]),
-            len(geom_shapes.loc[:, "shape_id"][0].strip()),
-        )
-        shape = geom_shapes.loc[
-            (geom_shapes.loc[:, "shape_id"] == row["shape_id"].strip()),
-            "geometry",
-        ]
-        print(shape)
-        print(type(shape))
-        print(f"Now ingesting route {i}...")
-        # print(row["route_id"])
-        obs = TransitRoute(
-            city=row["city"],
-            route_id=row["route_id"],
-            route_name=row["route_long_name"],
-            color=row["route_color"],
-            # TODO: Get row["geometry"] converted to valid WKT string
-            # before doing GEOSGeometry() type convert
-            geo_representation=GEOSGeometry(shape),
             mode=row["route_type"],
         )
         print(obs)
@@ -476,25 +368,12 @@ def run():
     stops = gtfs_dataframe_dict["stops"]
     stops.loc[:, "city"] = CHI
     geom_shapes = handroll_geometrize_routes(CHI, feed)
-    # print(stops.columns)
-    # print("Starting test ingestion of Metra stops...")
-    # ingest_transit_stations(stops)
+    print("Starting test ingestion of Metra stops...")
+    ingest_transit_stations(stops)
 
     print("Starting test ingestion of Metra routes...")
-    # routes_trips, geom_shapes = handroll_geometrize_routes_no_joins(CHI, feed)
     ingest_transit_routes(geom_shapes)
-    # ingest_transit_routes_no_joins(CHI, routes_trips, geom_shapes)
-
-    # stops_pointified = pointify_stops(stops)
-    # print(stops_pointified)
-    # print(stops_pointified.columns)
 
 
-# if __name__ == "__main__":
-# feed_city, feed_agency, feed = get_gtfs_feed(METRA_URL)
-# gtfs_dataframe_dict = get_gtfs_component_dfs(feed_city, feed_agency, feed)
-# stops = gtfs_dataframe_dict["stops"]
-# # pdb.set_trace()
-# print(stops)
-
-# gtfs_data_for_postgres = combine_different_feeds(ALL_PILOT_CITY_URLS)
+if __name__ == "__main__":
+    run()
