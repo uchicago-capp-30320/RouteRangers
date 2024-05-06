@@ -20,7 +20,7 @@ VARIABLES:
 """
 
 import pandas as pd
-from typing import Dict
+from typing import Dict, Tuple
 
 
 folder_path = ".../CloudStorage/Box-Box/Route Rangers/Transit dataset exploration/Portland Ridership Data/portland_ridership/"
