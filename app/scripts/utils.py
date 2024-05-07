@@ -59,6 +59,8 @@ def extract_stations(url:str) -> List:
 
 def process_daily_ridership_data(monthly_df)->pd.DataFrame:
     monthly_df["date"] = pd.to_datetime(monthly_df["started_at"]).dt.date
+    monthly_df["start_station_id"] = monthly_df["start_station_id"].str.strip()
+    monthly_df["end_station_id"] = monthly_df["end_station_id"].str.strip()
 
     started_at = (
         monthly_df.groupby(["start_station_id", "date"])

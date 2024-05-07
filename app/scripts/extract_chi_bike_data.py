@@ -80,13 +80,17 @@ def ingest_monthly_data(monthly_ridership_df:pd.DataFrame)->None:
     Ingest ridership at the daily level into the BikeRidership table
     """
     for row in monthly_ridership_df.itertuples():
-        obs_station = BikeStation.objects.filter(station_id=row.station)
-        obs = BikeRidership(station=obs_station,date=row.date,
+        try:
+            obs_station = BikeStation.objects.filter(city="CHI",short_name=row.station_id).first().id
+            print(f"Observation Station: {obs_station}")
+            obs = BikeRidership(station=obs_station,date=row.date,
                             n_started = row.n_rides_started,
                             n_ended = row.n_rides_ended)
-        obs.save()
+            obs.save()
+        except:
+            pass
 
-def ingest_divvy_data():
+def ingest_trip_data():
     """
     Ingest the divvy data into the BikeRidership table 
     """
@@ -96,10 +100,11 @@ def ingest_divvy_data():
             ingest_monthly_data(monthly_df)
 
 def run():
-    ingest_bike_stations()
+    #ingest_bike_stations()
+    ingest_trip_data()
 
 if __name__ == "__main__":
 
-   stations = extract_bike_stations_api()
-   print(stations[0]["short_name"])
+   df = create_daily_ridership_month(f"{BIKE_DATA_DIR}/2023-divvy-tripdata/202301-divvy-tripdata.csv")
+   print(df)
 

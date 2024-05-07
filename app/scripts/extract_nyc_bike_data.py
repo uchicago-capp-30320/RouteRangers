@@ -65,15 +65,18 @@ def extract_bike_stations_files() -> List:
 def ingest_bike_stations_data()-> None:
     stations = extract_stations(BIKE_STATIONS_ENDPOINT)
     for station in stations:
-        obs = BikeStation(
-                city = "NYC",
-                station_id=station["station_id"],
-                station_name=station["name"],
-                short_name = station["short_name"],
-                n_docks=station["capacity"],
-                location=Point(station["lon"],station["lat"]),
-            )
-        obs.save()
+        try:
+            obs = BikeStation(
+                    city = "NYC",
+                    station_id=station["station_id"],
+                    station_name=station["name"],
+                    short_name = station["short_name"],
+                    n_docks=station["capacity"],
+                    location=Point(station["lon"],station["lat"]),
+                )
+            obs.save()
+        except:
+            print(f"station {station['name']} has already been ingested")
 
 def create_daily_ridership_month(filepath: str) -> pd.DataFrame:
     """
