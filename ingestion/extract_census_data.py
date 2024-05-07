@@ -1,0 +1,151 @@
+import os
+import sys
+import csv
+import logging
+import requests
+from typing import List, Dict
+from dotenv import load_dotenv
+
+########################################################################################
+# SETUP
+########################################################################################
+
+# Enviornment variables
+load_dotenv()
+CENSUS_API_KEY = os.getenv("CENSUS_API_KEY")
+
+# Logging configuration
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
+# Mappings
+variable_ids = {
+    "B01001_001E": "population",
+    "B19013_001E": "median_hhi_2022",
+    "B08301_001E": "transportation_to_work_total",
+    "B08301_002E": "transportation_to_work_car",
+    "B08301_010E": "transportation_to_work_public",
+    "B08301_011E": "transportation_to_work_bus",
+    "B08301_012E": "transportation_to_work_subway",
+    "B08303_001E": "work_commute_time"
+    }
+city_fips = {
+    "nyc": {"state_fips": "36", "county_fips": ["061", "047", "081", "005", "085"]},
+    "chicago": {"state_fips": "17", "county_fips": ["031"]},
+    "portland": {"state_fips": "41", "county_fips": ["051"]},
+}
+
+########################################################################################
+# HELPER FUNCTIONS
+########################################################################################
+
+def valid_command_line_arg(supported_cities: List[str]) -> str:
+    """
+    Validates command line use and extracts argument.
+
+    Inputs:
+        available_cities (List[str]): List of cities that are valid inputs.
+
+    Returns:
+      A string referring to the city to pull data from.
+    """
+    # Check syntax
+    if len(sys.argv) != 2:
+        sys.exit("Retype command as 'python3 extract_census_data.py <city_name>'")
+    # Check city
+    city = sys.argv[1]
+    if city not in supported_cities:
+        sys.exit(
+            "Unsupported city." + f" Available options: {', '.join(supported_cities)}"
+        )
+    return city
+
+def get_census_data(
+    variable_ids: Dict[str, str], state_code: str, county_code: str
+) -> List[Dict]:
+    """
+    Fetches data from US Census API.
+
+    Inputs:
+        variable_ids (dict): Unique variable IDs and their names
+        state_code (str): State-level FIPS code
+        county_code (str): County-level FIPS code
+
+    Returns:
+        A list of dictionaries with function inputs as key, value pairs.
+    """
+    # Request parameters
+    url = "https://api.census.gov/data/2022/acs/acs5"
+    params = {
+        "get": ",".join(variable_ids.keys()),
+        "for": "block group:*",
+        "in": f"state:{state_code}+county:{county_code}",
+        "key": CENSUS_API_KEY,
+    }
+    # API call
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
+        data = response.json()
+        headers = data[0]
+        rows = data[1:]
+        formatted_data = [dict(zip(headers, row)) for row in rows]
+        return formatted_data
+    else:
+        logging.error(f"Failed to retrieve data. Status code: {response.status_code}")
+        return []
+
+def store_census_data(data: List[Dict], city: str) -> None:
+    """
+    Stores retrieved data in csv file.
+
+    Inputs:
+        - data (list of dicts): output from get_census_data() function
+        - city (str): city of analysis
+        - filename (str): filename for the output CSV
+
+    Stores csv file of requested city data, with proper variable names.
+    """
+    output_dir = os.path.join(os.getcwd(), f"{city}_data.csv")
+    data_keys = set().union(*(d.keys() for d in data))
+    all_possible_fields = set(variable_ids.keys()).union(data_keys)
+    fieldnames = [
+        variable_ids.get(header, header.replace(" ", "_"))
+        for header in all_possible_fields
+    ]
+
+    with open(output_dir, "w", newline="") as file:
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in data:
+            row_renamed = {
+                variable_ids.get(k, k.replace(" ", "_")): v for k, v in row.items()
+            }
+            writer.writerow(row_renamed)
+
+def main():
+    """
+    Extracts US Census data and stores it locally.
+
+    Inputs: None
+
+    Returns:
+        A csv file located in same directory.
+    """
+    city = valid_command_line_arg(list(city_fips.keys()))
+    state_code = city_fips[city]["state_fips"]
+    county_codes = city_fips[city]["county_fips"]
+    for county_code in county_codes:
+        data = get_census_data(variable_ids, state_code, county_code)
+        if data:
+            store_census_data(data, city)
+        else:
+            logging.warning(f"No data found for county {state_code}{county_code}.")
+    logging.info(f"{city.upper()} data stored.")
+
+########################################################################################
+# MAIN EXECUTION
+########################################################################################
+
+if __name__ == "__main__":
+    main()
