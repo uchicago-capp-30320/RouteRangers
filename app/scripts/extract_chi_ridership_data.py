@@ -9,7 +9,7 @@ import datetime
 import os
 import pytz
 from dotenv import load_dotenv
-from app.route_rangers_api.models import (
+from route_rangers_api.models import (
     TransitRoute,
     RidershipRoute,
     TransitStation,
@@ -23,7 +23,7 @@ load_dotenv()
 
 DATA_PORTAL_APP_TOKEN = os.getenv("DATA_PORTAL_APP_TOKEN")
 
-REQUEST_DELAY = 0.2
+REQUEST_DELAY = 1
 RESULTS_PER_PAGE = 50000  # Max number of results for API
 TIMEOUT = 30
 
@@ -91,9 +91,9 @@ def extract_daily_data(
     elif (
         resp.status_code == 202
     ):  # API docs indicate that OK Status Codes are 200 and 202
-        pass  ##TODO: Add retry functionality
+        print("202 response code")  ##TODO: Add retry functionality
     else:
-        pass
+        print("Not succesful requests")
 
     resp_list = resp.json()
 
@@ -151,10 +151,12 @@ def ingest_bus_ridership(
     date = start_date
     time_delta = datetime.timedelta(days=1)
     while date <= end_date:
+        print(f"Extracting bus ridership for {date}")
         date_ridership = extract_daily_data(
-            url, date, order_by="routename", session=session
+            url=url, date=date, order_by="route"
         )
-        ingest_daily_bus_ridership(date_ridership)
+        print(f"Ingesting bus ridership for {date}")
+        ingest_daily_bus_ridership(date_ridership,date)
         date += time_delta
 
 
@@ -164,10 +166,15 @@ def ingest_daily_bus_ridership(daily_bus_json, date: datetime.date) -> None:
     day of ridership
     """
     for row in daily_bus_json:
-        print(f"Ingesting ridership data for stations {row["route"]} - {row["date"]}")
-        obs_route = TransitRoute.objects.filter(city="CHI", route_id=row["route"])[0]
-        obs = RidershipRoute(route=obs_route, date=date, ridership=row["ridership"])
-        obs.save()
+        print(row["route"])
+        try:
+            print(f"Ingesting ridership data for stations {str(row['route'])} - {row['date']}")
+            obs_route = TransitRoute.objects.filter(city="CHI", route_id=row["route"]).first()
+            obs_route_id = obs_route.id
+            obs = RidershipRoute(route_id=obs_route_id, date=date, ridership=row["rides"])
+            obs.save()
+        except:
+            print(f"Ingestion for row {row['route']} - {row['date']} not succesful")
 
 
 def ingest_subway_ridership(start_date: datetime.date, end_date: datetime.date) -> None:
@@ -180,9 +187,11 @@ def ingest_subway_ridership(start_date: datetime.date, end_date: datetime.date) 
     date = start_date
     time_delta = datetime.timedelta(days=1)
     while date <= end_date:
+        print(f"Extracting subway ridership for {date}")
         date_ridership = extract_daily_data(
-            url, date, order_by="stationname", session=session
+            url=url, date=date, order_by="station_id"
         )
+        print(f"Starting subway ridership for {date}")
         ingest_daily_subway_ridership(date_ridership, date)
         date += time_delta
 
@@ -193,13 +202,28 @@ def ingest_daily_subway_ridership(daily_subway_json, date: datetime.date) -> Non
     day of ridership
     """
     for row in daily_subway_json:
-        print(f"Ingesting ridership data for stations {row["stationname"]} - {row["date"]}")
-        obs_route = TransitStation.objects.filter(
-            city="CHI", station_id=row["station_id"]
-        )[0]
-        obs = RidershipStation(route=obs_route, date=date, ridership=row["ridership"])
-        obs.save()
+        
+        try:
+            print(f"Ingesting ridership data for station {row['station_id']} - {row['date']}")
+            obs_station = TransitStation.objects.filter(
+                city="CHI", station_id=row["station_id"]
+            ).first()
+            obs_station_id = obs_station.id
+            obs = RidershipStation(station_id=obs_station_id, date=date, ridership=row["rides"])
+            obs.save()
+        except:
+            print(f"Ingestion for row {row['station_id']} - {row['date']} not succesful")
+
 
 def run():
-    ingest_bus_ridership()
-    ingest_subway_ridership()
+    start = datetime.datetime(2023,1,1)
+    end = datetime.datetime(2023,2,1)
+    #ingest_bus_ridership()
+    ingest_subway_ridership(start_date=start,end_date=end)
+
+# if __name__ == "__main__":
+#     date = datetime.datetime(2023,7,9)
+#     resp = extract_daily_data(DATASETS["BUS_RIDERSHIP"]["URL"],date)
+#     for r in resp[:10]:
+#         print(r)
+#         print(r["route"])
