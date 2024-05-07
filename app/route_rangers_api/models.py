@@ -1,6 +1,7 @@
 from django.contrib.gis.db import models
 
 CITIES_CHOICES = {"CHI": "Chicago", "NYC": "New York", "PDX": "Portland"}
+
 #################################
 ###### DEMOGRAPHIC MODELS #######
 #################################
@@ -12,12 +13,12 @@ class Demographics(models.Model):
     """
 
     census_block = models.CharField(
-        max_length=15
+        max_length=64
     )  # Check length of census block if its uniform to enforce it here
     state = models.CharField(
-        max_length=15
+        max_length=64
     )  # Check if it's worth to keep or if we should add a method
-    county = models.CharField(max_length=15)  # Same as above
+    county = models.CharField(max_length=64)  # Same as above
     median_income = models.IntegerField()
     transportation_to_work = models.IntegerField(
         verbose_name="Means of Transportation to Work Total"
@@ -35,9 +36,9 @@ class Demographics(models.Model):
         verbose_name="Means of Transportation to Work: subway", null=True
     )
     work_commute_time = models.FloatField(verbose_name="Time of commute to work")
-    vehicles_available = models.IntegerField()
+    vehicles_available = models.IntegerField(null=True)
     disability_status = models.IntegerField(
-        verbose_name="Number of people with disability"
+        verbose_name="Number of people with disability", null=True
     )
 
 
@@ -65,10 +66,10 @@ class TransitRoute(models.Model):
     """
 
     city = models.CharField(max_length=30, choices=CITIES_CHOICES)
-    route_id = models.CharField(max_length=30)
-    route_name = models.CharField(max_length=30)
+    route_id = models.CharField(max_length=64)
+    route_name = models.CharField(max_length=64)
     color = models.CharField(max_length=30, null=True)
-    geo_representation = models.LineStringField()
+    geo_representation = models.MultiLineStringField()
     mode = models.IntegerField(
         verbose_name="Mode of transportation", choices=TransitModes.choices
     )
@@ -86,8 +87,8 @@ class TransitStation(models.Model):
     """
 
     city = models.CharField(max_length=30, choices=CITIES_CHOICES)
-    station_id = models.CharField(max_length=30)
-    station_name = models.CharField(max_length=30)
+    station_id = models.CharField(max_length=64)
+    station_name = models.CharField(max_length=64)
     location = models.PointField(null=True)
     mode = models.IntegerField(
         verbose_name="Mode of transportation", choices=TransitModes.choices
@@ -120,6 +121,11 @@ class RidershipRoute(models.Model):
     date = models.DateField()
     ridership = models.IntegerField()
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["route_id", "date"], name="route_ridership")
+        ]
+
 
 class RidershipStation(models.Model):
     """
@@ -130,14 +136,32 @@ class RidershipStation(models.Model):
     date = models.DateField()
     ridership = models.IntegerField()
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["station_id", "date"], name="station_ridership"
+            )
+        ]
+
 
 class BikeStation(models.Model):
     """
     Class that represent bike sharing docking stations
     """
 
-    station_id = models.CharField(max_length=30, primary_key=True)
+    city = models.CharField(max_length=30, choices=CITIES_CHOICES)
+    station_id = models.CharField(max_length=64)
+    station_name = models.CharField(max_length=64)
+    short_name = models.CharField(max_length=30, null=True)
     location = models.PointField()
+    n_docks = models.IntegerField(null=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["city", "station_id"], name="city_station_bike"
+            )
+        ]
 
 
 class BikeRidership(models.Model):
@@ -149,6 +173,13 @@ class BikeRidership(models.Model):
     date = models.DateField()
     n_started = models.IntegerField()
     n_ended = models.IntegerField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["station_id", "date"], name="bike_ridership"
+            )
+        ]
 
 
 #################################
