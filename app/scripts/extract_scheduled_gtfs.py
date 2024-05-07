@@ -125,11 +125,7 @@ def get_gtfs_component_dfs(
         transfers = feed.transfers
         gtfs_dataframe_dict["transfers"] = transfers
     else:
-        print(
-            # Question: if we only need feed city and agency for these warnings,
-            # do we strictly need to pass it in here, or should we not bother?
-            f"This {feed_city} GTFS feed has no transfers.txt file."
-        )
+        print(f"This {feed_city} GTFS feed has no transfers.txt file.")
 
     # Add city column
     for key in gtfs_dataframe_dict.keys():
@@ -138,12 +134,7 @@ def get_gtfs_component_dfs(
     return gtfs_dataframe_dict
 
 
-def ingest_transit_stations(
-    stops: pd.DataFrame | gpd.GeoDataFrame,
-    url: str,
-    # transit_mode=2,  # TODO: Undo hard-code -- should be 2 for Metra
-    # 0 for Trimet streetcar, 1 for subway train, and 3 for bus
-) -> None:
+def ingest_transit_stations(stops: pd.DataFrame | gpd.GeoDataFrame, url: str) -> None:
     """Feed a DataFrame of stops into Postgres as TransitStation objects"""
     for i, row in stops.iterrows():
         print(f"Now ingesting row {i}...")
@@ -165,7 +156,7 @@ def ingest_transit_stations(
         )
         try:
             obs.save()
-            print(f"Observation {i} saved to PostGIS")
+            print(f"Observation {i} saved to PostGIS\n")
         except Exception as e:  # TODO: make this more specific
             print(e)
             print("Skipping import of this observation\n")
@@ -193,7 +184,7 @@ def assign_mode(row, url: str) -> int:
     elif url == MTA_SUBWAY_URL:
         return SUBWAY
     elif url == CTA_URL:
-        # stop_id is an integer. Bus stop_ids currently end at 18,709
+        # every CTA stop_id is an integer. Bus stop_ids currently end at 18,709
         # El stop_ids currently start at 30,000
         # This may fail
         if int(row["stop_id"]) > 30000:
@@ -208,7 +199,7 @@ def assign_mode(row, url: str) -> int:
         elif "Tram Terminal" in row["stop_name"]:
             return AERIAL_LIFT  # there's an aerial tram!!
         else:
-            return BUS  # other routes are buses
+            return BUS
 
 
 def handroll_multiline_routes(city: str, feed) -> gpd.GeoDataFrame:
@@ -261,56 +252,6 @@ def handroll_multiline_routes(city: str, feed) -> gpd.GeoDataFrame:
     return gdf
 
 
-def handroll_geometrize_routes(city: str, feed) -> gpd.GeoDataFrame:
-    """Associate each route and its properties with an appropriate GEOS LineString.
-    Handrolls a simplified version of the gtfs_kit library's geometrize_routes()
-    method, which broke on some transit feeds with which we tried it.
-    Results in one shape per route, irrespective of direction.
-
-    Warning: Some users may not be able to test this function in any way
-    other than running this script, due to the 'ImproperlyConfigured' error
-    in which attempts to import types from django.contrib.gis.geos fail to find
-    the path for GDAL.
-
-    TODO: write test that establishes all needed fields are there for every city
-    """
-    geom_shapes = feed.geometrize_shapes()
-    geom_shapes.loc[:, "city"] = city
-    gtfs_dict = get_gtfs_component_dfs(city, feed)
-    routes = gtfs_dict["routes"]
-    trips = gtfs_dict["trips"]
-
-    # Conversion of shapely/Geopandas linestrings to GEOSGeometry/Django LineStrings
-    # https://stackoverflow.com/questions/56299888/how-can-i-efficiently-save-data-from-geopandas-to-django-converting-from-shapel
-
-    # this might cause NaNs - check that these merges should be "left" and not "right"
-    routes_trips = trips.merge(routes, how="left", on="route_id").drop_duplicates(
-        ["route_id", "shape_id"]
-    )
-    # Merges were failing because whitespace in shape_id column differed between
-    # tables. Remove all of it and merge should go through
-    routes_trips.loc[:, "shape_id"] = routes_trips.loc[:, "shape_id"].str.strip()
-    geom_shapes.loc[:, "shape_id"] = geom_shapes.loc[:, "shape_id"].str.strip()
-    # TODO: Consider adding an equality check here
-
-    geom_shapes = geom_shapes.merge(routes_trips, how="left", on="shape_id")
-    geom_shapes = geom_shapes.loc[
-        :,
-        [
-            "shape_id",
-            "geometry",
-            "route_id",
-            "service_id",
-            "route_type",
-            "route_long_name",
-            "route_color",
-        ],
-    ].drop_duplicates()
-    geom_shapes.loc[:, "city"] = city
-    print(geom_shapes)
-    return geom_shapes
-
-
 def ingest_transit_routes(geom_shapes: gpd.GeoDataFrame) -> None:
     """Ingest routes and their shapes to Postgres database."""
     # convert all geometries to a GEOS-compatible representation
@@ -321,8 +262,7 @@ def ingest_transit_routes(geom_shapes: gpd.GeoDataFrame) -> None:
         obs = TransitRoute(
             city=row["city"],
             route_id=row["route_id"],
-            route_name=row["route_long_name"],  # TODO: switch to short name or
-            # or truncate to 30 characters or raise 30 character max in PostGIS
+            route_name=row["route_long_name"],
             color=row["route_color"],
             geo_representation=GEOSGeometry(row["geometry"]),
             mode=row["route_type"],
@@ -357,7 +297,6 @@ def ingest_multiple_feeds(feed_url_list: list[str]) -> None:
         stops.loc[:, "city"] = city  # should be extraneous now
         print("Preparing shapes of routes for upload... THIS COULD TAKE A FEW MINUTES.")
         geom_shapes = handroll_multiline_routes(city, feed)
-        # geom_shapes = handroll_geometrize_routes(city, feed)
 
         print(f"Starting ingestion of {city} {agency} stops into PostGIS...")
         ingest_transit_stations(stops, url)
