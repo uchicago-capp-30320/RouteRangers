@@ -68,6 +68,7 @@
             display: block;
         }
         .city-grid {
+          background-color: #fff;
           width: 70%;
           margin: 0 auto; /* Centers the container horizontally */
       }

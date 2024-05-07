@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     replaces = [
         ("route_rangers_api", "0001_restart_models"),
         ("route_rangers_api", "0002_modify_pre_merging"),
