@@ -22,8 +22,7 @@ load_dotenv()
 DATA_PORTAL_APP_TOKEN = os.getenv("DATA_PORTAL_APP_TOKEN")
 TEST_DATA_DIR = os.getenv("TEST_DATA_DIR")
 
-REQUEST_DELAY = 0.2
-RESULTS_PER_PAGE = 50000  # Max number of results for API
+REQUEST_DELAY = 1
 TIMEOUT = 30
 
 DATASETS = {
@@ -191,8 +190,8 @@ def ingest_daily_subway_ridership(daily_subway_json, date: datetime.date) -> Non
 
 
 def run():
-    start = datetime.datetime(2023,1,1)
-    end = datetime.datetime(2023,2,1)
+    start = datetime.datetime(2023,1,1,tzinfo=NY_TZ)
+    end = datetime.datetime(2023,2,1,tzinfo=NY_TZ)
     #print("Ingesting bus ridership data into RidershipRoute")
     #ingest_bus_ridership()
     print("Ingesting subway ridership data into RidershipStation")
@@ -200,6 +199,7 @@ def run():
 
 
 if __name__ == "__main__":
-    date = datetime.datetime(2023, 9, 7)
+    date = datetime.datetime(2022, 12, 31)
     results = extract_daily_data("SUBWAY_RIDERSHIP", date)
-    print(results)
+    for r in results:
+        print(r["total_ridership"])
