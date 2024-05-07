@@ -7,7 +7,6 @@ from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
 from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT
-from route_rangers_api.models import TransitRoute
 
 
 def home(request):
