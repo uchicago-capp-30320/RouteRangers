@@ -8,10 +8,7 @@ def test_fake():
 
 @pytest.mark.django_db
 def test_hello_view(client):
-    url = reverse("/map")
+    url = reverse("/")
 
     response = client.get(url)
-    import pdb
-
-    pdb.set_trace()
     assert response.status_code == 200
