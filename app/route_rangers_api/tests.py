@@ -1,5 +1,6 @@
 import pytest
 from django.urls import reverse
+from route_rangers_api.models import TransitRoute
 
 
 def test_fake():
