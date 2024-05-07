@@ -47,7 +47,7 @@ def get_transit_station_ids() -> list:
     """
     Get a list of all id values from the TransitStation table
     """
-    return list(TransitStation.objects.values_list("id", flat=True))
+    return list(TransitStation.objects.filter(city="PDX").values_list("id", flat=True))
 
 
 def get_list_of_stations() -> list:
@@ -56,12 +56,18 @@ def get_list_of_stations() -> list:
     """
     return [
         str(station_id)
-        for station_id in TransitStation.objects.values_list("station_id", flat=True)
+        for station_id in TransitStation.objects.filter(city="PDX").values_list(
+            "station_id", flat=True
+        )
     ]
 
 
 def ingest_pdx_ridership_data(
-    json_file_path: str, list_of_db_ids: List, list_of_stations: List
+    json_file_path: str,
+    start_date: datetime.date,
+    end_date: datetime.date,
+    list_of_db_ids: List,
+    list_of_stations: List,
 ) -> None:
     """
     Ingest portland ridership data from extracted JSON file
@@ -69,43 +75,47 @@ def ingest_pdx_ridership_data(
     """
     stations_not_matched = []
 
-    RidershipStation.objects.all().delete()
+    # RidershipStation.objects.all().delete()
     with open(json_file_path, "r") as file:
         data = json.load(file)
 
     for record in data:
         try:
             # Get the id from TransitStation using station_id + city = 'PDX'
-            foreign_key = TransitStation.objects.get(
+            transit_station = TransitStation.objects.filter(
                 station_id=str(record["station_id"]), city="PDX"
-            ).id
+            ).first()
 
-            station_id = str(record["station_id"])
+            if transit_station:
+                foreign_key = transit_station.id
+                station_id = transit_station.station_id
 
-            # print(f"FOREIGN_key '{station_id}', {foreign_key}")
-
-            # Check if foreign key exists in the list of TransitStation ids
-            if (foreign_key in list_of_db_ids) and (station_id in list_of_stations):
-
-                print(f"Ingesting ridership data for station {record['station_id']}...")
-
-                #     # For each row, create a RidershipStation object
+                # For each row, create a RidershipStation object
                 timestamp_seconds = int(record["date"]) / 1000
                 date_obj = datetime.datetime.fromtimestamp(timestamp_seconds)
                 # date formatting to match model
 
-                ridership_obj = RidershipStation.objects.create(
-                    id=foreign_key,
-                    date=date_obj,
-                    ridership=record["ridership"],
-                    station_id=station_id,
-                )
-                print(ridership_obj)
-                ridership_obj.save()
-            else:
-                print(
-                    f"Skipping ingestion for station {record['station_id']}, foreign key not found in TransitStation."
-                )
+                if start_date <= date_obj.date() <= end_date:
+                    # Check if foreign key exists in the list of TransitStation ids
+                    # if (foreign_key in list_of_db_ids) and (
+                    #     station_id in list_of_stations
+                    # ):
+                    # print("OBJECT PREVIEW", foreign_key, station_id)
+                    print(
+                        f"Ingesting ridership data for station {record['station_id']}..."
+                    )
+
+                    ridership_obj = RidershipStation.objects.create(
+                        date=date_obj,
+                        ridership=record["ridership"],
+                        station_id=foreign_key,
+                    )
+
+                    ridership_obj.save()
+                else:
+                    print(
+                        f"Skipping ingestion for station {record['station_id']}, foreign key not found in TransitStation."
+                    )
 
         except TransitStation.DoesNotExist:
             stations_not_matched.append(record["station_id"])
@@ -133,10 +143,14 @@ def run():
     """
     Ingest PDX ridership data into Django db
     """
+    start_date = datetime.date(2023, 1, 2)
+    end_date = datetime.date(2023, 1, 31)
     json_file_path = "/Users/jimenasalinas/Library/CloudStorage/Box-Box/Route Rangers/Transit dataset exploration/Portland Ridership Data/portland_ridership/Portland_ridership.json"
     transit_station_ids = get_transit_station_ids()
     list_of_stations = get_list_of_stations()
-    ingest_pdx_ridership_data(json_file_path, transit_station_ids, list_of_stations)
+    ingest_pdx_ridership_data(
+        json_file_path, start_date, end_date, transit_station_ids, list_of_stations
+    )
 
 
 if __name__ == "__main__":
