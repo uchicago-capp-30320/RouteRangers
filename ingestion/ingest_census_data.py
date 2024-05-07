@@ -68,6 +68,7 @@ minutes_to_work = {
     "work_commute_time_between_60_and_89": ["work_commute_time_60_to_89"],
     "work_commute_time_more_than_90": ["work_commute_time_90_or_more"],
 }
+
 ########################################################################################
 # HELPER FUNCTIONS
 ########################################################################################
@@ -199,6 +200,11 @@ def upload_census_data(city_df: pd.DataFrame) -> None:
             work_commute_time_more_than_90=row["work_commute_time_more_than_90"],
         )
         obs.save()
+
+
+########################################################################################
+# MAIN
+########################################################################################
 
 
 def main():
