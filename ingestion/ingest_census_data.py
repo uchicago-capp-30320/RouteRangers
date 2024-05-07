@@ -158,27 +158,27 @@ def upload_census_data(city_df: pd.DataFrame) -> None:
         Nothing.
     """
     for _, row in df.iterrows():
-    obs = Demographics(
-        state=row['state'],
-        county=row['county'],
-        tract=row['tract'],
-        block_group=row['block_group'],
-        population=row['population'],
-        median_hhi_2022=row['median_hhi_2022'],
-        transportation_to_work_total=row['transportation_to_work_total'],
-        transportation_to_work_car=row['transportation_to_work_car'],
-        transportation_to_work_public=row['transportation_to_work_public'],
-        transportation_to_work_bus=row['transportation_to_work_bus'],
-        transportation_to_work_subway=row['transportation_to_work_subway'],
-        work_commute_time_total=row['work_commute_time_total'],
-        work_commute_time_less_than_15=row['work_commute_time_less_than_15'],
-        work_commute_time_between_15_and_29=row['work_commute_time_between_15_and_29'],
-        work_commute_time_between_30_and_44=row['work_commute_time_between_30_and_44'],
-        work_commute_time_between_45_and_59=row['work_commute_time_between_45_and_59'],
-        work_commute_time_between_60_and_89=row['work_commute_time_between_60_and_89'],
-        work_commute_time_more_than_90=row['work_commute_time_more_than_90']
-    )
-    obs.save()
+        obs = Demographics(
+            state=row['state'],
+            county=row['county'],
+            tract=row['tract'],
+            block_group=row['block_group'],
+            population=row['population'],
+            median_hhi_2022=row['median_hhi_2022'],
+            transportation_to_work_total=row['transportation_to_work_total'],
+            transportation_to_work_car=row['transportation_to_work_car'],
+            transportation_to_work_public=row['transportation_to_work_public'],
+            transportation_to_work_bus=row['transportation_to_work_bus'],
+            transportation_to_work_subway=row['transportation_to_work_subway'],
+            work_commute_time_total=row['work_commute_time_total'],
+            work_commute_time_less_than_15=row['work_commute_time_less_than_15'],
+            work_commute_time_between_15_and_29=row['work_commute_time_between_15_and_29'],
+            work_commute_time_between_30_and_44=row['work_commute_time_between_30_and_44'],
+            work_commute_time_between_45_and_59=row['work_commute_time_between_45_and_59'],
+            work_commute_time_between_60_and_89=row['work_commute_time_between_60_and_89'],
+            work_commute_time_more_than_90=row['work_commute_time_more_than_90']
+        )
+        obs.save()
 
 def main():
     """
