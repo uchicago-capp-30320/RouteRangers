@@ -1,6 +1,5 @@
 import os
 import sys
-import csv
 import logging
 import requests
 import pandas as pd
@@ -43,19 +42,31 @@ variable_ids = {
     "B08303_011E": "work_commute_time_45_to_59",
     "B08303_012E": "work_commute_time_60_to_89",
     "B08303_013E": "work_commute_time_90_or_more",
-    }
+}
 city_fips = {
     "nyc": {"state_fips": "36", "county_fips": ["061", "047", "081", "005", "085"]},
     "chicago": {"state_fips": "17", "county_fips": ["031"]},
     "portland": {"state_fips": "41", "county_fips": ["051"]},
 }
 minutes_to_work = {
-    "work_commute_time_less_than_15": ["work_commute_time_00_to_04", "work_commute_time_05_to_09", "work_commute_time_10_to_14"],
-    "work_commute_time_between_15_and_29" : ["work_commute_time_15_to_19", "work_commute_time_20_to_24", "work_commute_time_25_to_29"],  
-    "work_commute_time_between_30_and_44" : ["work_commute_time_30_to_34", "work_commute_time_35_to_39", "work_commute_time_40_to_44"],  
-    "work_commute_time_between_45_and_59" : ["work_commute_time_45_to_59"],  
-    "work_commute_time_between_60_and_89" : ["work_commute_time_60_to_89"],  
-    "work_commute_time_more_than_90" : ["work_commute_time_90_or_more"],  
+    "work_commute_time_less_than_15": [
+        "work_commute_time_00_to_04",
+        "work_commute_time_05_to_09",
+        "work_commute_time_10_to_14",
+    ],
+    "work_commute_time_between_15_and_29": [
+        "work_commute_time_15_to_19",
+        "work_commute_time_20_to_24",
+        "work_commute_time_25_to_29",
+    ],
+    "work_commute_time_between_30_and_44": [
+        "work_commute_time_30_to_34",
+        "work_commute_time_35_to_39",
+        "work_commute_time_40_to_44",
+    ],
+    "work_commute_time_between_45_and_59": ["work_commute_time_45_to_59"],
+    "work_commute_time_between_60_and_89": ["work_commute_time_60_to_89"],
+    "work_commute_time_more_than_90": ["work_commute_time_90_or_more"],
 }
 ########################################################################################
 # HELPER FUNCTIONS
@@ -118,6 +129,7 @@ def get_census_data(
         logging.error(f"Failed to retrieve data. Status code: {response.status_code}")
         return []
 
+
 def clean_census_data(data: List[Dict]) -> pd.DataFrame:
     """
     Cleans fetched data from Census API.
@@ -131,9 +143,9 @@ def clean_census_data(data: List[Dict]) -> pd.DataFrame:
     # Create dataframe
     df = pd.DataFrame(data)
     df.rename(columns=variable_ids, inplace=True)
-    df.columns = [col.replace(' ', '_') for col in df.columns]
+    df.columns = [col.replace(" ", "_") for col in df.columns]
     # Set column types
-    str_columns = ['state', 'county', 'tract', 'block group']
+    str_columns = ["state", "county", "tract", "block group"]
     for col in df.columns:
         if col not in str_columns:
             df[col] = pd.to_numeric(df[col])
@@ -143,7 +155,7 @@ def clean_census_data(data: List[Dict]) -> pd.DataFrame:
     cols_to_drop = [col for sublist in minutes_to_work.values() for col in sublist]
     df.drop(cols_to_drop, axis=1, inplace=True)
     # Clean values
-    df['median_hhi_2022'] = df['median_hhi_2022'].mask(df['median_hhi_2022'] < 0)
+    df["median_hhi_2022"] = df["median_hhi_2022"].mask(df["median_hhi_2022"] < 0)
     return df
 
 
@@ -153,32 +165,41 @@ def upload_census_data(city_df: pd.DataFrame) -> None:
 
     Input:
         - city_data (DataFrame): demographic data of city.
-    
+
     Returns:
         Nothing.
     """
-    for _, row in df.iterrows():
+    for _, row in city_df.iterrows():
         obs = Demographics(
-            state=row['state'],
-            county=row['county'],
-            tract=row['tract'],
-            block_group=row['block_group'],
-            population=row['population'],
-            median_hhi_2022=row['median_hhi_2022'],
-            transportation_to_work_total=row['transportation_to_work_total'],
-            transportation_to_work_car=row['transportation_to_work_car'],
-            transportation_to_work_public=row['transportation_to_work_public'],
-            transportation_to_work_bus=row['transportation_to_work_bus'],
-            transportation_to_work_subway=row['transportation_to_work_subway'],
-            work_commute_time_total=row['work_commute_time_total'],
-            work_commute_time_less_than_15=row['work_commute_time_less_than_15'],
-            work_commute_time_between_15_and_29=row['work_commute_time_between_15_and_29'],
-            work_commute_time_between_30_and_44=row['work_commute_time_between_30_and_44'],
-            work_commute_time_between_45_and_59=row['work_commute_time_between_45_and_59'],
-            work_commute_time_between_60_and_89=row['work_commute_time_between_60_and_89'],
-            work_commute_time_more_than_90=row['work_commute_time_more_than_90']
+            state=row["state"],
+            county=row["county"],
+            tract=row["tract"],
+            block_group=row["block_group"],
+            population=row["population"],
+            median_hhi_2022=row["median_hhi_2022"],
+            transportation_to_work_total=row["transportation_to_work_total"],
+            transportation_to_work_car=row["transportation_to_work_car"],
+            transportation_to_work_public=row["transportation_to_work_public"],
+            transportation_to_work_bus=row["transportation_to_work_bus"],
+            transportation_to_work_subway=row["transportation_to_work_subway"],
+            work_commute_time_total=row["work_commute_time_total"],
+            work_commute_time_less_than_15=row["work_commute_time_less_than_15"],
+            work_commute_time_between_15_and_29=row[
+                "work_commute_time_between_15_and_29"
+            ],
+            work_commute_time_between_30_and_44=row[
+                "work_commute_time_between_30_and_44"
+            ],
+            work_commute_time_between_45_and_59=row[
+                "work_commute_time_between_45_and_59"
+            ],
+            work_commute_time_between_60_and_89=row[
+                "work_commute_time_between_60_and_89"
+            ],
+            work_commute_time_more_than_90=row["work_commute_time_more_than_90"],
         )
         obs.save()
+
 
 def main():
     """
