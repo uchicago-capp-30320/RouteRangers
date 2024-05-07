@@ -51,7 +51,7 @@ def ingest_bike_stations() -> None:
     bike_stations = extract_bike_stations_api()
     for station in bike_stations:
         try:
-            print(f"ingesting {station['station_name']}")
+            print(f"ingesting CHI {station['id']}")
             obs = BikeStation(
                 city = "CHI",
                 station_id=station["id"],
@@ -61,8 +61,22 @@ def ingest_bike_stations() -> None:
                 location=Point(station["location"]["coordinates"]),
             )
             obs.save()
+        except KeyError:
+            try:
+                print(f"ingesting CHI {station['id']}, no short_name")
+                obs = BikeStation(
+                    city = "CHI",
+                    station_id=station["id"],
+                    station_name=station["station_name"],
+                    n_docks=station["total_docks"],
+                    location=Point(station["location"]["coordinates"]),
+                )
+                obs.save()
+            except:
+                print(f"Observation{station['station_name']} already ingested")
         except:
             print(f"Observation{station['station_name']} already ingested")
+
         
 
 def create_daily_ridership_month(filepath: str) -> pd.DataFrame:
@@ -83,7 +97,7 @@ def ingest_monthly_data(monthly_ridership_df:pd.DataFrame)->None:
         try:
             obs_station = BikeStation.objects.filter(city="CHI",short_name=row.station_id).first().id
             print(f"Observation Station: {obs_station}")
-            obs = BikeRidership(station=obs_station,date=row.date,
+            obs = BikeRidership(station_id=obs_station,date=row.date,
                             n_started = row.n_rides_started,
                             n_ended = row.n_rides_ended)
             obs.save()
@@ -100,11 +114,11 @@ def ingest_trip_data():
             ingest_monthly_data(monthly_df)
 
 def run():
-    #ingest_bike_stations()
-    ingest_trip_data()
+    ingest_bike_stations()
+    #ingest_trip_data()
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-   df = create_daily_ridership_month(f"{BIKE_DATA_DIR}/2023-divvy-tripdata/202301-divvy-tripdata.csv")
-   print(df)
+#    df = create_daily_ridership_month(f"{BIKE_DATA_DIR}/2023-divvy-tripdata/202301-divvy-tripdata.csv")
+#    print(df)
 
