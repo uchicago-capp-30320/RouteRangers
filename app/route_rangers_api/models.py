@@ -38,8 +38,9 @@ class Demographics(models.Model):
     work_commute_time = models.FloatField(verbose_name="Time of commute to work")
     vehicles_available = models.IntegerField(null=True)
     disability_status = models.IntegerField(
-        verbose_name="Number of people with disability",null=True
+        verbose_name="Number of people with disability", null=True
     )
+
 
 #################################
 ######## TRANSIT MODELS #########
@@ -119,10 +120,11 @@ class RidershipRoute(models.Model):
     route = models.ForeignKey(TransitRoute, on_delete=models.PROTECT)
     date = models.DateField()
     ridership = models.IntegerField()
+
     class Meta:
-            constraints = [
-                models.UniqueConstraint(fields=["route_id","date"], name="route_ridership")
-            ]
+        constraints = [
+            models.UniqueConstraint(fields=["route_id", "date"], name="route_ridership")
+        ]
 
 
 class RidershipStation(models.Model):
@@ -135,40 +137,49 @@ class RidershipStation(models.Model):
     ridership = models.IntegerField()
 
     class Meta:
-            constraints = [
-                models.UniqueConstraint(fields=["station_id","date"], name="station_ridership")
-            ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["station_id", "date"], name="station_ridership"
+            )
+        ]
 
 
 class BikeStation(models.Model):
     """
     Class that represent bike sharing docking stations
     """
+
     city = models.CharField(max_length=30, choices=CITIES_CHOICES)
     station_id = models.CharField(max_length=64)
     station_name = models.CharField(max_length=64)
-    short_name = models.CharField(max_length=30,null=True)
+    short_name = models.CharField(max_length=30, null=True)
     location = models.PointField()
     n_docks = models.IntegerField(null=True)
 
     class Meta:
-            constraints = [
-                models.UniqueConstraint(fields=["city", "station_id"], name="city_station_bike")
-            ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["city", "station_id"], name="city_station_bike"
+            )
+        ]
+
 
 class BikeRidership(models.Model):
     """
     Class that represent bike sharing ridership
     """
+
     station = models.ForeignKey(BikeStation, on_delete=models.PROTECT)
     date = models.DateField()
     n_started = models.IntegerField()
     n_ended = models.IntegerField()
 
     class Meta:
-            constraints = [
-                models.UniqueConstraint(fields=["station_id","date"], name="bike_ridership")
-            ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["station_id", "date"], name="bike_ridership"
+            )
+        ]
 
 
 #################################
@@ -190,6 +201,7 @@ class SurveyAnswer(models.Model):
     """
     Class that represents answers to surveys
     """
+
     user_id = models.CharField(max_length=30)
     response_date = models.DateTimeField("Survey response date", auto_now_add=True)
     city = models.CharField(max_length=30)
