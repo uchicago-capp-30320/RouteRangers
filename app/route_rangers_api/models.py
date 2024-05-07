@@ -12,14 +12,15 @@ class Demographics(models.Model):
     Class to represent demographic data pulled from the ACS Survey
     """
 
-    census_block = models.CharField(
+    block_group = models.CharField(max_length=64)
+    census_tract = models.CharField(
         max_length=64
-    )  # Check length of census block if its uniform to enforce it here
+    )  
     state = models.CharField(
         max_length=64
-    )  # Check if it's worth to keep or if we should add a method
-    county = models.CharField(max_length=64)  # Same as above
-    median_income = models.IntegerField()
+    )  
+    county = models.CharField(max_length=64) 
+    median_income = models.IntegerField(verbose_name="Median household income")
     transportation_to_work = models.IntegerField(
         verbose_name="Means of Transportation to Work Total"
     )
@@ -35,11 +36,16 @@ class Demographics(models.Model):
     transportation_to_work_subway = models.IntegerField(
         verbose_name="Means of Transportation to Work: subway", null=True
     )
-    work_commute_time = models.FloatField(verbose_name="Time of commute to work")
+    work_commute_time = models.IntegerField(verbose_name="Time of commute to work")
     vehicles_available = models.IntegerField(null=True)
-    disability_status = models.IntegerField(
-        verbose_name="Number of people with disability", null=True
-    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["block_group", "census_tract", "county", "state"],
+                name="demographic_uniqueness",
+            )
+        ]
 
 
 #################################
