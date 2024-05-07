@@ -1,9 +1,0 @@
-{% extends 'Policymaker.html' %}
-{% load static %}
-        {% block map%}
-        <div id="map"></div>
-        {% endblock %}        
-        {% block heatmap%}
-        {% endblock %}
-        {% block trends%}
-        {% endblock %}

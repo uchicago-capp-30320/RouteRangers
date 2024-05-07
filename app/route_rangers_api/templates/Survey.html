@@ -4,17 +4,17 @@
 
 
     <div class="headers">
-    <h1> {{ City }} Rider Survey </h1>
-    <p class="inline">Please enter the trips you frequently take on transit, bike, or by car.
-         Click on the map to drop a start pin and then click to add a pin where the trip ends. 
-         This feedback will be used to asses gaps in current transit routes. We will ask you some follow-up questions to better understand whether a new transit route would make this trip eaiser for you. Please enter up to three routes.  </p>
+        <h1> {{ City }} Rider Survey </h1>
+        <p class="inline">Please enter the trips you frequently take on transit, bike, or by car.
+            Click on the map to drop a start pin and then click to add a pin where the trip ends.
+            This feedback will be used to asses gaps in current transit routes. We will ask you some follow-up questions to better understand whether a new transit route would make this trip eaiser for you. Please enter up to three routes.  </p>
     </div>
-        {% block map%}
+    {% block map%}
         <div id="map"></div>
-        {% endblock %}
-        {% block survey%}
-        {% endblock %}
-            </div>     
+    {% endblock %}
+    {% block survey%}
+    {% endblock %}
+    </div>
 
-    
+
 {% endblock %}
