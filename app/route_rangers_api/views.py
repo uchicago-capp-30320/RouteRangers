@@ -24,9 +24,7 @@ def dashboard(request, city: str):
     # get num riders
 
     # get num routes
-    num_routes = num_routes = TransitRoute.objects.filter(
-        city=CITY_CONTEXT[city]["DB_Name"]
-    ).count()
+    num_routes = TransitRoute.objects.filter(city=CITY_CONTEXT[city]["DB_Name"]).count()
 
     # get commute
 
