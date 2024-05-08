@@ -1,18 +1,32 @@
 import pytest
+
+# from django.test import TestCase # this one tries to build a test db which we dont seem to have db perms to do
 from django.urls import reverse
+from django.contrib.gis.geos.collections import MultiLineString
+
+from route_rangers_api.models import TransitRoute
+from unittest import TestCase
 
 from app.scripts.extract_scheduled_gtfs import (
-    ingest_gtfs_feed,
+    # ingest_gtfs_feed,
     CTA_URL,
     METRA_URL,
     get_gtfs_component_dfs,
-    add_extra_columns,
-    combine_different_feeds,
+    # add_extra_columns,
+    # combine_different_feeds, # need to resolve these imports with ingestion updates
 )
 
 
-def test_fake():
-    assert 1 == 1
+class ModelTests(TestCase):
+
+    def test_pull_route_countt(self):
+        num_routes = TransitRoute.objects.filter(city="CHI").count()
+        self.assertIs((num_routes > 1), True)
+
+    def test_pull_georoutes(self):
+        routes = TransitRoute.objects.filter(city="CHI").values("geo_representation")
+        geo_type = type(routes[0]["geo_representation"])
+        self.assertIs(geo_type == MultiLineString, True)
 
 
 @pytest.mark.django_db

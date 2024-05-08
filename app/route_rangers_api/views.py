@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
 from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT
+from route_rangers_api.models import TransitRoute
 
 
 def home(request):
@@ -23,15 +24,22 @@ def dashboard(request, city: str):
     # get num riders
 
     # get num routes
+    num_routes = num_routes = TransitRoute.objects.filter(
+        city=CITY_CONTEXT[city]["DB_Name"]
+    ).count()
 
     # get commute
 
     # get paths
+    routes = TransitRoute.objects.filter(city="CHI").values(
+        "geo_representation", "route_name", "color"
+    )
+
     context = {
         "City": CITY_CONTEXT[city]["CityName"],
         "City_NoSpace": city,
         "TotalRiders": "104,749",
-        "TotalRoutes": "203",
+        "TotalRoutes": num_routes,
         "Commute": "40 Min",
         "cities_class": "cs-li-link",
         "policy_class": "cs-li-link cs-active",

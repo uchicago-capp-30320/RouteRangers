@@ -8,15 +8,18 @@ CITY_CONTEXT = {
         "CityName": "Chicago",
         "City_NoSpace": "Chicago",
         "Coordinates": [41.8781, -87.6298],
+        "DB_Name": "CHI",
     },
     "NewYork": {
         "CityName": "New York",
         "City_NoSpace": "NewYork",
         "Coordinates": [40.7128, -74.0060],
+        "DB_Name": "NYC",
     },
     "Portland": {
         "CityName": "Portland",
         "City_NoSpace": "Portland",
         "Coordinates": [45.5051, -122.6750],
+        "DB_Name": "PDX",
     },
 }
