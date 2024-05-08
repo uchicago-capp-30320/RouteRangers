@@ -1,0 +1,25 @@
+{% extends 'basetemplate.html' %}
+{% block content %}
+{% load static %}
+
+    <div style="min-height: 80vh">
+    <div class="city-grid">
+    <div class="container py-3">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-12 col-lg-5 py-2"> <!-- Adjust column sizes -->
+                <a href="/dashboard/Chicago"><img src="{% static 'Chicagobutton.png' %}" class="img-fluid-rounded" alt="Chicago"></a>
+            </div>
+            <div class="col-12 col-md-12 col-lg-5 py-2"> <!-- Adjust column sizes -->
+                <a href="/dashboard/NewYork"><img src="{% static 'NYButton.png' %}" class="img-fluid-rounded" alt="New York"></a>
+            </div>
+            <div class="col-12 col-md-12 col-lg-5 py-2"> <!-- Adjust column sizes -->
+                <a href="/dashboard/Portland"><img src="{% static 'PortlandButton.png' %}"  class="img-fluid-rounded" alt="Portland"></a>
+            </div>
+            <div class="col-12 col-md-5 col-lg-5 py-3"> <!-- Adjust column sizes -->
+                <img class="img-fluid-rounded">
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+    {% endblock %}
