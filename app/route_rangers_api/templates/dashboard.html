@@ -38,8 +38,15 @@
         <h2 >Transit Map</h2>
         <p class="inline">Map showing all transit routes in your city</p>
         <div id="map"></div>
-    </div>
-    {% block map%}
+        <script>src="{% static 'map.js' %}"</script>
+          
+        <!-- Initialize the map with data from Django
+        <script>
+        initializeMap({{coordinates}}, {{stations}})
+        </script>
+    </div> -->
+    
+    <!-- {% block map%} -->
     {% endblock %}
     <div class="headers">
         <h2 >Heat Map</h2>
