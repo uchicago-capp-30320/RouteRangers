@@ -6,8 +6,10 @@ from django.http import Http404
 from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
+from django.core.serializers import serialize
+
 from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT
-from route_rangers_api.models import TransitRoute
+from route_rangers_api.models import TransitRoute, TransitStation
 
 
 def home(request):
@@ -33,6 +35,12 @@ def dashboard(request, city: str):
         "geo_representation", "route_name", "color"
     )
 
+    # stations
+    stations = TransitStation.objects.values().filter(
+        city=CITY_CONTEXT[city]["DB_Name"]
+    )
+    lst_coords = [[point["location"].x, point["location"].y] for point in stations]
+
     context = {
         "City": CITY_CONTEXT[city]["CityName"],
         "City_NoSpace": city,
@@ -44,6 +52,7 @@ def dashboard(request, city: str):
         "survey_class": "cs-li-link",
         "feedback_class": "cs-li-link",
         "Coordinates": CITY_CONTEXT[city]["Coordinates"],
+        "stations": lst_coords,
     }
     return render(request, "dashboard.html", context)
 
