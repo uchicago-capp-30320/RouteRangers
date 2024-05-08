@@ -132,7 +132,7 @@ def ingest_bus_ridership(
         print(f"Extracting bus ridership for {date}")
         date_ridership = extract_daily_data(dataset="BUS_RIDERSHIP", date=date)
         print(f"Ingesting bus ridership for {date}")
-        ingest_daily_bus_ridership(date_ridership)
+        ingest_daily_bus_ridership(date_ridership, date=date)
         date += time_delta
 
 
@@ -142,14 +142,19 @@ def ingest_daily_bus_ridership(daily_bus_json, date: datetime.date) -> None:
     day of ridership
     """
     for row in daily_bus_json:
-        print(
-            f"Ingesting ridership data for stop {row['bus_route']} - {row['date']}"
-        )
-        obs_route = TransitRoute.objects.filter(city="NYC", route_id=row["bus_route"]).first()
-        obs_route_id = obs_route.id
-        ridership = int(float(row["total_ridership"]))
-        obs = RidershipRoute(route_id=obs_route_id, date=date, ridership=ridership)
-        obs.save()
+        try:
+            print(
+                f"Ingesting ridership data for stop {row['bus_route']} - {row['date']}"
+            )
+            obs_route = TransitRoute.objects.filter(
+                city="NYC", route_id=row["bus_route"]
+            ).first()
+            obs_route_id = obs_route.id
+            ridership = int(float(row["total_ridership"]))
+            obs = RidershipRoute(route_id=obs_route_id, date=date, ridership=ridership)
+            obs.save()
+        except:
+            print(f"Ingesting {row['bus_route']} - {row['date']} unsuccesful")
 
 
 def ingest_subway_ridership(start_date: datetime.date, end_date: datetime.date) -> None:
@@ -176,26 +181,28 @@ def ingest_daily_subway_ridership(daily_subway_json, date: datetime.date) -> Non
     for row in daily_subway_json:
         try:
             print(
-            f"Ingesting ridership data for station {row['station_complex_id']} - {row['date']}"
-        )
+                f"Ingesting ridership data for station {row['station_complex_id']} - {row['date']}"
+            )
             obs_station = TransitStation.objects.filter(
                 city="NYC", station_id=row["station_complex_id"]
             ).first()
             obs_station_id = obs_station.id
             ridership = int(float(row["total_ridership"]))
-            obs = RidershipStation(station_id=obs_station_id, date=date, ridership=ridership)
+            obs = RidershipStation(
+                station_id=obs_station_id, date=date, ridership=ridership
+            )
             obs.save()
         except:
             print(f"Ingesting {row['station_complex_id']} - {row['date']} unsuccesful")
 
 
 def run():
-    start = datetime.datetime(2023,1,1,tzinfo=NY_TZ)
-    end = datetime.datetime(2023,2,1,tzinfo=NY_TZ)
-    #print("Ingesting bus ridership data into RidershipRoute")
-    #ingest_bus_ridership()
+    start = datetime.datetime(2023, 1, 1, tzinfo=NY_TZ)
+    end = datetime.datetime(2023, 2, 1, tzinfo=NY_TZ)
+    # print("Ingesting bus ridership data into RidershipRoute")
+    # ingest_bus_ridership(start_date=start,end_date=end)
     print("Ingesting subway ridership data into RidershipStation")
-    ingest_subway_ridership(start_date=start,end_date=end)
+    ingest_subway_ridership(start_date=start, end_date=end)
 
 
 if __name__ == "__main__":
