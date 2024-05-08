@@ -1,6 +1,6 @@
 from django.contrib.gis.db import models
+from app.route_rangers_api.utils.city_mapping import CITIES_CHOICES
 
-CITIES_CHOICES = {"CHI": "Chicago", "NYC": "New York", "PDX": "Portland"}
 
 #################################
 ###### DEMOGRAPHIC MODELS #######
