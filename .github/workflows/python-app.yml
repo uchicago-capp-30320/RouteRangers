@@ -41,8 +41,5 @@ jobs:
     - name: Lint with black
       run: poetry run black . --check
     - name: Test with pytest
-      run: |
-        poetry run pytest
-        cd app 
-        python -m manage test route_rangers_api.tests
+      run: poetry run pytest
 
