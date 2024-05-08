@@ -224,8 +224,8 @@ def ingest_daily_subway_ridership(daily_subway_json, date: datetime.date) -> Non
 
 
 def run():
-    start = datetime.datetime(2023, 1, 1)
-    end = datetime.datetime(2023, 2, 1)
+    start = datetime.datetime(2023, 1, 1,tzinfo=CHI_TZ)
+    end = datetime.datetime(2023, 2, 1,tzinfo=CHI_TZ)
     # ingest_bus_ridership()
     ingest_subway_ridership(start_date=start, end_date=end)
 
