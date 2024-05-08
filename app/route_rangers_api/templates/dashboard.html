@@ -4,8 +4,8 @@
 
 
     <div class="headers">
-    <h1> {{ City }} Transit Ecosystem</h1>
-    <p class="inline">Overview of Transit in Your City</p>
+        <h1> {{ City }} Transit Ecosystem</h1>
+        <p class="inline">Overview of Transit in Your City</p>
     </div>
     <div class="card-container row mx-3 ">
         <div class="col-12 col-md-4 col-lg-4">
@@ -22,8 +22,8 @@
                     <p class="card-title">Total Routes</p>
                     <p class="card-text">{{TotalRoutes}}</p>
                 </div>
-                </div>
             </div>
+        </div>
         <div class="col-12 col-md-4 col-lg-4">
             <div class="card">
                 <div class="card-content">
@@ -37,21 +37,22 @@
     <div class="headers">
         <h2 >Transit Map</h2>
         <p class="inline">Map showing all transit routes in your city</p>
-        </div>
-        {% block map%}
-        {% endblock %}
-        <div class="headers">
-            <h2 >Heat Map</h2>
-            <p class="inline">Maps of showing variation in transit, environmental, and socio-economic variables across census tracts </p>
-            </div>   
-        {% block heatmap%}
-        {% endblock %}
-        <div class="headers">
-            <h2 >Trends Over Time</h2>
-            <p class="inline">The following show evolution of trends in ridership and other key variables over time. This is critical as we continue to understand the impact of the pandemic.  </p>
-            </div>   
-        {% block trends%}
-        {% endblock %}
+        <div id="map"></div>
+    </div>
+    {% block map%}
+    {% endblock %}
+    <div class="headers">
+        <h2 >Heat Map</h2>
+        <p class="inline">Maps of showing variation in transit, environmental, and socio-economic variables across census tracts </p>
+    </div>
+    {% block heatmap%}
+    {% endblock %}
+    <div class="headers">
+        <h2 >Trends Over Time</h2>
+        <p class="inline">The following show evolution of trends in ridership and other key variables over time. This is critical as we continue to understand the impact of the pandemic.  </p>
+    </div>
+    {% block trends%}
+    {% endblock %}
 
-    
+
 {% endblock %}
