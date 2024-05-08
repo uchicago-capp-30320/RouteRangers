@@ -167,6 +167,8 @@ class ExtractNYData(TestCase):
         self.assertIs(
             int(float(results[0]["total_ridership"])), first_station_ridership
         )
+
+
 import datetime
 from app.scripts.extract_chi_ridership_data import extract_daily_data, DATASETS, CHI_TZ
 from unittest import TestCase
