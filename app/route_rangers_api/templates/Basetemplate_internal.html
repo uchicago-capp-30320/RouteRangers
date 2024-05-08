@@ -1,3 +1,5 @@
+</script>
+
 <html lang="en">
     <head>
         {% load static %}
@@ -10,6 +12,7 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+        
     <!-- Leaflet JavaScript --> 
         <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
@@ -104,12 +107,33 @@
             </div>
         </footer>
         <script>
+
     // Initialize the map with Chicago as the center
-            var map = L.map('map').setView({{Coordinates}}, 10); // [latitude, longitude], zoom level
+    var map = L.map('map').setView({{Coordinates}}, 13); // [latitude, longitude], zoom level
+    
     // Add a tile layer
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
-            }).addTo(map);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attribution">CARTO</a>',
+        maxZoom: 19
+    }).addTo(map);
+
+    // Loop through the stations and add a smaller marker for each
+    var stations_data = {{stations}};
+    stations_data.forEach(function(station) {
+        var marker = L.marker([station[0], station[1]]).addTo(map);
+        });
+
+    // // Custom icon for smaller markers
+    // var smallIcon = L.icon({
+    //     iconUrl: 'https://example.com/small-marker.png', // URL to a smaller icon image
+    //     iconSize: [12, 12], // Set the icon size you want
+    //     iconAnchor: [6, 6] // Adjust the anchor point if necessary
+    // });
+
+    // stations_data.forEach(function(station) {
+    //     var marker = L.marker([station[0], station[1]], {icon: smallIcon}).addTo(map);
+    // });
+
     // add classes for mobile navigation toggling
             var CSbody = document.querySelector('body');
             const CSnavbarMenu = document.querySelector('#cs-navigation');
