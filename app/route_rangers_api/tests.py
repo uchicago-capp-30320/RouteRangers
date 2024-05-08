@@ -28,6 +28,12 @@ class ModelTests(TestCase):
         geo_type = type(routes[0]["geo_representation"])
         self.assertIs(geo_type == MultiLineString, True)
 
+    def test_pull_multi_field(self):
+        routes = TransitRoute.objects.filter(city="CHI").values(
+            "geo_representation", "route_name", "color"
+        )
+        self.assertIs(len(routes[0].keys()) == 3, True)
+
 
 @pytest.mark.django_db
 def test_hello_view(client):
