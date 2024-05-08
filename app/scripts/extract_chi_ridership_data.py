@@ -167,7 +167,7 @@ def ingest_daily_bus_ridership(daily_bus_json, date: datetime.date) -> None:
         print(row["route"])
         try:
             print(
-                f"Ingesting ridership data for stations {str(row['route'])} - {row['date']}"
+                f"Ingesting ridership data for route {str(row['route'])} - {row['date']}"
             )
             obs_route = TransitRoute.objects.filter(
                 city="CHI", route_id=row["route"]
@@ -224,10 +224,10 @@ def ingest_daily_subway_ridership(daily_subway_json, date: datetime.date) -> Non
 
 
 def run():
-    start = datetime.datetime(2023, 1, 1,tzinfo=CHI_TZ)
-    end = datetime.datetime(2023, 2, 1,tzinfo=CHI_TZ)
-    # ingest_bus_ridership()
-    ingest_subway_ridership(start_date=start, end_date=end)
+    start = datetime.datetime(2023, 1, 1, tzinfo=CHI_TZ)
+    end = datetime.datetime(2023, 2, 1, tzinfo=CHI_TZ)
+    ingest_bus_ridership(start_date=start, end_date=end)
+    # ingest_subway_ridership(start_date=start, end_date=end)
 
 
 # if __name__ == "__main__":
