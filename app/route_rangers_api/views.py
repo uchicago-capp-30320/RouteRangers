@@ -6,11 +6,15 @@ from django.http import Http404
 from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
+from django.core.serializers import serialize
+
+from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT
+from route_rangers_api.models import TransitRoute, TransitStation
 
 
 def home(request):
     context = {"cities_class": "cs-li-link cs-active", "about_class": "cs-li-link"}
-    return render(request, "Cities.html", context)
+    return render(request, "cities.html", context)
 
 
 def about(request):
@@ -18,142 +22,65 @@ def about(request):
     return render(request, "about.html", context)
 
 
-def Policy_Chicago(request):
+def dashboard(request, city: str):
+    # get num riders
+
+    # get num routes
+    num_routes = TransitRoute.objects.filter(city=CITY_CONTEXT[city]["DB_Name"]).count()
+
+    # get commute
+
+    # get paths
+    routes = TransitRoute.objects.filter(city="CHI").values(
+        "geo_representation", "route_name", "color"
+    )
+
+    # stations
+    stations = TransitStation.objects.values().filter(
+        city=CITY_CONTEXT[city]["DB_Name"]
+    )
+    lst_coords = [[point["location"].x, point["location"].y] for point in stations]
+
     context = {
-        "City": "Chicago",
-        "City_NoSpace": "Chicago",
+        "City": CITY_CONTEXT[city]["CityName"],
+        "City_NoSpace": city,
         "TotalRiders": "104,749",
-        "TotalRoutes": "203",
+        "TotalRoutes": num_routes,
         "Commute": "40 Min",
         "cities_class": "cs-li-link",
         "policy_class": "cs-li-link cs-active",
         "survey_class": "cs-li-link",
         "feedback_class": "cs-li-link",
-        "Coordinates": [41.8781, -87.6298],
+        "Coordinates": CITY_CONTEXT[city]["Coordinates"],
+        "stations": lst_coords,
     }
-    return render(request, "PolicyMaker_CHI.html", context)
+    return render(request, "dashboard.html", context)
 
 
-def Policy_NY(request):
+def survey(request, city: str):
     context = {
-        "City": "New York",
-        "City_NoSpace": "NewYork",
-        "TotalRiders": "144",
-        "TotalRoutes": "144",
-        "cities_class": "cs-li-link",
-        "policy_class": "cs-li-link cs-active",
-        "survey_class": "cs-li-link",
-        "feedback_class": "cs-li-link",
-        "Commute": "147 Min",
-        "Coordinates": [40.7128, -74.0060],
-    }
-    return render(request, "PolicyMaker_CHI.html", context)
-
-
-def Policy_PRT(request):
-    context = {
-        "City": "Portland",
-        "City_NoSpace": "Portland",
-        "TotalRiders": "104,749",
-        "TotalRoutes": "2",
-        "Commute": "147 Min",
-        "cities_class": "cs-li-link",
-        "policy_class": "cs-li-link cs-active",
-        "survey_class": "cs-li-link",
-        "feedback_class": "cs-li-link",
-        "Coordinates": [45.5051, -122.6750],
-    }
-    return render(request, "PolicyMaker_CHI.html", context)
-
-
-def Survey_Chicago(request):
-    context = {
-        "City": "Chicago",
-        "City_NoSpace": "Chicago",
+        "City": CITY_CONTEXT[city]["CityName"],
+        "City_NoSpace": city,
         "cities_class": "cs-li-link",
         "policy_class": "cs-li-link ",
         "survey_class": "cs-li-link cs-active",
         "feedback_class": "cs-li-link",
-        "Coordinates": [41.8781, -87.6298],
+        "Coordinates": CITY_CONTEXT[city]["Coordinates"],
     }
-    return render(request, "Survey.html", context)
+    return render(request, "survey.html", context)
 
 
-def Survey_NY(request):
+def responses(request, city: str):
     context = {
-        "City": "New York",
-        "City_NoSpace": "NewYork",
-        "Response": "246",
-        "Riders": "12%",
-        "Cars": "25%",
-        "cities_class": "cs-li-link",
-        "policy_class": "cs-li-link ",
-        "survey_class": "cs-li-link cs-active",
-        "feedback_class": "cs-li-link",
-        "Coordinates": [40.7128, -74.0060],
-    }
-    return render(request, "Survey.html", context)
-
-
-def Survey_PRT(request):
-    context = {
-        "City": "Portland",
-        "City_NoSpace": "Portland",
-        "Response": "11",
-        "Riders": "42%",
-        "Cars": "40%",
-        "cities_class": "cs-li-link",
-        "policy_class": "cs-li-link ",
-        "survey_class": "cs-li-link cs-active",
-        "feedback_class": "cs-li-link",
-        "Coordinates": [45.5051, -122.6750],
-    }
-    return render(request, "Survey.html", context)
-
-
-def Feedback_Chicago(request):
-    context = {
-        "City": "Chicago",
+        "City": CITY_CONTEXT[city]["CityName"],
         "Response": "567",
-        "City_NoSpace": "Chicago",
+        "City_NoSpace": city,
         "Riders": "30%",
         "Cars": "270%",
         "cities_class": "cs-li-link",
         "policy_class": "cs-li-link ",
         "survey_class": "cs-li-link",
         "feedback_class": "cs-li-link cs-active",
-        "Coordinates": [41.8781, -87.6298],
+        "Coordinates": CITY_CONTEXT[city]["Coordinates"],
     }
-    return render(request, "Feedback.html", context)
-
-
-def Feedback_NY(request):
-    context = {
-        "City": "New York",
-        "City_NoSpace": "NewYork",
-        "Response": "246",
-        "Riders": "12%",
-        "Cars": "25%",
-        "cities_class": "cs-li-link",
-        "policy_class": "cs-li-link ",
-        "survey_class": "cs-li-link",
-        "feedback_class": "cs-li-link cs-active",
-        "Coordinates": [40.7128, -74.0060],
-    }
-    return render(request, "Feedback.html", context)
-
-
-def Feedback_PRT(request):
-    context = {
-        "City": "Portland",
-        "City_NoSpace": "Portland",
-        "Response": "11",
-        "Riders": "42%",
-        "Cars": "40%",
-        "cities_class": "cs-li-link",
-        "policy_class": "cs-li-link ",
-        "survey_class": "cs-li-link",
-        "feedback_class": "cs-li-link cs-active",
-        "Coordinates": [45.5051, -122.6750],
-    }
-    return render(request, "Feedback.html", context)
+    return render(request, "responses.html", context)
