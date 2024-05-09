@@ -10,12 +10,16 @@ import psycopg2
 
 
 from route_rangers_api.models import (
-   BikeRidership,
-   BikeStation,
+    BikeRidership,
+    BikeStation,
 )
 from django.contrib.gis.geos import Point
 
-from app.scripts.utils import make_request, process_daily_ridership_data, ingest_monthly_data
+from app.scripts.utils import (
+    make_request,
+    process_daily_ridership_data,
+    ingest_monthly_data,
+)
 
 #########################
 # Load and define variables
@@ -53,10 +57,10 @@ def ingest_bike_stations() -> None:
         try:
             print(f"ingesting CHI {station['id']}")
             obs = BikeStation(
-                city = "CHI",
+                city="CHI",
                 station_id=station["id"],
                 station_name=station["station_name"],
-                short_name = station["short_name"],
+                short_name=station["short_name"],
                 n_docks=station["total_docks"],
                 location=Point(station["location"]["coordinates"]),
             )
@@ -65,7 +69,7 @@ def ingest_bike_stations() -> None:
             try:
                 print(f"ingesting CHI {station['id']}, no short_name")
                 obs = BikeStation(
-                    city = "CHI",
+                    city="CHI",
                     station_id=station["id"],
                     station_name=station["station_name"],
                     n_docks=station["total_docks"],
@@ -77,11 +81,10 @@ def ingest_bike_stations() -> None:
         except:
             print(f"Observation{station['station_name']} already ingested")
 
-        
 
 def create_daily_ridership_month(filepath: str) -> pd.DataFrame:
     """
-    Create a dataframe with daily information by station with the 
+    Create a dataframe with daily information by station with the
     number of trips started and ended for one monthly file
     """
     monthly_df = pd.read_csv(filepath)
@@ -89,36 +92,48 @@ def create_daily_ridership_month(filepath: str) -> pd.DataFrame:
 
     return ridership_df
 
-def ingest_monthly_data(monthly_ridership_df:pd.DataFrame)->None:
+
+def ingest_monthly_data(monthly_ridership_df: pd.DataFrame) -> None:
     """
     Ingest ridership at the daily level into the BikeRidership table
     """
     for row in monthly_ridership_df.itertuples():
         try:
-            obs_station = BikeStation.objects.filter(city="CHI",short_name=row.station_id).first().id
+            obs_station = (
+                BikeStation.objects.filter(city="CHI", short_name=row.station_id)
+                .first()
+                .id
+            )
             print(f"Observation Station: {obs_station}")
-            obs = BikeRidership(station_id=obs_station,date=row.date,
-                            n_started = row.n_rides_started,
-                            n_ended = row.n_rides_ended)
+            obs = BikeRidership(
+                station_id=obs_station,
+                date=row.date,
+                n_started=row.n_rides_started,
+                n_ended=row.n_rides_ended,
+            )
             obs.save()
         except:
             pass
 
+
 def ingest_trip_data():
     """
-    Ingest the divvy data into the BikeRidership table 
+    Ingest the divvy data into the BikeRidership table
     """
     for file in os.listdir(f"{BIKE_DATA_DIR}/2023-divvy-tripdata/"):
-        if file!=".DS_Store":
-            monthly_df = create_daily_ridership_month(f"{BIKE_DATA_DIR}/2023-divvy-tripdata/{file}")
+        if file != ".DS_Store":
+            monthly_df = create_daily_ridership_month(
+                f"{BIKE_DATA_DIR}/2023-divvy-tripdata/{file}"
+            )
             ingest_monthly_data(monthly_df)
+
 
 def run():
     ingest_bike_stations()
     ingest_trip_data()
 
+
 # if __name__ == "__main__":
 
 #    df = create_daily_ridership_month(f"{BIKE_DATA_DIR}/2023-divvy-tripdata/202301-divvy-tripdata.csv")
 #    print(df)
-

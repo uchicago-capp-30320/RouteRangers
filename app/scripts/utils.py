@@ -7,10 +7,7 @@ import requests
 import time
 import datetime
 import pytz
-from route_rangers_api.models import (
-    BikeStation,
-    BikeRidership
-)
+from route_rangers_api.models import BikeStation, BikeRidership
 
 
 REQUEST_DELAY = 0.2
@@ -33,7 +30,8 @@ def make_request(url: str, params: Dict, session: Callable = None) -> Response:
         resp = requests.get(url, params, timeout=TIMEOUT)
     return resp
 
-def build_start_end_date_str(date: datetime.datetime,timezone:str) -> Tuple[str, str]:
+
+def build_start_end_date_str(date: datetime.datetime, timezone: str) -> Tuple[str, str]:
     """
     Creates two strings to pass as filters on the query for
     a request to the NYC Portal
@@ -46,23 +44,24 @@ def build_start_end_date_str(date: datetime.datetime,timezone:str) -> Tuple[str,
 
     return start_date, end_date
 
+
 #######################
 ## Bike Ridership Utils
 #######################
 
-def extract_stations(url:str) -> List:
+
+def extract_stations(url: str) -> List:
     """
     Extract bike station data from GTFS
     """
-    resp = make_request(
-        url=url, params={}
-    )
+    resp = make_request(url=url, params={})
     results = resp.json()
     stations = results["data"]["stations"]
 
     return stations
 
-def process_daily_ridership_data(monthly_df)->pd.DataFrame:
+
+def process_daily_ridership_data(monthly_df) -> pd.DataFrame:
     monthly_df["date"] = pd.to_datetime(monthly_df["started_at"]).dt.date
     monthly_df["start_station_id"] = monthly_df["start_station_id"].str.strip()
     monthly_df["end_station_id"] = monthly_df["end_station_id"].str.strip()
@@ -81,22 +80,28 @@ def process_daily_ridership_data(monthly_df)->pd.DataFrame:
     )
     ended_at = ended_at.rename(columns={"end_station_id": "station_id"})
 
-    ridership_df = started_at.merge(ended_at, how="left", on=["station_id","date"])
+    ridership_df = started_at.merge(ended_at, how="left", on=["station_id", "date"])
     ridership_df["n_rides_ended"] = ridership_df["n_rides_ended"].fillna(0).astype(int)
     ridership_df["date"] = pd.to_datetime(ridership_df["date"])
 
     return ridership_df
 
-def ingest_monthly_data(monthly_ridership_df:pd.DataFrame)->None:
+
+def ingest_monthly_data(monthly_ridership_df: pd.DataFrame) -> None:
     """
     Ingest ridership at the daily level into the BikeRidership table
     """
     for row in monthly_ridership_df.itertuples():
         try:
-            obs_station = BikeStation.objects.filter(short_name=row.station_id).first().id
-            obs = BikeRidership(station_id=obs_station,date=row.date,
-                            n_started = row.n_rides_started,
-                            n_ended = row.n_rides_ended)
+            obs_station = (
+                BikeStation.objects.filter(short_name=row.station_id).first().id
+            )
+            obs = BikeRidership(
+                station_id=obs_station,
+                date=row.date,
+                n_started=row.n_rides_started,
+                n_ended=row.n_rides_ended,
+            )
             obs.save()
             print(f"Station {row.station_id} succesfully ingested")
         except:
