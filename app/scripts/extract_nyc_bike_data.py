@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 import itertools
 from app.scripts.utils import (
     process_daily_ridership_data,
-    ingest_monthly_data,
+    #ingest_monthly_data,
     extract_stations,
 )
 
@@ -52,16 +52,6 @@ def extract_bike_stations_files() -> List:
     return stations
 
 
-# def ingest_bike_stations_data() -> None:
-#     stations_df = extract_bike_stations_files()
-
-#     for row in stations_df.itertuples():
-#         loc = Point(row.start_lat, row.start_lng)
-#         obs = BikeStation(
-#             station_id=row.started_at_id, station_name=row.started_at_name, location=loc
-#         )
-#         obs.save()
-
 def ingest_bike_stations_data()-> None:
     stations = extract_stations(BIKE_STATIONS_ENDPOINT)
     for station in stations:
@@ -84,11 +74,11 @@ def create_daily_ridership_month(filepath: str) -> pd.DataFrame:
     number of trips started and ended for one monthly file
     """
     monthly_dfs = []
-
-    for file in os.listdir(f"{BIKE_DATA_DIR}/2023-citibike-tripdata/{filepath}"):
-        file_df = pd.read_csv(
-            f"{BIKE_DATA_DIR}/2023-citibike-tripdata/{filepath}/{file}"
-        )
+    print(f"Directory from where to read csv {filepath}")
+    #for file in os.listdir(f"{BIKE_DATA_DIR}/2023-citibike-tripdata/{filepath}"):
+    for file in os.listdir(filepath):
+        print(f"File to be read to concatenate df: {file}")
+        file_df = pd.read_csv(f"{filepath}/{file}")
         monthly_dfs.append(file_df)
 
     monthly_df = pd.concat(monthly_dfs)
@@ -98,20 +88,36 @@ def create_daily_ridership_month(filepath: str) -> pd.DataFrame:
     return ridership_df
 
 
+def ingest_monthly_data(monthly_ridership_df:pd.DataFrame)->None:
+    """
+    Ingest ridership at the daily level into the BikeRidership table
+    """
+    for row in monthly_ridership_df.itertuples():
+        try:
+            obs_station = BikeStation.objects.filter(city="NYC",short_name=row.station_id).first().id
+            print(f"Observation Station: {obs_station}")
+            obs = BikeRidership(station_id=obs_station,date=row.date,
+                            n_started = row.n_rides_started,
+                            n_ended = row.n_rides_ended)
+            obs.save()
+            print(f"Observation Station: {obs_station} - {row.date} succesfully ingested")
+        except:
+            print(f"Observation Station: {obs_station} - {row.date} not ingested")
+
 def ingest_citibike_ridership_data():
     """
     Ingest the citibike ridership data into the BikeRidership table
     """
     for file in os.listdir(f"{BIKE_DATA_DIR}/2023-citibike-tripdata/"):
+        print(f"File to be created as df: {file}")
         if file != ".DS_Store":
+            print(f"File to be passed into create_daily_ridership_month: {BIKE_DATA_DIR}/2023-citibike-tripdata/{file}")
             monthly_df = create_daily_ridership_month(
-                f"{BIKE_DATA_DIR}/2023-divvy-tripdata/{file}"
+                f"{BIKE_DATA_DIR}/2023-citibike-tripdata/{file}"
             )
             ingest_monthly_data(monthly_df)
 
 def run():
     ingest_bike_stations_data()
+    ingest_citibike_ridership_data()
 
-# if __name__ == "__main__":
-#     stations = extract_stations(BIKE_STATIONS_ENDPOINT)
-#     print(len(stations))

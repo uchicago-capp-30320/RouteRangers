@@ -7,6 +7,11 @@ import requests
 import time
 import datetime
 import pytz
+from route_rangers_api.models import (
+    BikeStation,
+    BikeRidership
+)
+
 
 REQUEST_DELAY = 0.2
 RESULTS_PER_PAGE = 50000  # Max number of results for API
@@ -87,8 +92,12 @@ def ingest_monthly_data(monthly_ridership_df:pd.DataFrame)->None:
     Ingest ridership at the daily level into the BikeRidership table
     """
     for row in monthly_ridership_df.itertuples():
-        obs_station = BikeStation.objects.filter(station_id=row.station)
-        obs = BikeRidership(station=obs_station,date=row.date,
+        try:
+            obs_station = BikeStation.objects.filter(short_name=row.station_id).first().id
+            obs = BikeRidership(station_id=obs_station,date=row.date,
                             n_started = row.n_rides_started,
                             n_ended = row.n_rides_ended)
-        obs.save()
+            obs.save()
+            print(f"Station {row.station_id} succesfully ingested")
+        except:
+            print(f"Ingesting station {row.station_id} unsuccesful")

@@ -115,7 +115,7 @@ def ingest_trip_data():
 
 def run():
     ingest_bike_stations()
-    #ingest_trip_data()
+    ingest_trip_data()
 
 # if __name__ == "__main__":
 
