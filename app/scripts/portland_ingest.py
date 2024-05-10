@@ -150,7 +150,7 @@ def run():
     """
     start_date = datetime(2023, 3, 8)
     end_date = datetime(2023, 3, 8)
-    json_file_path = "/Users/jimenasalinas/Library/CloudStorage/Box-Box/Route Rangers/Transit dataset exploration/Portland Ridership Data/portland_ridership/Portland_ridership.json"
+    json_file_path = ".../CloudStorage/Box-Box/Route Rangers/Transit dataset exploration/Portland Ridership Data/portland_ridership/Portland_ridership.json"
     transit_station_ids = get_transit_station_ids_pdx()
     ingest_pdx_ridership_data(json_file_path, start_date, end_date, transit_station_ids)
 
