@@ -12,7 +12,8 @@ The  Receipt ID for this Public Records Request is PRR 2024-254.
 VARIABLES:
     - ID (int): this ID is the foreign key from the TransitStations table,
     it can be obtained using city = 'PDX' and station_id
-    - station_id: (str) a stop_id (GTFS)
+    - station_id (from JSON raw file): (str) a stop_id (GTFS), only needed to 
+    get the foreign key, it does not go into the ridership db table
     - date: (datetime) represents a day in the format yyyy-mm-dd, only includes
     values for 2023
     - ridership: (int) represents the average number of bus and light rail Tri Met
@@ -27,8 +28,9 @@ import os
 from requests.models import Response
 import django
 import datetime
+from datetime import datetime
 import pytz
-from typing import List
+from typing import List, Dict, Any
 from django.db.utils import IntegrityError
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -43,23 +45,33 @@ django.setup()
 from route_rangers_api.models import TransitStation, RidershipStation
 
 
-def get_transit_station_ids() -> list:
+def get_transit_station_ids_pdx() -> list:
     """
-    Get a list of all id values from the TransitStation table
+    Get a list of all id values from the TransitStation table for PDX
     """
     return list(TransitStation.objects.filter(city="PDX").values_list("id", flat=True))
 
 
-def get_list_of_stations() -> list:
+def format_input_ridership_data(
+    json_file_path: str, start_date: datetime.date, end_date: datetime.date
+) -> List[Dict[str, Any]]:
     """
-    Get a list of all id values from the TransitStation table as strings
+    Format the dates in the input JSON ridership data
+    and filter the data set to only include the dates that we need to
+    work with
     """
-    return [
-        str(station_id)
-        for station_id in TransitStation.objects.filter(city="PDX").values_list(
-            "station_id", flat=True
-        )
-    ]
+    formatted_data = []
+    with open(json_file_path, "r") as file:
+        data = json.load(file)
+    for record in data:
+        timestamp_seconds = int(record["date"]) / 1000
+        date_obj = datetime.fromtimestamp(timestamp_seconds)
+        formatted_date = date_obj.strftime("%Y-%m-%d %H:%M:%S")
+        record["date"] = formatted_date
+        if start_date <= date_obj <= end_date:
+            formatted_data.append(record)
+    print("JSON ready..")
+    return formatted_data
 
 
 def ingest_pdx_ridership_data(
@@ -67,19 +79,17 @@ def ingest_pdx_ridership_data(
     start_date: datetime.date,
     end_date: datetime.date,
     list_of_db_ids: List,
-    list_of_stations: List,
 ) -> None:
     """
     Ingest portland ridership data from extracted JSON file
-    into Django database
+    into Django database for a given subset of date ranges
     """
     stations_not_matched = []
 
     # RidershipStation.objects.all().delete()
-    with open(json_file_path, "r") as file:
-        data = json.load(file)
+    formatted_data = format_input_ridership_data(json_file_path, start_date, end_date)
 
-    for record in data:
+    for record in formatted_data:
         try:
             # Get the id from TransitStation using station_id + city = 'PDX'
             transit_station = TransitStation.objects.filter(
@@ -88,44 +98,39 @@ def ingest_pdx_ridership_data(
 
             if transit_station:
                 foreign_key = transit_station.id
-                station_id = transit_station.station_id
-
-                # For each row, create a RidershipStation object
-                timestamp_seconds = int(record["date"]) / 1000
-                date_obj = datetime.datetime.fromtimestamp(timestamp_seconds)
+                date_str = record["date"]
+                date_obj = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
                 # date formatting to match model
 
-                if start_date <= date_obj.date() <= end_date:
+                if start_date <= date_obj <= end_date:
                     # Check if foreign key exists in the list of TransitStation ids
-                    # if (foreign_key in list_of_db_ids) and (
-                    #     station_id in list_of_stations
-                    # ):
-                    # print("OBJECT PREVIEW", foreign_key, station_id)
-                    print(
-                        f"Ingesting ridership data for station {record['station_id']}..."
-                    )
+                    if foreign_key in list_of_db_ids:
 
-                    ridership_obj = RidershipStation.objects.create(
-                        date=date_obj,
-                        ridership=record["ridership"],
-                        station_id=foreign_key,
-                    )
+                        ridership_obj = RidershipStation.objects.create(
+                            date=date_obj,
+                            ridership=record["ridership"],
+                            station_id=foreign_key,
+                        )
 
-                    ridership_obj.save()
-                else:
-                    print(
-                        f"Skipping ingestion for station {record['station_id']}, foreign key not found in TransitStation."
-                    )
+                        print(
+                            f"Ingesting ridership data for station {record['station_id']}..."
+                        )
+
+                        ridership_obj.save()
+                    else:
+                        print(
+                            f"Skipping ingestion for station {record['station_id']}, foreign key not found in TransitStation"
+                        )
 
         except TransitStation.DoesNotExist:
             stations_not_matched.append(record["station_id"])
             print(
-                f"Skipping ingestion for station {record['station_id']}, no matching TransitStation found."
+                f"Skipping ingestion for station {record['station_id']}, no matching TransitStation"
             )
             continue
 
         except IntegrityError as e:
-            # foreign key db rule violation
+            # foreign key db rule violation, skips records if they are already in the db
             print(
                 f"Skipping ingestion for station {record['station_id']} due to foreign key constraint violation"
             )
@@ -143,14 +148,11 @@ def run():
     """
     Ingest PDX ridership data into Django db
     """
-    start_date = datetime.date(2023, 1, 2)
-    end_date = datetime.date(2023, 1, 31)
+    start_date = datetime(2023, 3, 8)
+    end_date = datetime(2023, 3, 8)
     json_file_path = "/Users/jimenasalinas/Library/CloudStorage/Box-Box/Route Rangers/Transit dataset exploration/Portland Ridership Data/portland_ridership/Portland_ridership.json"
-    transit_station_ids = get_transit_station_ids()
-    list_of_stations = get_list_of_stations()
-    ingest_pdx_ridership_data(
-        json_file_path, start_date, end_date, transit_station_ids, list_of_stations
-    )
+    transit_station_ids = get_transit_station_ids_pdx()
+    ingest_pdx_ridership_data(json_file_path, start_date, end_date, transit_station_ids)
 
 
 if __name__ == "__main__":
