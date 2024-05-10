@@ -128,7 +128,7 @@
         // Loop through the stations and add a smaller marker for each
         // but clustered!
         var stations_data = {{ stations }};
-        var markers = L.markerClusterGroup();
+        var markers = L.markerClusterGroup({ disableClusteringAtZoom: 16 });
 
 
         for (var i = 0; i < stations_data.length; i++) {
