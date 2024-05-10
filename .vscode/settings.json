@@ -1,0 +1,33 @@
+{
+    "editor.formatOnSave": true,
+    "black-formatter.args": [
+        "--line-length",
+        "88",
+    ],
+    "flake8.args": [
+        "--max-line-length",
+        "88",
+    ],
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "sql_class",
+            "username": "postgres",
+            "password": "postgres",
+            "database": "sql_class"
+        },
+        {
+            "previewLimit": 50,
+            "server": "sect-db-do-user-16388856-0.c.db.ondigitalocean.com",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "RouteRangers",
+            "database": "routerangers",
+            "username": "routerangers",
+            "password": "AVNS_d05lBfyODY1Ri6BNujG"
+        }
+    ]
+   }
