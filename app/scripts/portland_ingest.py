@@ -86,7 +86,6 @@ def ingest_pdx_ridership_data(
     """
     stations_not_matched = []
 
-    # RidershipStation.objects.all().delete()
     formatted_data = format_input_ridership_data(json_file_path, start_date, end_date)
 
     for record in formatted_data:
