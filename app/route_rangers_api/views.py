@@ -51,7 +51,7 @@ def dashboard(request, city: str):
         "policy_class": "cs-li-link cs-active",
         "survey_class": "cs-li-link",
         "feedback_class": "cs-li-link",
-        "Coordinates": CITY_CONTEXT[city]["Coordinates"],
+        "coordinates": CITY_CONTEXT[city]["Coordinates"],
         "stations": lst_coords,
     }
     return render(request, "dashboard.html", context)
