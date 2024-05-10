@@ -24,7 +24,7 @@ def about(request):
 
 def dashboard(request, city: str):
     # get num riders
-
+    print(city)
     # get num routes
     num_routes = TransitRoute.objects.filter(city=CITY_CONTEXT[city]["DB_Name"]).count()
 
@@ -53,6 +53,9 @@ def dashboard(request, city: str):
         "feedback_class": "cs-li-link",
         "coordinates": CITY_CONTEXT[city]["Coordinates"],
         "stations": lst_coords,
+        "csv": CITY_CONTEXT[city]["csv"],
+        "lineplot": CITY_CONTEXT[city]["lineplot"],
+
     }
     return render(request, "dashboard.html", context)
 
