@@ -1,5 +1,5 @@
 export function initializeMap(coordinates, stations, iconUrl) {
-  // Initialize the map with the given coordinates as the center
+  // Initialize the map at center of city
   var map = L.map('map').setView(coordinates, 13);
 
   // Add a tile layer
@@ -13,8 +13,8 @@ export function initializeMap(coordinates, stations, iconUrl) {
   // Custom icon for smaller markers
   var smallIcon = L.icon({
     iconUrl: iconUrl, // URL to a smaller icon image
-    iconSize: [15, 15], // Set the icon size you want
-    iconAnchor: [6, 6], // Adjust the anchor point if necessary
+    iconSize: [15, 15], 
+    iconAnchor: [6, 6],
   });
 
   var markers = L.markerClusterGroup();
