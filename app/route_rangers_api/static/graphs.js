@@ -1,4 +1,4 @@
-function drawgraph(csv,var1) {
+function drawgraph(csv,xaxis,yaxis) {
     var margin = {top: 30, right: 30, bottom: 70, left: 60},
         width = 460 - margin.left - margin.right,
         height = 400 - margin.top - margin.bottom;
@@ -35,7 +35,7 @@ function update(selectedVar) {
     d3.csv(csv, function(data) {
         // X axis
         x.domain(data.map(function(d) { return d.group; }));
-        xAxis.transition().duration(1000).call(d3.axisBottom(x));
+        xAxis.transition().duration(1000).call(d3.axisTop(x));
 
         // Add Y axis
         y.domain([0, d3.max(data, function(d) { return +d[selectedVar]; })]);
@@ -50,8 +50,8 @@ function update(selectedVar) {
             .append("rect")
             .merge(u)
             .transition()
-            .duration(1000)
-            .attr("x", function(d) { return x(d.group); })
+            .duration(5)
+            .attr("x", function(d) { return x(d[xaxis]); })
             .attr("y", function(d) { return y(d[selectedVar]); })
             .attr("width", x.bandwidth())
             .attr("height", function(d) { return height - y(d[selectedVar]); })
@@ -60,7 +60,7 @@ function update(selectedVar) {
 }
 
     // Initialize plot
-    update(var1);
+    update(yaxis);
 }
 
 function drawTrends(csv) {
