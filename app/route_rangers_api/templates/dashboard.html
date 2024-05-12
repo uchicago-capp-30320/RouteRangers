@@ -1,112 +1,64 @@
-{% extends 'basetemplate_internal.html' %}
-{% load static %}
-{% block content %}
+{% extends 'basetemplate_internal.html' %} {% load static %} {% block content %}
 <div class="headers">
-    <h1> {{ City }} Transit Ecosystem</h1>
-    <p class="inline">Overview of Transit in Your City</p>
+  <h1>{{ City }} Transit Ecosystem</h1>
+  <p class="inline">Overview of Transit in Your City</p>
 </div>
-<div class="card-container row mx-3 ">
-    <div class="col-12 col-md-4 col-lg-4">
-        <div class="card">
-            <div class="card-content">
-                <p class="card-title">Total Riders</p>
-                <p class="card-text">{{TotalRiders}} </p>
-            </div>
-        </div>
+<div class="card-container row mx-3">
+  <div class="col-12 col-md-4 col-lg-4">
+    <div class="card">
+      <div class="card-content">
+        <p class="card-title">Total Riders</p>
+        <p class="card-text">{{TotalRiders}}</p>
+      </div>
     </div>
-    <div class="col-12 col-md-4 col-lg-4">
-        <div class="card">
-            <div class="card-content">
-                <p class="card-title">Total Routes</p>
-                <p class="card-text">{{TotalRoutes}}</p>
-            </div>
-        </div>
+  </div>
+  <div class="col-12 col-md-4 col-lg-4">
+    <div class="card">
+      <div class="card-content">
+        <p class="card-title">Total Routes</p>
+        <p class="card-text">{{TotalRoutes}}</p>
+      </div>
     </div>
-    <div class="col-12 col-md-4 col-lg-4">
-        <div class="card">
-            <div class="card-content">
-                <p class="card-title">Average Commute Time</p>
-                <p class="card-text">{{Commute}}</p>
-            </div>
-        </div>
+  </div>
+  <div class="col-12 col-md-4 col-lg-4">
+    <div class="card">
+      <div class="card-content">
+        <p class="card-title">Average Commute Time</p>
+        <p class="card-text">{{Commute}}</p>
+      </div>
     </div>
-</div>
-<div class="headers">\
-    <h2>Transit Map</h2>
-    <p class="inline">Map showing all transit routes in your city</p>
-    <div id="map"></div>
-    <script type="module">
-        import { initializeMap } from "{% static 'map.js' %}";
-        var coordinates = {{ coordinates }};
-        var stations = {{ stations }};
-        var iconUrl = "{% static 'images/map_pin.png' %}";
-        initializeMap(coordinates, stations, iconUrl);
-    </script>
+  </div>
 </div>
 
 <div class="headers">
-    <h2>Heat Map</h2>
-    <p class="inline">Maps of showing variation in transit, environmental, and socio-economic variables across census
-        tracts </p>
-</div>
-
-
-<div class="headers">
-    <h2>Trends Over Time</h2>
-    <p class="inline">The following show evolution of trends in ridership and other key variables over time. This is
-        critical as we continue to understand the impact of the pandemic. </p>
-</div>
-<div class="headers">
-    <h1> {{ City }} Transit Ecosystem</h1>
-    <p class="inline">Overview of Transit in Your City</p>
-</div>
-<div class="card-container row mx-3 ">
-    <div class="col-12 col-md-4 col-lg-4">
-        <div class="card">
-            <div class="card-content">
-                <p class="card-title">Total Riders</p>
-                <p class="card-text">{{TotalRiders}} </p>
-            </div>
-        </div>
-    </div>
-    <div class="col-12 col-md-4 col-lg-4">
-        <div class="card">
-            <div class="card-content">
-                <p class="card-title">Total Routes</p>
-                <p class="card-text">{{TotalRoutes}}</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-12 col-md-4 col-lg-4">
-        <div class="card">
-            <div class="card-content">
-                <p class="card-title">Average Commute Time</p>
-                <p class="card-text">{{Commute}}</p>
-            </div>
-        </div>
-    </div>
-
-</div>
-<div class="headers">
-    <h2>Transit Map</h2>
-    <p class="inline">Map showing all transit routes in your city</p>
-    <div id="map"></div>
-    <script type="module">
-        import { initializeMap } from "{% static 'map.js' %}";
-        var coordinates = {{ coordinates }};
-        var stations = {{ stations }};
-        var iconUrl = "{% static 'images/map_pin.png' %}";
-        initializeMap(coordinates, stations, iconUrl);
-    </script>
+  <h2>Transit Map</h2>
+  <p class="inline">Map showing all transit routes in your city</p>
+  <div id="map"></div>
+  <script type="module">
+    import { initializeMap } from "{% static 'map.js' %}";
+    var coordinates = {{ coordinates }};
+    var stations = {{ stations }};
+    var iconUrl = "{% static 'images/map_pin.png' %}";
+    initializeMap(coordinates, stations, iconUrl);
+  </script>
 </div>
 
 <div class="headers">
-    <h2>Heat Map</h2>
-    <p class="inline">Maps of showing variation in transit, environmental, and socio-economic variables across census
-        tracts </p>
+  <h2>Heat Map</h2>
+  <p class="inline">
+    Maps of showing variation in transit, environmental, and socio-economic variables across census
+    tracts
+  </p>
 </div>
->>>>>>> Stashed changes
 
+<div class="headers">
+  <h2>Trends Over Time</h2>
+  <p class="inline">
+    The following show evolution of trends in ridership and other key variables over time. This is
+    critical as we continue to understand the impact of the pandemic.
+  </p>
+</div>
+{% endblock %}
 
 <div class="headers">
     <h2>Trends Over Time</h2>
