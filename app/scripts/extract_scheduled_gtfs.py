@@ -282,7 +282,7 @@ def ingest_transit_routes(geom_shapes: gpd.GeoDataFrame) -> None:
         except IntegrityError:
             print(f"Skipping observation: {row['route_id']} already ingested")
         except Exception as e:
-            #TODO: Add log of error
+            # TODO: Add log of error
             print(e)
             print("Skipping ingestion of this observation\n")
     print("Ingestion complete")
@@ -293,17 +293,17 @@ def ingest_stop_route_relation(
 ):
     """Ingest relationship between stops and routes"""
 
-    #Clean variables before merging
+    # Clean variables before merging
     stops.loc[:, "stop_id"] = stops.loc[:, "stop_id"].str.strip()
     trips.loc[:, "trip_id"] = trips.loc[:, "trip_id"].str.strip()
     stop_times.loc[:, "trip_id"] = stop_times.loc[:, "trip_id"].str.strip()
     stop_times.loc[:, "stop_id"] = stop_times.loc[:, "stop_id"].str.strip()
 
-    #Merge df to create relationship between routes and stations
+    # Merge df to create relationship between routes and stations
     merged_df = pd.merge(trips, stop_times, on="trip_id", how="inner")
     merged_df = pd.merge(merged_df, stops, on="stop_id", how="inner")
 
-    #Keep one obs per unique combinations of route/stop/city before ingestion
+    # Keep one obs per unique combinations of route/stop/city before ingestion
     distinct_stop_routes_df = merged_df[
         ["route_id", "stop_id", "city"]
     ].drop_duplicates()
@@ -324,11 +324,13 @@ def ingest_stop_route_relation(
                 f"Ingestion route {row.route_id} - station {row.stop_id} relation succesful"
             )
         except IntegrityError:
-            print(f"Skipping observation: route {row.route_id} - station {row.stop_id}, already ingested")
+            print(
+                f"Skipping observation: route {row.route_id} - station {row.stop_id}, already ingested"
+            )
 
         except Exception as e:
             print(f"Skipping observation due to: {e}")
-            #TODO: log errors not related to already ingested
+            # TODO: log errors not related to already ingested
     print("Ingestion complete")
 
 
