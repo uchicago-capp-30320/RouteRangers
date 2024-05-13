@@ -45,13 +45,6 @@ django.setup()
 from route_rangers_api.models import TransitStation, RidershipStation
 
 
-def get_transit_station_ids_pdx() -> list:
-    """
-    Get a list of all id values from the TransitStation table for PDX
-    """
-    return list(TransitStation.objects.filter(city="PDX").values_list("id", flat=True))
-
-
 def format_input_ridership_data(
     json_file_path: str, start_date: datetime.date, end_date: datetime.date
 ) -> List[Dict[str, Any]]:
@@ -75,10 +68,7 @@ def format_input_ridership_data(
 
 
 def ingest_pdx_ridership_data(
-    json_file_path: str,
-    start_date: datetime.date,
-    end_date: datetime.date,
-    list_of_db_ids: List,
+    json_file_path: str, start_date: datetime.date, end_date: datetime.date
 ) -> None:
     """
     Ingest portland ridership data from extracted JSON file
@@ -102,24 +92,22 @@ def ingest_pdx_ridership_data(
                 # date formatting to match model
 
                 if start_date <= date_obj <= end_date:
-                    # Check if foreign key exists in the list of TransitStation ids
-                    if foreign_key in list_of_db_ids:
 
-                        ridership_obj = RidershipStation.objects.create(
-                            date=date_obj,
-                            ridership=record["ridership"],
-                            station_id=foreign_key,
-                        )
+                    ridership_obj = RidershipStation.objects.create(
+                        date=date_obj,
+                        ridership=record["ridership"],
+                        station_id=foreign_key,
+                    )
 
-                        print(
-                            f"Ingesting ridership data for station {record['station_id']}..."
-                        )
+                    print(
+                        f"Ingesting ridership data for station {record['station_id']}..."
+                    )
 
-                        ridership_obj.save()
-                    else:
-                        print(
-                            f"Skipping ingestion for station {record['station_id']}, foreign key not found in TransitStation"
-                        )
+                    ridership_obj.save()
+                else:
+                    print(
+                        f"Skipping ingestion for station {record['station_id']}, foreign key not found in TransitStation"
+                    )
 
         except TransitStation.DoesNotExist:
             stations_not_matched.append(record["station_id"])
@@ -147,11 +135,11 @@ def run():
     """
     Ingest PDX ridership data into Django db
     """
-    start_date = datetime(2023, 3, 8)
-    end_date = datetime(2023, 3, 8)
-    json_file_path = ".../CloudStorage/Box-Box/Route Rangers/Transit dataset exploration/Portland Ridership Data/portland_ridership/Portland_ridership.json"
+    start_date = datetime(2023, 5, 9)
+    end_date = datetime(2023, 5, 31)
+    json_file_path = "/Users/jimenasalinas/Library/CloudStorage/Box-Box/Route Rangers/Transit dataset exploration/Portland Ridership Data/portland_ridership/Portland_ridership.json"
     transit_station_ids = get_transit_station_ids_pdx()
-    ingest_pdx_ridership_data(json_file_path, start_date, end_date, transit_station_ids)
+    ingest_pdx_ridership_data(json_file_path, start_date, end_date)
 
 
 if __name__ == "__main__":
