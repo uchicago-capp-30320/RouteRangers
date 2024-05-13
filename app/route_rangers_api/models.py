@@ -1,7 +1,6 @@
 from django.contrib.gis.db import models
 from app.route_rangers_api.utils.city_mapping import CITIES_CHOICES
 
-
 #################################
 ###### DEMOGRAPHIC MODELS #######
 #################################
@@ -52,6 +51,9 @@ class Demographics(models.Model):
     work_commute_time_over_90 = models.IntegerField(
         verbose_name="N° of people that commute more than 90", null=True
     )
+    population = models.IntegerField(null=True)
+
+    # geographic_delimitation = models.PolygonField(null=True)
 
     class Meta:
         constraints = [
@@ -130,6 +132,11 @@ class StationRouteRelation(models.Model):
 
     station = models.ForeignKey(TransitStation, on_delete=models.PROTECT)
     route = models.ForeignKey(TransitRoute, on_delete=models.PROTECT)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["station", "route"], name="station_route")
+        ]
 
 
 class RidershipRoute(models.Model):

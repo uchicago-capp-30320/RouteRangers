@@ -10,7 +10,7 @@ from datetime import datetime
 import pdb
 
 from django.contrib.gis.geos import GEOSGeometry, LineString, Point, MultiLineString
-from route_rangers_api.models import TransitStation, TransitRoute
+from route_rangers_api.models import TransitStation, TransitRoute, StationRouteRelation
 
 # to avoid a namespace conflict when creating shapely MultiLineStrings in geopandas
 # before they are turned into Django GEOS MultiLineStrings later
@@ -63,7 +63,7 @@ TRIMET_URL = "http://developer.trimet.org/schedule/gtfs.zip"
 
 ALL_PILOT_CITY_URLS = [
     METRA_URL,
-    CTA_URL,
+    # CTA_URL,
     MTA_SUBWAY_URL,
     BRONX_BUS_URL,
     BROOKLYN_BUS_URL,
@@ -112,12 +112,14 @@ def get_gtfs_component_dfs(
     trips = feed.trips
     stops = feed.stops
     shapes = feed.shapes
+    stop_times = feed.stop_times
 
     gtfs_dataframe_dict = {
         "routes": routes,
         "trips": trips,
         "stops": stops,
         "shapes": shapes,
+        "stop_times": stop_times,
     }
     # Some systems have a "transfers.txt" file; others don't.
     # gtfs_kit will initialize the feed.transfers attribute as None if no such file exists
@@ -280,7 +282,45 @@ def ingest_transit_routes(geom_shapes: gpd.GeoDataFrame) -> None:
     print("Ingestion complete")
 
 
-def ingest_multiple_feeds(feed_url_list: list[str]) -> None:
+def ingest_stop_route_relation(
+    stops: pd.DataFrame, trips: pd.DataFrame, stop_times: pd.DataFrame
+):
+    """Ingest relationship between stops and routes"""
+
+    merged_df = pd.merge(trips, stop_times, on="trip_id", how="inner")
+    merged_df = pd.merge(merged_df, stops, on="stop_id", how="inner")
+
+    distinct_stop_routes_df = merged_df[
+        ["route_id", "stop_id", "city"]
+    ].drop_duplicates()
+
+    for row in distinct_stop_routes_df.itertuples():
+        try:
+            obs_route = TransitRoute.objects.filter(
+                city=row.city, route_id=row.route_id
+            ).first()
+            obs_route_id = obs_route.id
+            obs_station = TransitStation.objects.filter(
+                city=row.city, station_id=row.stop_id
+            ).first()
+            obs_station_id = obs_station.id
+            obj = StationRouteRelation(station_id=obs_station_id, route_id=obs_route_id)
+            obj.save()
+            print(
+                f"Ingestion route {row.route_id} - station {row.stop_id} relation succesful"
+            )
+        except Exception as e:
+            print(e)
+            print("Skipping observation")
+    print("Ingestion complete")
+
+
+def ingest_multiple_feeds(
+    feed_url_list: list[str],
+    ingest_stops: bool = True,
+    ingest_routes: bool = True,
+    ingest_stop_route: bool = True,
+) -> None:
     """
     Run the entire GTFS ingestion pipeline for multiple endpoint URLs.
     TODO: consider allowing this to take an arbitrary list of *args rather than
@@ -295,14 +335,26 @@ def ingest_multiple_feeds(feed_url_list: list[str]) -> None:
 
         stops = gtfs_df_dict["stops"]
         stops.loc[:, "city"] = city  # should be extraneous now
-        print("Preparing shapes of routes for upload... THIS COULD TAKE A FEW MINUTES.")
-        geom_shapes = handroll_multiline_routes(city, feed)
+        trips = gtfs_df_dict["trips"]
+        stop_times = gtfs_df_dict["stop_times"]
 
-        print(f"Starting ingestion of {city} {agency} stops into PostGIS...")
-        ingest_transit_stations(stops, url)
+        if ingest_stops:
+            print(f"Starting ingestion of {city} {agency} stops into PostGIS...")
+            ingest_transit_stations(stops, url)
 
-        print(f"Starting test ingestion of {city} {agency} routes into PostGIS...")
-        ingest_transit_routes(geom_shapes)
+        if ingest_routes:
+            print(
+                "Preparing shapes of routes for upload... THIS COULD TAKE A FEW MINUTES."
+            )
+            geom_shapes = handroll_multiline_routes(city, feed)
+            print(f"Starting test ingestion of {city} {agency} routes into PostGIS...")
+            ingest_transit_routes(geom_shapes)
+
+        if ingest_stop_route:
+            print(
+                f"Starting ingestion of {city} {agency} stops-routes relationship into PostGIS..."
+            )
+            ingest_stop_route_relation(stops, trips, stop_times)
 
         # TODO: Consider doing an ingestion of transfers.txt if it exists
         # TODO: Consider reading out stdout to a log for inspection of ingestion errors
@@ -311,7 +363,12 @@ def ingest_multiple_feeds(feed_url_list: list[str]) -> None:
 def run():
     """TODO: Build out into a script that gets GTFS feed for
     all three cities (all ten GTFS feeds), and ingests stops and routes for each"""
-    ingest_multiple_feeds(ALL_PILOT_CITY_URLS)
+    ingest_multiple_feeds(
+        ALL_PILOT_CITY_URLS,
+        ingest_stops=False,
+        ingest_routes=False,
+        ingest_stop_route=True,
+    )
 
 
 if __name__ == "__main__":
