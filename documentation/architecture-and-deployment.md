@@ -38,10 +38,14 @@ stations from Chicago's Metra system; it will be expanded out to ingest more kin
 of data in the coming days.
 
 ### Frontend
-To run the webserver (again make sure you have dependencies installed and `.env` up to date)
+To run the webserver locally (again make sure you have dependencies installed and `.env` up to date)
 
 Run:
 ```
 cd app/
 python -m manage runserver
 ```
+
+To deploy the production service, we are using heroku. 
+** Note: we applied for heroku education credits to deploy for free to heroku (this is a one time task)
+
