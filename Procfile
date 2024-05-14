@@ -1,1 +1,1 @@
-web: gunicorn geodjango.wsgi
+web: cd app && gunicorn geodjango.wsgi
