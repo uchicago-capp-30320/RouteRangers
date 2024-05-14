@@ -852,6 +852,9 @@ urllib3==2.2.1 ; python_version >= "3.11" and python_version < "4.0" \
     --hash=sha256:d0570876c61ab9e520d776c38acbbb5b05a776d3f9ff98a5c8fd5162a444cf19
 utm==0.7.0 ; python_version >= "3.11" and python_version < "4" \
     --hash=sha256:3c9a3650e98bb6eecec535418d0dfd4db8f88c8ceaca112a0ff0787e116566e2
+whitenoise==6.6.0 ; python_version >= "3.11" and python_version < "4.0" \
+    --hash=sha256:8998f7370973447fac1e8ef6e8ded2c5209a7b1f67c1012866dbcd09681c3251 \
+    --hash=sha256:b1f9db9bf67dc183484d760b99f4080185633136a273a03f6436034a41064146
 xyzservices==2024.4.0 ; python_version >= "3.11" and python_version < "4" \
     --hash=sha256:6a04f11487a6fb77d92a98984cd107fbd9157fd5e65f929add9c3d6e604ee88c \
     --hash=sha256:b83e48c5b776c9969fffcfff57b03d02b1b1cd6607a9d9c4e7f568b01ef47f4c
