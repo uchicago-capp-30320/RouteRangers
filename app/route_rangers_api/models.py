@@ -1,6 +1,5 @@
 from django.contrib.gis.db import models
-
-CITIES_CHOICES = {"CHI": "Chicago", "NYC": "New York", "PDX": "Portland"}
+from app.route_rangers_api.utils.city_mapping import CITIES_CHOICES
 
 #################################
 ###### DEMOGRAPHIC MODELS #######
@@ -12,16 +11,15 @@ class Demographics(models.Model):
     Class to represent demographic data pulled from the ACS Survey
     """
 
-    census_block = models.CharField(
-        max_length=64
-    )  # Check length of census block if its uniform to enforce it here
-    state = models.CharField(
-        max_length=64
-    )  # Check if it's worth to keep or if we should add a method
-    county = models.CharField(max_length=64)  # Same as above
-    median_income = models.IntegerField()
+    block_group = models.CharField(max_length=64)
+    census_tract = models.CharField(max_length=64)
+    state = models.CharField(max_length=64)
+    county = models.CharField(max_length=64)
+    median_income = models.IntegerField(
+        verbose_name="Median household income", null=True
+    )
     transportation_to_work = models.IntegerField(
-        verbose_name="Means of Transportation to Work Total"
+        verbose_name="Means of Transportation to Work Total", null=True
     )
     transportation_to_work_car = models.IntegerField(
         verbose_name="Means of Transportation to Work: Car", null=True
@@ -35,11 +33,35 @@ class Demographics(models.Model):
     transportation_to_work_subway = models.IntegerField(
         verbose_name="Means of Transportation to Work: subway", null=True
     )
-    work_commute_time = models.FloatField(verbose_name="Time of commute to work")
-    vehicles_available = models.IntegerField(null=True)
-    disability_status = models.IntegerField(
-        verbose_name="Number of people with disability", null=True
+    work_commute_time_less_15 = models.IntegerField(
+        verbose_name="N° of people that commute less than 15 minutes", null=True
     )
+    work_commute_time_15_29 = models.IntegerField(
+        verbose_name="N° of people that commute between 15 and 30 minutes", null=True
+    )
+    work_commute_time_30_44 = models.IntegerField(
+        verbose_name="N° of people that commute between 30 and 45 minutes", null=True
+    )
+    work_commute_time_45_59 = models.IntegerField(
+        verbose_name="N° of people that commute between 45 and 60 minutes", null=True
+    )
+    work_commute_time_60_89 = models.IntegerField(
+        verbose_name="N° of people that commute between 60 and 90 minutes", null=True
+    )
+    work_commute_time_over_90 = models.IntegerField(
+        verbose_name="N° of people that commute more than 90", null=True
+    )
+    population = models.IntegerField(null=True)
+
+    # geographic_delimitation = models.PolygonField(null=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["block_group", "census_tract", "county", "state"],
+                name="demographic_uniqueness",
+            )
+        ]
 
 
 #################################
@@ -110,6 +132,11 @@ class StationRouteRelation(models.Model):
 
     station = models.ForeignKey(TransitStation, on_delete=models.PROTECT)
     route = models.ForeignKey(TransitRoute, on_delete=models.PROTECT)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["station", "route"], name="station_route")
+        ]
 
 
 class RidershipRoute(models.Model):

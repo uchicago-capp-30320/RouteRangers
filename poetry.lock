@@ -373,6 +373,19 @@ files = [
 Django = ">=3.2"
 
 [[package]]
+name = "djhtml"
+version = "3.0.6"
+description = "Django/Jinja template indenter"
+optional = false
+python-versions = "*"
+files = [
+    {file = "djhtml-3.0.6.tar.gz", hash = "sha256:abfc4d7b4730432ca6a98322fbdf8ae9d6ba254ea57ba3759a10ecb293bc57de"},
+]
+
+[package.extras]
+dev = ["nox", "pre-commit"]
+
+[[package]]
 name = "fiona"
 version = "1.9.6"
 description = "Fiona reads and writes spatial data files"
@@ -1563,4 +1576,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "682bd01407bbfe95cd2ff0a93fca26b6ed3cbc457c7a9ac95e3f2460d1fb1aac"
+content-hash = "52fb0cdb85bf7ccfdd55ac97fb330775ebe850cf6008496286fc68bdb5804d2a"
