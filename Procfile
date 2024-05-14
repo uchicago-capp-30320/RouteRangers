@@ -1,1 +1,1 @@
-web: cd app && gunicorn geodjango.wsgi
+web: bash run.sh
