@@ -36,7 +36,11 @@ export function initializeMap(coordinates, stations, iconUrl, routes) {
 
   L.geoJSON(routes, {
     style: function (feature) {
-      return { color: '#' + feature.properties.color, weight: 3 };
+      return {
+        color: '#' + feature.properties.color,
+        weight: 3,
+        "opacity": .7
+      };
     },
     onEachFeature: function (feature, layer) {
       layer.bindPopup(feature.properties.route_name);

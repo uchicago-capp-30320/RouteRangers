@@ -50,12 +50,11 @@ def dashboard(request, city: str):
     stations = TransitStation.objects.values().filter(
         city=CITY_CONTEXT[city]["DB_Name"]
     )
-    # print(stations)
+
     lst_coords = [
         [point["location"].x, point["location"].y, point["station_name"]]
         for point in stations
     ]
-    print(lst_coords)
 
     context = {
         "City": CITY_CONTEXT[city]["CityName"],
