@@ -74,8 +74,8 @@ def dashboard(request, city: str):
         "stations": lst_coords,
         "csv": CITY_CONTEXT[city]["csv"],
         "lineplot": CITY_CONTEXT[city]["lineplot"],
-        'geojsonfilepath': static(CITY_CONTEXT[city]['geojsonfilepath'])
-        "routes": routes_json,
+        'geojsonfilepath': static(CITY_CONTEXT[city]['geojsonfilepath']),
+        "routes": routes_json
     }
     return render(request, "dashboard.html", context)
 
