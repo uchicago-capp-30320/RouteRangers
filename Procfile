@@ -1,1 +1,1 @@
-web: cd app && gunicorn --env DJANGO_SETTINGS_MODULE=app.geodjango.settings app.geodjango.wsgi
+web: gunicorn app.geodjango.wsgi
