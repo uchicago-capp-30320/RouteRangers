@@ -1,4 +1,4 @@
 pip install poetry
 poetry install
 cd app
-gunicorn geodjango.wsgi
+poetry run gunicorn geodjango.wsgi
