@@ -38,6 +38,16 @@
         <p class="inline">Map showing all transit routes in your city</p>
         <div id="map"></div>
         <script>src="{% static 'map.js' %}"</script>
+        <div id="map"></div>
+    <script type="module">
+      import { initializeMap } from "{% static 'map.js' %}";
+      var coordinates = {{ coordinates }};
+      var stations = {{ stations | safe }};
+      var iconUrl = "{% static 'images/map_pin.png' %}";
+      var routes = {{ routes | safe}};
+      // "safe" parameter needed to deal with escaped quotation marks in GeoJSON
+      initializeMap(coordinates, stations, iconUrl, routes);
+    </script>
         <script>
         </script>
     </div>
@@ -65,6 +75,7 @@
               </div>
               </div>
     </div>
+
 <script src="https://d3js.org/d3.v4.js"></script>
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
@@ -82,5 +93,3 @@
 
 
 {% endblock %}
-
-=======
