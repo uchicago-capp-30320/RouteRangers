@@ -158,7 +158,19 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 print(f"Base dir is: {BASE_DIR}")
-STATIC_ROOT = os.path.join(BASE_DIR, "/staticfiles")
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+STORAGES = {
+    # Enable WhiteNoise's GZip and Brotli compression of static assets:
+    # https://whitenoise.readthedocs.io/en/latest/django.html#add-compression-and-caching-support
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+# Don't store the original (un-hashed filename) version of static files, to reduce slug size:
+# https://whitenoise.readthedocs.io/en/latest/django.html#WHITENOISE_KEEP_ONLY_HASHED_FILES
+WHITENOISE_KEEP_ONLY_HASHED_FILES = True
 
 
 # Default primary key field type
