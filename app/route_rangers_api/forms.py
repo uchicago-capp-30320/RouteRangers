@@ -1,4 +1,7 @@
+# ask JP why we're importing like this instead of:
+# from django import forms
 from django.contrib.gis import forms
+
 
 MODES_OF_TRANIST = {
     "bus": "Bus",
@@ -42,19 +45,25 @@ QUESTIONS = {
 BOOL_CHOICES = ((True, "Yes"), (False, "No"))
 
 
-class RideSurvey(forms.Form):
-    # Page 1: Intro
+class RiderSurvey(forms.Form):
+    # Django example
+    # your_name = forms.CharField(label="Your name", max_length=100)
 
+    # Page 1: Intro
     frequent_transit = forms.ChoiceField(
-        label=QUESTIONS["p1"]["frequent_transit"], choices=BOOL_CHOICES
+        label=QUESTIONS["p1"]["frequent_transit"],
+        choices=BOOL_CHOICES,
+        widget=forms.RadioSelect,
     )
     car_owner = forms.ChoiceField(
-        label=QUESTIONS["p1"]["car_owner"], choices=BOOL_CHOICES
+        label=QUESTIONS["p1"]["car_owner"],
+        choices=BOOL_CHOICES,
+        widget=forms.RadioSelect,
     )
 
     # Page 2: Rider Trips
-    start_point = forms.PointField()
-    end_point = forms.PointField()
+    # start_point = forms.PointField()
+    # end_point = forms.PointField()
     trip_frequency = forms.MultipleChoiceField(label=QUESTIONS["p2"]["trip_frequency"])
     trip_time = forms.IntegerField(
         label=QUESTIONS["p2"]["trip_time"], min_value=0, widget=forms.NumberInput
@@ -66,15 +75,20 @@ class RideSurvey(forms.Form):
     )
 
     # Page 3: Transit Questions
-    satisfied = forms.ChoiceField(label=QUESTIONS["p3"]["satisfied"],
-                                  widget=forms.CheckboxInput, choices=SATISFIED)
-    transit_improvement = forms.MultipleChoiceField(label=QUESTIONS["p3"]["transit_improvement"],
-                                                    widget=forms.CheckboxSelectMultiple)
+    satisfied = forms.ChoiceField(
+        label=QUESTIONS["p3"]["satisfied"],
+        widget=forms.CheckboxInput,
+        choices=SATISFIED,
+    )
+    transit_improvement = forms.MultipleChoiceField(
+        label=QUESTIONS["p3"]["transit_improvement"],
+        widget=forms.CheckboxSelectMultiple,
+    )
 
     # Page 4: Car Questions
     car_question = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple)
 
-    # Page 5: Feedback
-    comment = forms.CharField(
-        label=QUESTIONS["p5"]["feedback"], widget=forms.Textarea, max_length=300
-    )
+    # # Page 5: Feedback
+    # comment = forms.CharField(
+    #     label=QUESTIONS["p5"]["feedback"], widget=forms.Textarea, max_length=300
+    # )

@@ -13,6 +13,7 @@ from django.templatetags.static import static
 
 from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT
 from route_rangers_api.models import TransitRoute, TransitStation
+from .forms import RiderSurvey
 
 import json
 
@@ -191,6 +192,15 @@ def dashboard(request, city: str):
 
 
 def survey(request, city: str):
+    if request.method == "POST":
+        form = RiderSurvey(request.POST)
+        if form.is_valid():
+            # Process the form data
+            # ...
+            return HttpResponseRedirect("/thanks/")
+    else:
+        form = RiderSurvey()
+
     context = {
         "City": CITY_CONTEXT[city]["CityName"],
         "City_NoSpace": city,
@@ -198,7 +208,8 @@ def survey(request, city: str):
         "policy_class": "cs-li-link ",
         "survey_class": "cs-li-link cs-active",
         "feedback_class": "cs-li-link",
-        "coordinates": CITY_CONTEXT[city]["Coordinates"],
+        "Coordinates": CITY_CONTEXT[city]["Coordinates"],
+        "form": form,
     }
     return render(request, "survey.html", context)
 
