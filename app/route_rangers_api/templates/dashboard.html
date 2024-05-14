@@ -37,9 +37,11 @@
   <script type="module">
     import { initializeMap } from "{% static 'map.js' %}";
     var coordinates = {{ coordinates }};
-    var stations = {{ stations }};
+    var stations = {{ stations | safe }};
     var iconUrl = "{% static 'images/map_pin.png' %}";
-    initializeMap(coordinates, stations, iconUrl);
+    var routes = {{ routes | safe}};
+    // "safe" parameter needed to deal with escaped quotation marks in GeoJSON
+    initializeMap(coordinates, stations, iconUrl, routes);
   </script>
 </div>
 
