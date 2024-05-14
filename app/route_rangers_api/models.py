@@ -11,7 +11,6 @@ class Demographics(models.Model):
     Class to represent demographic data pulled from the ACS Survey
     """
 
-    block_group = models.CharField(max_length=64)
     census_tract = models.CharField(max_length=64)
     state = models.CharField(max_length=64)
     county = models.CharField(max_length=64)
@@ -53,12 +52,12 @@ class Demographics(models.Model):
     )
     population = models.IntegerField(null=True)
 
-    # geographic_delimitation = models.PolygonField(null=True)
+    geographic_delimitation = models.PolygonField(null=True)
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["block_group", "census_tract", "county", "state"],
+                fields=["census_tract", "county", "state"],
                 name="demographic_uniqueness",
             )
         ]
