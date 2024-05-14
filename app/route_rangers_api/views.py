@@ -12,6 +12,10 @@ from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT
 from route_rangers_api.models import TransitRoute, TransitStation
 
 
+def test(request):
+    return HttpResponse("""This is a test route without any html/JS/statuc stuff""")
+
+
 def home(request):
     context = {"cities_class": "cs-li-link cs-active", "about_class": "cs-li-link"}
     return render(request, "cities.html", context)
