@@ -1,1 +1,1 @@
-web: pip install poetry && poetry install && cd app && poetry run gunicorn geodjango.wsgi
+web: pip install . && cd app && gunicorn geodjango.wsgi

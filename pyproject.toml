@@ -24,6 +24,7 @@ django-extensions = "^3.2.3"
 djhtml = "^3.0.6"
 gunicorn = "^22.0.0"
 whitenoise = "^6.6.0"
+poetry = "^1.8.3"
 
 [build-system]
 requires = ["poetry-core"]
