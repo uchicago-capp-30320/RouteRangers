@@ -12,13 +12,6 @@ from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT
 from route_rangers_api.models import TransitRoute, TransitStation
 
 
-def index(request):
-    return HttpResponse(
-        """This will be changed to a template for
-                         the routerangers index webpage"""
-    )
-
-
 def home(request):
     context = {"cities_class": "cs-li-link cs-active", "about_class": "cs-li-link"}
     return render(request, "cities.html", context)
