@@ -1,6 +1,7 @@
 import os
 import logging
 import requests
+import numpy as np
 import pandas as pd
 from typing import List, Dict
 from dotenv import load_dotenv
@@ -47,7 +48,7 @@ city_fips = {
     "chicago": {"state_fips": "17", "county_fips": ["031"]},
     "portland": {"state_fips": "41", "county_fips": ["051"]},
 }
-minutes_to_work = {
+min_to_work = {
     "work_commute_time_less_than_15": [
         "work_commute_time_00_to_04",
         "work_commute_time_05_to_09",
@@ -131,9 +132,9 @@ def clean_census_data(data: List[Dict]) -> pd.DataFrame:
         if col not in str_columns:
             df[col] = pd.to_numeric(df[col])
     # Build commute time windows
-    for new_column, old_columns in minutes_to_work.items():
+    for new_column, old_columns in min_to_work.items():
         df[new_column] = df[old_columns].sum(axis=1)
-    cols_to_drop = [col for sublist in minutes_to_work.values() for col in sublist]
+    cols_to_drop = [col for sublist in min_to_work.values() for col in sublist]
     df.drop(cols_to_drop, axis=1, inplace=True)
     # Clean values
     df["median_hhi_2022"] = df["median_hhi_2022"].mask(df["median_hhi_2022"] < 0)
@@ -156,27 +157,18 @@ def upload_census_data(city_df: pd.DataFrame) -> None:
             county=row["county"],
             census_tract=row["tract"],
             population=row["population"],
-            median_hhi_2022=row["median_hhi_2022"],
-            transportation_to_work_total=row["transportation_to_work_total"],
+            median_income=row["median_hhi_2022"],
+            transportation_to_work=row["transportation_to_work_total"],
             transportation_to_work_car=row["transportation_to_work_car"],
             transportation_to_work_public=row["transportation_to_work_public"],
             transportation_to_work_bus=row["transportation_to_work_bus"],
             transportation_to_work_subway=row["transportation_to_work_subway"],
-            work_commute_time_total=row["work_commute_time_total"],
-            work_commute_time_less_than_15=row["work_commute_time_less_than_15"],
-            work_commute_time_between_15_and_29=row[
-                "work_commute_time_between_15_and_29"
-            ],
-            work_commute_time_between_30_and_44=row[
-                "work_commute_time_between_30_and_44"
-            ],
-            work_commute_time_between_45_and_59=row[
-                "work_commute_time_between_45_and_59"
-            ],
-            work_commute_time_between_60_and_89=row[
-                "work_commute_time_between_60_and_89"
-            ],
-            work_commute_time_more_than_90=row["work_commute_time_more_than_90"],
+            work_commute_time_less_15=row["work_commute_time_less_than_15"],
+            work_commute_time_15_29=row["work_commute_time_between_15_and_29"],
+            work_commute_time_30_44=row["work_commute_time_between_30_and_44"],
+            work_commute_time_45_59=row["work_commute_time_between_45_and_59"],
+            work_commute_time_60_89=row["work_commute_time_between_60_and_89"],
+            work_commute_time_over_90=row["work_commute_time_more_than_90"],
         )
         obs.save()
 
@@ -190,7 +182,7 @@ def run():
     """
     Extracts US Census data and stores it in database.
     """
-    supported_cities = ["nyc", "chicago", "portland"]
+    supported_cities = ["portland", "chicago", "nyc"]
     for city in supported_cities:
         state_code = city_fips[city]["state_fips"]
         county_codes = city_fips[city]["county_fips"]
