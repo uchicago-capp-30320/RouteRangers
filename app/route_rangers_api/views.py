@@ -7,6 +7,9 @@ from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
 from django.core.serializers import serialize
+from django.templatetags.static import static
+
+
 
 from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT
 from route_rangers_api.models import TransitRoute, TransitStation
@@ -30,7 +33,7 @@ def about(request):
 
 def dashboard(request, city: str):
     # get num riders
-
+    print(city)
     # get num routes
     num_routes = TransitRoute.objects.filter(city=CITY_CONTEXT[city]["DB_Name"]).count()
 
@@ -59,10 +62,13 @@ def dashboard(request, city: str):
         [point["location"].x, point["location"].y, point["station_name"]]
         for point in stations
     ]
+    
+    city_name = CITY_CONTEXT[city]["CityName"]
 
     context = {
         "City": CITY_CONTEXT[city]["CityName"],
         "City_NoSpace": city,
+        "heatmaplabel": f"{city_name} Population Density",
         "TotalRiders": "104,749",
         "TotalRoutes": num_routes,
         "Commute": "40 Min",
@@ -72,7 +78,10 @@ def dashboard(request, city: str):
         "feedback_class": "cs-li-link",
         "coordinates": CITY_CONTEXT[city]["Coordinates"],
         "stations": lst_coords,
-        "routes": routes_json,
+        "csv": CITY_CONTEXT[city]["csv"],
+        "lineplot": CITY_CONTEXT[city]["lineplot"],
+        'geojsonfilepath': static(CITY_CONTEXT[city]['geojsonfilepath']),
+        "routes": routes_json
     }
     return render(request, "dashboard.html", context)
 
@@ -85,7 +94,7 @@ def survey(request, city: str):
         "policy_class": "cs-li-link ",
         "survey_class": "cs-li-link cs-active",
         "feedback_class": "cs-li-link",
-        "Coordinates": CITY_CONTEXT[city]["Coordinates"],
+        "coordinates": CITY_CONTEXT[city]["Coordinates"],
     }
     return render(request, "survey.html", context)
 
@@ -101,6 +110,6 @@ def responses(request, city: str):
         "policy_class": "cs-li-link ",
         "survey_class": "cs-li-link",
         "feedback_class": "cs-li-link cs-active",
-        "Coordinates": CITY_CONTEXT[city]["Coordinates"],
+        "coordinates": CITY_CONTEXT[city]["Coordinates"],
     }
     return render(request, "responses.html", context)
