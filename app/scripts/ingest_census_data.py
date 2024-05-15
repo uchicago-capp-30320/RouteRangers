@@ -91,7 +91,7 @@ def get_census_data(
     url = "https://api.census.gov/data/2022/acs/acs5"
     params = {
         "get": ",".join(variable_ids.keys()),
-        "for": "block group:*",
+        "for": "tract:*",
         "in": f"state:{state_code}+county:{county_code}",
         "key": CENSUS_API_KEY,
     }
