@@ -1,5 +1,5 @@
 from django.db.models import F
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404,redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.http import Http404
@@ -60,12 +60,12 @@ def dashboard(request, city: str):
 
 def survey_p1(request, city: str):
     if request.method == "POST":
-        form = RiderSurvey(request.POST)
+        form = RiderSurvey1(request.POST)
         if form.is_valid():
             # Process the form data
             # ...
             # Redirect to page 2
-            return redirect("/survey2/")
+            return redirect("survey_p2",city=city)
     else:
         form = RiderSurvey1()
 

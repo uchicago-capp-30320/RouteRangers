@@ -1,7 +1,8 @@
 # ask JP why we're importing like this instead of:
 # from django import forms
 from django.contrib.gis import forms
-
+from route_rangers_api.models import SurveyAnswer
+from django.forms import ModelForm
 
 MODES_OF_TRANIST = {
     "bus": "Bus",
@@ -70,58 +71,82 @@ QUESTIONS = {
 BOOL_CHOICES = ((True, "Yes"), (False, "No"))
 
 
-class RiderSurvey1(forms.Form):
-    # Page 1: Intro
-    frequent_transit = forms.ChoiceField(
-        label=QUESTIONS["p1"]["frequent_transit"],
-        choices=BOOL_CHOICES,
-        widget=forms.RadioSelect,
-    )
-    car_owner = forms.ChoiceField(
-        label=QUESTIONS["p1"]["car_owner"],
-        choices=BOOL_CHOICES,
-        widget=forms.RadioSelect,
-    )
+# class RiderSurvey1(forms.Form):
+#     # Page 1: Intro
+#     frequent_transit = forms.ChoiceField(
+#         label=QUESTIONS["p1"]["frequent_transit"],
+#         choices=BOOL_CHOICES,
+#         widget=forms.RadioSelect,
+#     )
+#     car_owner = forms.ChoiceField(
+#         label=QUESTIONS["p1"]["car_owner"],
+#         choices=BOOL_CHOICES,
+#         widget=forms.RadioSelect,
+#     )
 
 
-class RiderSurvey2(forms.Form):
-    # Page 2: Rider Trips
-    trip_frequency = forms.MultipleChoiceField(
-        label=QUESTIONS["p2"]["trip_freq"], choices=TRIP_FREQ, widget=forms.RadioSelect
-    )
+# class RiderSurvey2(forms.Form):
+#     # Page 2: Rider Trips
+#     trip_frequency = forms.MultipleChoiceField(
+#         label=QUESTIONS["p2"]["trip_freq"], choices=TRIP_FREQ, widget=forms.RadioSelect
+#     )
 
-    trip_tod = forms.MultipleChoiceField(
-        label=QUESTIONS["p2"]["trip_tod"], choices=TIME_OF_DAY, widget=forms.RadioSelect
-    )
+#     trip_tod = forms.MultipleChoiceField(
+#         label=QUESTIONS["p2"]["trip_tod"], choices=TIME_OF_DAY, widget=forms.RadioSelect
+#     )
 
-    trip_time = forms.IntegerField(
-        label=QUESTIONS["p2"]["trip_time"], min_value=0, widget=forms.NumberInput
-    )
-    modes_of_transit = forms.MultipleChoiceField(
-        label=QUESTIONS["p2"]["modes_of_transit"],
-        choices=MODES_OF_TRANIST,
-        widget=forms.CheckboxSelectMultiple,
-    )
+#     trip_time = forms.IntegerField(
+#         label=QUESTIONS["p2"]["trip_time"], min_value=0, widget=forms.NumberInput
+#     )
+#     modes_of_transit = forms.MultipleChoiceField(
+#         label=QUESTIONS["p2"]["modes_of_transit"],
+#         choices=MODES_OF_TRANIST,
+#         widget=forms.CheckboxSelectMultiple,
+#     )
 
+# class RiderSurvey3(forms.Form):
+#     # Page 3: Transit Questions
+#     satisfied = forms.ChoiceField(
+#         label=QUESTIONS["p3"]["satisfied"],
+#         choices=SATISFIED,
+#         widget=forms.RadioSelect,
+#     )
+#     transit_improvement = forms.MultipleChoiceField(
+#         label=QUESTIONS["p3"]["transit_improvement"],
+#         choices=TRANSIT_IMPROVEMENT,
+#         widget=forms.RadioSelect,
+#     )
 
-class RiderSurvey3(forms.Form):
-    # Page 3: Transit Questions
-    satisfied = forms.ChoiceField(
-        label=QUESTIONS["p3"]["satisfied"],
-        choices=SATISFIED,
-        widget=forms.RadioSelect,
-    )
+# class RiderSurvey4(forms.Form):
+#     # Page 4: Car Questions
+#     switch_to_transit = forms.MultipleChoiceField(
+#         label=QUESTIONS["p4"]["switch"],
+#         choices=SWITCH_TO_TRANSIT,
+#         widget=forms.RadioSelect(attrs={"class": "small-text"}),
+#     )
+
+class RiderSurvey1(ModelForm):
+    class Meta:
+        model = SurveyAnswer
+        fields = ["frequent_transit","car_owner"]
+
+class RiderSurvey2(ModelForm):
+    class Meta:
+        model = SurveyAnswer
+        fields = ["trip_frequency","trip_tod","trip_time","modes_of_transit"]
+
+class RiderSurvey3(ModelForm):
     transit_improvement = forms.MultipleChoiceField(
         label=QUESTIONS["p3"]["transit_improvement"],
         choices=TRANSIT_IMPROVEMENT,
         widget=forms.RadioSelect,
     )
 
+    class Meta:
+        model = SurveyAnswer
+        fields = ["satisfied"]
 
-class RiderSurvey4(forms.Form):
-    # Page 4: Car Questions
-    switch_to_transit = forms.MultipleChoiceField(
-        label=QUESTIONS["p4"]["switch"],
-        choices=SWITCH_TO_TRANSIT,
-        widget=forms.RadioSelect(attrs={"class": "small-text"}),
-    )
+class RiderSurvey4(ModelForm):
+    class Meta:
+        model = SurveyAnswer
+        fields = ["switch_to_transit"]
