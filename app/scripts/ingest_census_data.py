@@ -1,5 +1,4 @@
 import os
-import sys
 import logging
 import requests
 import pandas as pd
@@ -72,28 +71,6 @@ minutes_to_work = {
 ###############################################################################
 # HELPER FUNCTIONS
 ###############################################################################
-
-
-def validate_command_line_argument(supported_cities: List[str]) -> str:
-    """
-    Validates command line use and extracts argument.
-
-    Inputs:
-        available_cities (List[str]): List of cities that are valid inputs.
-
-    Returns:
-      A string referring to the city to pull data from.
-    """
-    # Check syntax
-    if len(sys.argv) != 2:
-        sys.exit("Retype as 'python3 ingest_census_data.py <city_name>'")
-    # Check city
-    city = sys.argv[1]
-    if city not in supported_cities:
-        sys.exit(
-            "Unsupported city." + f" Available options: {', '.join(supported_cities)}"
-        )
-    return city
 
 
 def get_census_data(
@@ -177,7 +154,7 @@ def upload_census_data(city_df: pd.DataFrame) -> None:
         obs = Demographics(
             state=row["state"],
             county=row["county"],
-            census_block=row["tract"],
+            census_tract=row["tract"],
             population=row["population"],
             median_hhi_2022=row["median_hhi_2022"],
             transportation_to_work_total=row["transportation_to_work_total"],
@@ -213,7 +190,6 @@ def run():
     """
     Extracts US Census data and stores it in database.
     """
-    # city = validate_command_line_argument(list(city_fips.keys()))
     supported_cities = ["nyc", "chicago", "portland"]
     for city in supported_cities:
         state_code = city_fips[city]["state_fips"]
@@ -222,10 +198,6 @@ def run():
             raw_data = get_census_data(variable_ids, state_code, county_code)
             clean_data = clean_census_data(raw_data)
             upload_census_data(clean_data)
-            # if clean_data:
-            #     upload_census_data(clean_data)
-            # else:
-            #     logging.warning(f"No data found for county {state_code}{county_code}.")
         logging.info(f"{city.upper()} data ingested.")
 
 
