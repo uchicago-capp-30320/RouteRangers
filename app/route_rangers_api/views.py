@@ -15,7 +15,7 @@ import json
 
 
 def test(request):
-    return HttpResponse("""This is a test route without any html/JS/statuc stuff""")
+    return HttpResponse("""This is a test route without any html/JS/static stuff""")
 
 
 def home(request):
