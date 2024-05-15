@@ -1,10 +1,10 @@
 import os
 import logging
 import requests
-import numpy as np
 import pandas as pd
 from typing import List, Dict
 from dotenv import load_dotenv
+from django.db import IntegrityError
 from route_rangers_api.models import Demographics
 
 ###############################################################################
@@ -152,29 +152,33 @@ def upload_census_data(city_df: pd.DataFrame) -> None:
         Nothing.
     """
     for _, row in city_df.iterrows():
-        obs = Demographics(
-            state=row["state"],
-            county=row["county"],
-            census_tract=row["tract"],
-            population=row["population"],
-            median_income=row["median_hhi_2022"],
-            transportation_to_work=row["transportation_to_work_total"],
-            transportation_to_work_car=row["transportation_to_work_car"],
-            transportation_to_work_public=row["transportation_to_work_public"],
-            transportation_to_work_bus=row["transportation_to_work_bus"],
-            transportation_to_work_subway=row["transportation_to_work_subway"],
-            work_commute_time_less_15=row["work_commute_time_less_than_15"],
-            work_commute_time_15_29=row["work_commute_time_between_15_and_29"],
-            work_commute_time_30_44=row["work_commute_time_between_30_and_44"],
-            work_commute_time_45_59=row["work_commute_time_between_45_and_59"],
-            work_commute_time_60_89=row["work_commute_time_between_60_and_89"],
-            work_commute_time_over_90=row["work_commute_time_more_than_90"],
-        )
-        obs.save()
+        try:
+            obs = Demographics(
+                state=row["state"],
+                county=row["county"],
+                census_tract=row["tract"],
+                population=row["population"],
+                transportation_to_work=row["transportation_to_work_total"],
+                transportation_to_work_car=row["transportation_to_work_car"],
+                transportation_to_work_public=row["transportation_to_work_public"],
+                transportation_to_work_bus=row["transportation_to_work_bus"],
+                transportation_to_work_subway=row["transportation_to_work_subway"],
+                work_commute_time_less_15=row["work_commute_time_less_than_15"],
+                work_commute_time_15_29=row["work_commute_time_between_15_and_29"],
+                work_commute_time_30_44=row["work_commute_time_between_30_and_44"],
+                work_commute_time_45_59=row["work_commute_time_between_45_and_59"],
+                work_commute_time_60_89=row["work_commute_time_between_60_and_89"],
+                work_commute_time_over_90=row["work_commute_time_more_than_90"],
+            )
+            if row["median_hhi_2022"] >= 0:
+                obs.median_income = row["median_hhi_2022"]
+            obs.save()
+        except IntegrityError as e:
+            print(f"Duplicated observation {obs} in model: {e}")
 
 
 ###############################################################################
-# MAIN
+# RUN
 ###############################################################################
 
 
