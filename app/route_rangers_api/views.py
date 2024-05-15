@@ -10,7 +10,6 @@ from django.core.serializers import serialize
 from django.templatetags.static import static
 
 
-
 from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT
 from route_rangers_api.models import TransitRoute, TransitStation
 
@@ -62,7 +61,7 @@ def dashboard(request, city: str):
         [point["location"].x, point["location"].y, point["station_name"]]
         for point in stations
     ]
-    
+
     city_name = CITY_CONTEXT[city]["CityName"]
 
     context = {
@@ -80,8 +79,8 @@ def dashboard(request, city: str):
         "stations": lst_coords,
         "csv": CITY_CONTEXT[city]["csv"],
         "lineplot": CITY_CONTEXT[city]["lineplot"],
-        'geojsonfilepath': static(CITY_CONTEXT[city]['geojsonfilepath']),
-        "routes": routes_json
+        "geojsonfilepath": static(CITY_CONTEXT[city]["geojsonfilepath"]),
+        "routes": routes_json,
     }
     return render(request, "dashboard.html", context)
 
