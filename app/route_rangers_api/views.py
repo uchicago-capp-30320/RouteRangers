@@ -58,11 +58,13 @@ def dashboard(request, city: str):
         [point["location"].x, point["location"].y, point["station_name"]]
         for point in stations
     ]
+    
+    city_name = CITY_CONTEXT[city]["CityName"]
 
     context = {
         "City": CITY_CONTEXT[city]["CityName"],
         "City_NoSpace": city,
-        "heatmaplabel": f"{CITY_CONTEXT[city]["CityName"]} Population Density",
+        "heatmaplabel": f"{city_name} Population Density",
         "TotalRiders": "104,749",
         "TotalRoutes": num_routes,
         "Commute": "40 Min",

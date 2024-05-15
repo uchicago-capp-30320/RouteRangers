@@ -14,8 +14,8 @@ function heatmaps(filepath, coordinates, label) {
 
     var heatmap = L.map('heatmap').setView(coordinates, 9);
     var geojson;
-
-    var tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    
+    var tiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         maxZoom: 19,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(heatmap);
@@ -101,7 +101,7 @@ function heatmaps(filepath, coordinates, label) {
     info.update = function (props) {
         this._div.innerHTML = `<h4>${label}</h4>` + (props ?
             '<b>' + props.name + '</b><br />' + props.density + ' people / mi<sup>2</sup>'
-            : 'Hover over a census block');
+            : 'Hover over a census tract');
     };
 
     info.addTo(heatmap);
