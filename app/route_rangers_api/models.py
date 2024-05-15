@@ -232,7 +232,23 @@ class SurveyAnswer(models.Model):
     response_date = models.DateTimeField("Survey response date", auto_now_add=True)
     city = models.CharField(max_length=30)
     survey = models.ForeignKey(Survey, on_delete=models.PROTECT)
-    answers = models.JSONField()
+
+    #Page 1:
+    BOOL_CHOICES = {"Y": "Yes", "N": "No"}
+    frequent_transit = models.CharField(choices=BOOL_CHOICES)
+    car_owner = models.CharField()
+    #Page 2:
+
+    # trip_frequency = 
+    # trip_tod = 
+    # trip_time = 
+    # modes_of_transit = 
+    # #Page 3:
+
+    # satisfied = 
+    # transit_improvement =
+    # #Page 4:
+    # switch_to_transit =
 
 
 class PlannedRoute(models.Model):
