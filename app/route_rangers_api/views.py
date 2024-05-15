@@ -13,7 +13,7 @@ from django.templatetags.static import static
 
 from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT
 from route_rangers_api.models import TransitRoute, TransitStation
-from .forms import RiderSurvey
+from .forms import RiderSurvey1, RiderSurvey2, RiderSurvey3, RiderSurvey4
 
 import json
 
@@ -191,15 +191,16 @@ def dashboard(request, city: str):
     return render(request, "dashboard.html", context)
 
 
-def survey(request, city: str):
+def survey_p1(request, city: str):
     if request.method == "POST":
         form = RiderSurvey(request.POST)
         if form.is_valid():
             # Process the form data
             # ...
-            return HttpResponseRedirect("/thanks/")
+            # Redirect to page 2
+            return redirect("/survey2/")
     else:
-        form = RiderSurvey()
+        form = RiderSurvey1()
 
     context = {
         "City": CITY_CONTEXT[city]["CityName"],
@@ -212,6 +213,75 @@ def survey(request, city: str):
         "form": form,
     }
     return render(request, "survey.html", context)
+
+
+def survey_p2(request, city: str):
+    if request.method == "POST":
+        form = RiderSurvey2(request.POST)
+        if form.is_valid():
+            # Process the form data
+            # ...
+            return HttpResponseRedirect("/thanks/")
+    else:
+        form = RiderSurvey2()
+
+    context = {
+        "City": CITY_CONTEXT[city]["CityName"],
+        "City_NoSpace": city,
+        "cities_class": "cs-li-link",
+        "policy_class": "cs-li-link ",
+        "survey_class": "cs-li-link cs-active",
+        "feedback_class": "cs-li-link",
+        "Coordinates": CITY_CONTEXT[city]["Coordinates"],
+        "form": form,
+    }
+    return render(request, "survey_p2.html", context)
+
+
+def survey_p3(request, city: str):
+    if request.method == "POST":
+        form = RiderSurvey3(request.POST)
+        if form.is_valid():
+            # Process the form data
+            # ...
+            return HttpResponseRedirect("/thanks/")
+    else:
+        form = RiderSurvey3()
+
+    context = {
+        "City": CITY_CONTEXT[city]["CityName"],
+        "City_NoSpace": city,
+        "cities_class": "cs-li-link",
+        "policy_class": "cs-li-link ",
+        "survey_class": "cs-li-link cs-active",
+        "feedback_class": "cs-li-link",
+        "Coordinates": CITY_CONTEXT[city]["Coordinates"],
+        "form": form,
+    }
+    return render(request, "survey_p3.html", context)
+
+
+def survey_p4(request, city: str):
+    if request.method == "POST":
+        form = RiderSurvey4(request.POST)
+        if form.is_valid():
+            # Process the form data
+            # ...
+            return HttpResponseRedirect("/thanks/")
+    else:
+        form = RiderSurvey4()
+
+    context = {
+        "City": CITY_CONTEXT[city]["CityName"],
+        "City_NoSpace": city,
+        "cities_class": "cs-li-link",
+        "policy_class": "cs-li-link ",
+        "survey_class": "cs-li-link cs-active",
+        "feedback_class": "cs-li-link",
+        "Coordinates": CITY_CONTEXT[city]["Coordinates"],
+        "form": form,
+    }
+    return render(request, "survey_p4.html", context)
 
 
 def responses(request, city: str):

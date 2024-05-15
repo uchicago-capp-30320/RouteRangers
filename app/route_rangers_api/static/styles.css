@@ -24,7 +24,6 @@ margin: 0;
 }
 
 /* footer */
-
 #cs-footer {
 width: 100%;
 /* prevents padding and border from affecting height and width */
@@ -582,3 +581,8 @@ color: var(--bodyTextColor);
        display:flex;
        font-size-adjust: 2rem;
        }
+
+/* Add this for smaller text */
+.small-text {
+  font-size: 0.875rem;  /* Adjust the font size as needed */
+}       
