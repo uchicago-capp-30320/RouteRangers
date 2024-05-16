@@ -66,12 +66,14 @@ def get_census_tract_geom(state: str, county: str, tract: str):
     return coordinates
 
 
-def ingest_city_census_tract_geo(update = True):
+def ingest_city_census_tract_geo(update=True):
     """
     Ingest the geometry of the census tract
     """
     if update:
-        obs_to_update = Demographics.objects.filter(geographic_delimitation__isnull=True)
+        obs_to_update = Demographics.objects.filter(
+            geographic_delimitation__isnull=True
+        )
     else:
         obs_to_update = Demographics.objects.all()
 
@@ -92,8 +94,10 @@ def ingest_city_census_tract_geo(update = True):
         except Exception as e:
             print(f"observation {state}-{county}-{tract} not updated: {e}")
 
+
 def run():
     ingest_city_census_tract_geo()
+
 
 if __name__ == "__main__":
     run()
