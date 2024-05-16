@@ -76,18 +76,24 @@ def ingest_city_census_tract_geo(update = True):
         obs_to_update = Demographics.objects.all()
 
     for obs in obs_to_update:
-        # Retrieve parameters for query
-        state = obs.state
-        county = obs.county
-        tract = obs.census_tract
+        try:
+            # Retrieve parameters for query
+            state = obs.state
+            county = obs.county
+            tract = obs.census_tract
 
-        # Obtain and update geometry
-        coordinates = get_census_tract_geom(state, county, tract)
-        geom = Polygon(coordinates)
+            # Obtain and update geometry
+            coordinates = get_census_tract_geom(state, county, tract)
+            geom = Polygon(coordinates)
 
-        obs.geographic_delimitation = geom
-        obs.save()
+            obs.geographic_delimitation = geom
+            print(f"observation {state}-{county}-{tract} updated")
+            obs.save()
+        except Exception as e:
+            print(f"observation {state}-{county}-{tract} not updated: {e}")
+
+def run():
+    ingest_city_census_tract_geo()
 
 if __name__ == "__main__":
-    coords = get_census_tract_geom("17", "031", "340600")
-    print(coords)
+    run()
