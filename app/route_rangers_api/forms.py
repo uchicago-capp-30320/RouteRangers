@@ -2,7 +2,8 @@
 # from django import forms
 from django.contrib.gis import forms
 from route_rangers_api.models import SurveyAnswer
-from django.forms import ModelForm
+from django.forms import ModelForm, RadioSelect
+from django.utils.translation import gettext_lazy as _
 
 MODES_OF_TRANIST = {
     "bus": "Bus",
@@ -70,7 +71,6 @@ QUESTIONS = {
 
 BOOL_CHOICES = ((True, "Yes"), (False, "No"))
 
-
 # class RiderSurvey1(forms.Form):
 #     # Page 1: Intro
 #     frequent_transit = forms.ChoiceField(
@@ -129,11 +129,22 @@ class RiderSurvey1(ModelForm):
     class Meta:
         model = SurveyAnswer
         fields = ["frequent_transit","car_owner"]
+        labels = {
+            "frequent_transit": _(QUESTIONS["p1"]["frequent_transit"]),
+            "car_owner": _(QUESTIONS["p1"]["car_owner"])
+        }
+
 
 class RiderSurvey2(ModelForm):
     class Meta:
         model = SurveyAnswer
         fields = ["trip_frequency","trip_tod","trip_time","modes_of_transit"]
+        labels = {
+            "trip_frequency": _(QUESTIONS["p2"]["trip_freq"]),
+            "trip_tod": _(QUESTIONS["p2"]["trip_tod"]),
+            "trip_time": _(QUESTIONS["p2"]["trip_time"]),
+            "modes_of_transit": _(QUESTIONS["p2"]["modes_of_transit"])
+        }
 
 class RiderSurvey3(ModelForm):
     transit_improvement = forms.MultipleChoiceField(
@@ -145,8 +156,14 @@ class RiderSurvey3(ModelForm):
     class Meta:
         model = SurveyAnswer
         fields = ["satisfied"]
+        labels = {
+            "trip_frequency": _(QUESTIONS["p3"]["satisfied"]),
+        }
 
 class RiderSurvey4(ModelForm):
     class Meta:
         model = SurveyAnswer
         fields = ["switch_to_transit"]
+        labels = {
+            "trip_frequency": _(QUESTIONS["p4"]["switch"]),
+        }
