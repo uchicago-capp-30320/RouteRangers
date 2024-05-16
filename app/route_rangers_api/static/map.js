@@ -1,14 +1,15 @@
 export function initializeMap(coordinates, stations, iconUrl, routes) {
-  // Initialize the map at center of city
-  var map = L.map('map').setView(coordinates, 13);
 
   // Add a tile layer
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  var tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     // attribution:
     //   'Map data (c) <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, (c) <a href="https://carto.com/attribution">CARTO</a>',
     subdomains: 'abcd',
     maxZoom: 19,
-  }).addTo(map);
+  });
+
+  // Initialize the map at center of city
+  var map = L.map('map', { layers: [tileLayer] }).setView(coordinates, 13);
 
   // Custom icon for smaller markers
   var smallIcon = L.icon({
@@ -34,7 +35,7 @@ export function initializeMap(coordinates, stations, iconUrl, routes) {
 
   // Add routes layer
 
-  L.geoJSON(routes, {
+  var routesJSON = L.geoJSON(routes, {
     style: function (feature) {
       return {
         color: '#' + feature.properties.color,
@@ -45,6 +46,19 @@ export function initializeMap(coordinates, stations, iconUrl, routes) {
     onEachFeature: function (feature, layer) {
       layer.bindPopup(feature.properties.route_name);
     }
-  }).addTo(map);
+  });
+
+  map.addLayer(routesJSON);
+
+  var baseMaps = {
+    "base": tileLayer
+  }
+
+  var overlayMaps = {
+    "Stations": markers,
+    "Routes": routesJSON
+  };
+
+  var layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
 
 };
