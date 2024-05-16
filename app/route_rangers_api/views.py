@@ -10,7 +10,6 @@ from django.core.serializers import serialize
 from django.templatetags.static import static
 
 
-
 from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT
 from route_rangers_api.models import TransitRoute, TransitStation
 from .forms import RiderSurvey1, RiderSurvey2, RiderSurvey3, RiderSurvey4
@@ -54,11 +53,11 @@ def dashboard(request, city: str):
     #     city=CITY_CONTEXT[city]["DB_Name"]
     # )
 
-    # lst_coords = [
-    #     [point["location"].x, point["location"].y, point["station_name"]]
-    #     for point in stations
-    # ]
-    
+    lst_coords = [
+        [point["location"].x, point["location"].y, point["station_name"]]
+        for point in stations
+    ]
+
     city_name = CITY_CONTEXT[city]["CityName"]
 
 
@@ -183,10 +182,10 @@ def dashboard(request, city: str):
         # "stations": lst_coords,
         "csv": CITY_CONTEXT[city]["csv"],
         "lineplot": CITY_CONTEXT[city]["lineplot"],
-        'geojsonfilepath': static(CITY_CONTEXT[city]['geojsonfilepath']),
+        "geojsonfilepath": static(CITY_CONTEXT[city]["geojsonfilepath"]),
         'heatmapscale':  [0, 10, 20, 50, 100, 200, 500, 1000],
         'heat_map_variable': 'density'
-        # "routes": routes_json
+        # "routes": routes_json,
     }
     return render(request, "dashboard.html", context)
 

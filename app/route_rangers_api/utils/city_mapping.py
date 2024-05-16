@@ -1,4 +1,3 @@
-
 CITIES_CHOICES = {"CHI": "Chicago", "NYC": "New York", "PDX": "Portland"}
 
 # keying by "nospace" naming scheme b/c that is how things will be passed via the url
@@ -12,7 +11,7 @@ CITY_CONTEXT = {
         "DB_Name": "CHI",
         "csv": "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/barplot_change_data.csv",
         "lineplot": "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_connectedscatter.csv",
-        'geojsonfilepath': 'ChicagoCensus.geojson'
+        "geojsonfilepath": "ChicagoCensus.geojson",
     },
     "NewYork": {
         "CityName": "New York",
@@ -21,7 +20,7 @@ CITY_CONTEXT = {
         "DB_Name": "NYC",
         "csv": "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/barplot_change_data.csv",
         "lineplot": "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_connectedscatter.csv",
-        'geojsonfilepath': "newyork.geojson"
+        "geojsonfilepath": "newyork.geojson",
     },
     "Portland": {
         "CityName": "Portland",
@@ -30,6 +29,6 @@ CITY_CONTEXT = {
         "DB_Name": "PDX",
         "csv": "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/barplot_change_data.csv",
         "lineplot": "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_connectedscatter.csv",
-        'geojsonfilepath': 'portland.geojson'
+        "geojsonfilepath": "portland.geojson",
     },
 }
