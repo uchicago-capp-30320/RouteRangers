@@ -23,12 +23,12 @@ logging.basicConfig(
 # Mappings
 variable_ids = {
     "B01001_001E": "population",
-    "B19013_001E": "median_hhi_2022",
-    "B08301_001E": "transportation_to_work_total",
-    "B08301_002E": "transportation_to_work_car",
-    "B08301_010E": "transportation_to_work_public",
-    "B08301_011E": "transportation_to_work_bus",
-    "B08301_012E": "transportation_to_work_subway",
+    "B19013_001E": "med_hhi_2022",
+    "B08301_001E": "transp_to_work_total",
+    "B08301_002E": "transp_to_work_car",
+    "B08301_010E": "transp_to_work_public",
+    "B08301_011E": "transp_to_work_bus",
+    "B08301_012E": "transp_to_work_subway",
     "B08303_001E": "work_commute_time_total",
     "B08303_002E": "work_commute_time_00_to_04",
     "B08303_003E": "work_commute_time_05_to_09",
@@ -44,29 +44,29 @@ variable_ids = {
     "B08303_013E": "work_commute_time_90_or_more",
 }
 city_fips = {
-    "nyc": {"state_fips": "36", "county_fips": ["061", "047", "081", "005", "085"]},
-    "chicago": {"state_fips": "17", "county_fips": ["031"]},
-    "portland": {"state_fips": "41", "county_fips": ["051"]},
+    "nyc": {"state": "36", "county": ["061", "047", "081", "005", "085"]},
+    "chicago": {"state": "17", "county": ["031"]},
+    "portland": {"state": "41", "county": ["051"]},
 }
 min_to_work = {
-    "work_commute_time_less_than_15": [
+    "work_commute_time_less_15": [
         "work_commute_time_00_to_04",
         "work_commute_time_05_to_09",
         "work_commute_time_10_to_14",
     ],
-    "work_commute_time_between_15_and_29": [
+    "work_commute_time_15_29": [
         "work_commute_time_15_to_19",
         "work_commute_time_20_to_24",
         "work_commute_time_25_to_29",
     ],
-    "work_commute_time_between_30_and_44": [
+    "work_commute_time_30_44": [
         "work_commute_time_30_to_34",
         "work_commute_time_35_to_39",
         "work_commute_time_40_to_44",
     ],
-    "work_commute_time_between_45_and_59": ["work_commute_time_45_to_59"],
-    "work_commute_time_between_60_and_89": ["work_commute_time_60_to_89"],
-    "work_commute_time_more_than_90": ["work_commute_time_90_or_more"],
+    "work_commute_time_45_59": ["work_commute_time_45_to_59"],
+    "work_commute_time_60_89": ["work_commute_time_60_to_89"],
+    "work_commute_time_over_90": ["work_commute_time_90_or_more"],
 }
 
 ###############################################################################
@@ -137,7 +137,7 @@ def clean_census_data(data: List[Dict]) -> pd.DataFrame:
     cols_to_drop = [col for sublist in min_to_work.values() for col in sublist]
     df.drop(cols_to_drop, axis=1, inplace=True)
     # Clean values
-    df["median_hhi_2022"] = df["median_hhi_2022"].mask(df["median_hhi_2022"] < 0)
+    df["med_hhi_2022"] = df["med_hhi_2022"].mask(df["med_hhi_2022"] < 0)
     return df
 
 
@@ -158,20 +158,20 @@ def upload_census_data(city_df: pd.DataFrame) -> None:
                 county=row["county"],
                 census_tract=row["tract"],
                 population=row["population"],
-                transportation_to_work=row["transportation_to_work_total"],
-                transportation_to_work_car=row["transportation_to_work_car"],
-                transportation_to_work_public=row["transportation_to_work_public"],
-                transportation_to_work_bus=row["transportation_to_work_bus"],
-                transportation_to_work_subway=row["transportation_to_work_subway"],
-                work_commute_time_less_15=row["work_commute_time_less_than_15"],
-                work_commute_time_15_29=row["work_commute_time_between_15_and_29"],
-                work_commute_time_30_44=row["work_commute_time_between_30_and_44"],
-                work_commute_time_45_59=row["work_commute_time_between_45_and_59"],
-                work_commute_time_60_89=row["work_commute_time_between_60_and_89"],
-                work_commute_time_over_90=row["work_commute_time_more_than_90"],
+                transportation_to_work=row["transp_to_work_total"],
+                transportation_to_work_car=row["transp_to_work_car"],
+                transportation_to_work_public=row["transp_to_work_public"],
+                transportation_to_work_bus=row["transp_to_work_bus"],
+                transportation_to_work_subway=row["transp_to_work_subway"],
+                work_commute_time_less_15=row["work_commute_time_less_15"],
+                work_commute_time_15_29=row["work_commute_time_15_and_29"],
+                work_commute_time_30_44=row["work_commute_time_30_and_44"],
+                work_commute_time_45_59=row["work_commute_time_45_and_59"],
+                work_commute_time_60_89=row["work_commute_time_60_and_89"],
+                work_commute_time_over_90=row["work_commute_time_over_90"],
             )
-            if row["median_hhi_2022"] >= 0:
-                obs.median_income = row["median_hhi_2022"]
+            if row["med_hhi_2022"] >= 0:
+                obs.median_income = row["med_hhi_2022"]
             obs.save()
         except IntegrityError as e:
             print(f"Duplicated observation {obs} in model: {e}")
@@ -188,8 +188,8 @@ def run():
     """
     supported_cities = ["portland", "chicago", "nyc"]
     for city in supported_cities:
-        state_code = city_fips[city]["state_fips"]
-        county_codes = city_fips[city]["county_fips"]
+        state_code = city_fips[city]["state"]
+        county_codes = city_fips[city]["county"]
         for county_code in county_codes:
             raw_data = get_census_data(variable_ids, state_code, county_code)
             clean_data = clean_census_data(raw_data)
