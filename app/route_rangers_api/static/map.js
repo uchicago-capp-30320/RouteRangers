@@ -5,7 +5,8 @@ export function initializeMap(coordinates, stations, iconUrl, routes) {
     // attribution:
     //   'Map data (c) <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, (c) <a href="https://carto.com/attribution">CARTO</a>',
     subdomains: 'abcd',
-    maxZoom: 19,
+    minZoom: 8,
+    maxZoom: 17,
   });
 
   // Initialize the map at center of city
@@ -19,7 +20,7 @@ export function initializeMap(coordinates, stations, iconUrl, routes) {
   });
 
   var markers = L.markerClusterGroup({
-    disableClusteringAtZoom: 16
+    disableClusteringAtZoom: 15
   });
 
   for (var i = 0; i < stations.length; i++) {
@@ -54,7 +55,7 @@ export function initializeMap(coordinates, stations, iconUrl, routes) {
   function updateRouteWidth() {
     var zoom = map.getZoom();
     routesJSON.eachLayer(function (layer) {
-      layer.setStyle({ weight: zoom / 5 });
+      layer.setStyle({ weight: (zoom / 4) - 1 });
     });
   }
   map.on("zoom", updateRouteWidth);
