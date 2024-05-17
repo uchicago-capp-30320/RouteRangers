@@ -24,6 +24,10 @@ from route_rangers_api.forms import (
 import json
 
 
+def test(request):
+    return HttpResponse("""This is a test route without any html/JS/static stuff""")
+
+
 def home(request):
     context = {"cities_class": "cs-li-link cs-active", "about_class": "cs-li-link"}
     return render(request, "cities.html", context)
