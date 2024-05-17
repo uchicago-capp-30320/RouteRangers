@@ -1,5 +1,5 @@
 CITIES_CHOICES = {"CHI": "Chicago", "NYC": "New York", "PDX": "Portland"}
-
+CITIES_CHOICES_SURVEY = {"Chicago":"CHI","NewYork":"NYC","Portland":"PDX"}
 # keying by "nospace" naming scheme b/c that is how things will be passed via the url
 # TODO this should probably be turned into a dataclass
 

@@ -8,13 +8,17 @@ from django.views import generic
 from django.utils import timezone
 from django.core.serializers import serialize
 from django.templatetags.static import static
+import uuid
+import pdb
 
-
-from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT
-from route_rangers_api.models import TransitRoute, TransitStation
-from .forms import RiderSurvey1, RiderSurvey2, RiderSurvey3, RiderSurvey4
-
-import json
+from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT, CITIES_CHOICES_SURVEY
+from route_rangers_api.models import TransitRoute, TransitStation, SurveyAnswer
+from route_rangers_api.forms import (
+    RiderSurvey1,
+    RiderSurvey2,
+    RiderSurvey3,
+    RiderSurvey4,
+)
 
 
 def home(request):
@@ -83,56 +87,52 @@ def dashboard(request, city: str):
 
 
 def survey_p1(request, city):
-    url = "2"
+    url = ""
+    #Gen unique user id with uuid
+    request.session["uuid"] = str(uuid.uuid4())
+    print(request.method)
     if request.method == "POST":
-        form = RiderSurvey1(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect(url)
+        # # create new object
+        city_survey = CITIES_CHOICES_SURVEY[str(city)]
+        print(f"City passed to obs:{city_survey}")
+        survey_answer = SurveyAnswer(user_id=request.session["uuid"], city=city_survey)
+        update_survey = RiderSurvey1(request.POST,instance=survey_answer)
+        # update and save
+        update_survey.save()
+        print("survey answer", survey_answer)
+        url = "2"
+        return redirect(url)
     else:
         form = RiderSurvey1()
 
-    context = {
-        "City": CITY_CONTEXT[city]["CityName"],
-        "City_NoSpace": city,
-        "cities_class": "cs-li-link",
-        "policy_class": "cs-li-link ",
-        "survey_class": "cs-li-link cs-active",
-        "feedback_class": "cs-li-link",
-        "Coordinates": CITY_CONTEXT[city]["Coordinates"],
-        "form": form,
-        "url": url,
-    }
+    
+    context = get_city_context(city,form,url)
 
     return render(request, "survey.html", context)
 
 
 def survey_p2(request, city: str):
-    url = "3"
+    url = "2"
+    print(request.method)
     if request.method == "POST":
         form = RiderSurvey2(request.POST)
         if form.is_valid():
+            # return survey answer object
+            # get
+            # update and save
             form.save()
             return redirect(url)
     else:
         form = RiderSurvey2()
 
-    context = {
-        "City": CITY_CONTEXT[city]["CityName"],
-        "City_NoSpace": city,
-        "cities_class": "cs-li-link",
-        "policy_class": "cs-li-link ",
-        "survey_class": "cs-li-link cs-active",
-        "feedback_class": "cs-li-link",
-        "Coordinates": CITY_CONTEXT[city]["Coordinates"],
-        "form": form,
-        "url": url,
-    }
+    context = get_city_context(city,form,url)
+
     return render(request, "survey_p2.html", context)
 
 
 def survey_p3(request, city: str):
     url = "4"
+    print(request.method)
     if request.method == "POST":
         form = RiderSurvey3(request.POST)
         if form.is_valid():
@@ -141,22 +141,13 @@ def survey_p3(request, city: str):
     else:
         form = RiderSurvey3()
 
-    context = {
-        "City": CITY_CONTEXT[city]["CityName"],
-        "City_NoSpace": city,
-        "cities_class": "cs-li-link",
-        "policy_class": "cs-li-link ",
-        "survey_class": "cs-li-link cs-active",
-        "feedback_class": "cs-li-link",
-        "Coordinates": CITY_CONTEXT[city]["Coordinates"],
-        "form": form,
-        "url": url,
-    }
+    context = get_city_context(city,form,url)
     return render(request, "survey_p3.html", context)
 
 
 def survey_p4(request, city: str):
     url = "thanks"
+    print(request.method)
     if request.method == "POST":
         form = RiderSurvey4(request.POST)
         if form.is_valid():
@@ -165,6 +156,13 @@ def survey_p4(request, city: str):
     else:
         form = RiderSurvey4()
 
+    context = get_city_context(city,form,url)
+    return render(request, "survey_p4.html", context)
+
+
+def thanks(request, city: str):
+    url = "thanks"
+
     context = {
         "City": CITY_CONTEXT[city]["CityName"],
         "City_NoSpace": city,
@@ -173,10 +171,9 @@ def survey_p4(request, city: str):
         "survey_class": "cs-li-link cs-active",
         "feedback_class": "cs-li-link",
         "Coordinates": CITY_CONTEXT[city]["Coordinates"],
-        "form": form,
         "url": url,
     }
-    return render(request, "survey_p4.html", context)
+    return render(request, "thanks.html", context)
 
 
 def responses(request, city: str):
@@ -193,3 +190,18 @@ def responses(request, city: str):
         "coordinates": CITY_CONTEXT[city]["Coordinates"],
     }
     return render(request, "responses.html", context)
+
+
+def get_city_context(city,form,url):
+    context = {
+        "City": CITY_CONTEXT[city]["CityName"],
+        "City_NoSpace": city,
+        "cities_class": "cs-li-link",
+        "policy_class": "cs-li-link ",
+        "survey_class": "cs-li-link cs-active",
+        "feedback_class": "cs-li-link",
+        "Coordinates": CITY_CONTEXT[city]["Coordinates"],
+        "form": form,
+        "url": url,
+    }
+    return context
