@@ -1,5 +1,13 @@
 from django.contrib.gis.db import models
-from app.route_rangers_api.utils.city_mapping import CITIES_CHOICES
+from app.route_rangers_api.utils.city_mapping import (
+    CITIES_CHOICES,
+    TRIP_FREQ,
+    MODES_OF_TRANIST,
+    SWITCH_TO_TRANSIT,
+    TIME_OF_DAY,
+    BOOL_CHOICES,
+    SATISFIED,
+)
 
 #################################
 ###### DEMOGRAPHIC MODELS #######
@@ -218,9 +226,8 @@ class Survey(models.Model):
     Class that represents surveys deployed
     """
 
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=64, primary_key=True)
     created_at = models.DateTimeField("Created at", auto_now_add=True)
-    questionnaire = models.JSONField()
 
 
 class SurveyAnswer(models.Model):
@@ -228,11 +235,29 @@ class SurveyAnswer(models.Model):
     Class that represents answers to surveys
     """
 
-    user_id = models.CharField(max_length=30)
+    user_id = models.CharField(max_length=128, primary_key=True)
     response_date = models.DateTimeField("Survey response date", auto_now_add=True)
-    city = models.CharField(max_length=30)
-    survey = models.ForeignKey(Survey, on_delete=models.PROTECT)
-    answers = models.JSONField()
+    city = models.CharField(max_length=30, choices=CITIES_CHOICES)
+
+    # Page 1:
+    frequent_transit = models.IntegerField(choices=BOOL_CHOICES, null=True)
+    car_owner = models.IntegerField(choices=BOOL_CHOICES, null=True)
+
+    # Page 2:
+    trip_frequency = models.IntegerField(choices=TRIP_FREQ, null=True)
+    trip_tod = models.IntegerField(choices=TIME_OF_DAY, null=True)
+    trip_time = models.IntegerField(null=True)
+    modes_of_transit = models.IntegerField(choices=MODES_OF_TRANIST, null=True)
+
+    # Page 3:
+    satisfied = models.IntegerField(choices=SATISFIED, null=True)
+    transit_improvement_service = models.IntegerField(choices=BOOL_CHOICES, null=True)
+    transit_improvement_schedule = models.IntegerField(choices=BOOL_CHOICES, null=True)
+    transit_improvement_transfers = models.IntegerField(choices=BOOL_CHOICES, null=True)
+    transit_improvement_safety = models.IntegerField(choices=BOOL_CHOICES, null=True)
+
+    # Page 4:
+    switch_to_transit = models.IntegerField(choices=SWITCH_TO_TRANSIT, null=True)
 
 
 class PlannedRoute(models.Model):
@@ -243,3 +268,5 @@ class PlannedRoute(models.Model):
     user_id = models.CharField(max_length=30)
     response_date = models.DateTimeField("Survey response date", auto_now_add=True)
     route = models.LineStringField()
+    starting_point = models.PointField(null=True)
+    end_point = models.PointField(null=True)
