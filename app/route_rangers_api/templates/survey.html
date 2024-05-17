@@ -12,7 +12,7 @@
     {% endblock %}
     {% block survey %}
     <div class="survey-block"></div>
-        <form method="post" action="{{url}}">
+        <form method="post">
             {% csrf_token %}
             {{ form }}
             <div style="text-align: right;">
