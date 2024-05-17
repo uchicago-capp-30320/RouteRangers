@@ -8,6 +8,7 @@ from django.views import generic
 from django.utils import timezone
 from django.core.serializers import serialize
 from django.templatetags.static import static
+from django.contrib.gis.geos import GEOSGeometry, MultiLineString, LineString
 
 import uuid
 
@@ -41,23 +42,31 @@ def dashboard(request, city: str):
     # get commute
 
     # get paths
-    # routes = TransitRoute.objects.filter(city=CITY_CONTEXT[city]["DB_Name"])  # .values(
-    # MultiLineString needs to be serialized into a GeoJson object for Leaflet to
-    # work with it.
-    # to serialize into GeoJson, need to get out entire Django model object, not just
-    # the .values("geo_representation", "route_name", "color")
-    # with .values() you get "AttributeError: 'dict' has no component 'meta'"
-    # routes_json = serialize(
-    #     "geojson",
-    #     routes,
-    #     geometry_field="geo_representation",
-    #     fields=("route_name", "color"),
-    # )
+    routes = TransitRoute.objects.filter(city=CITY_CONTEXT[city]["DB_Name"])
+    # reduce load time and data transfer size by overwriting model attribute
+    TOLERANCE = 0.00005
+    for route in routes:
+        simple_geo_representation = route.geo_representation.simplify(
+            tolerance=TOLERANCE, preserve_topology=True
+        )
+        # simplify() might alter the GEOS type; can't allow that
+        if isinstance(simple_geo_representation, LineString):
+            simple_geo_representation = MultiLineString(simple_geo_representation)
+        route.geo_representation = simple_geo_representation
 
-    # # # stations
-    # stations = TransitStation.objects.values().filter(
-    #     city=CITY_CONTEXT[city]["DB_Name"]
-    # )
+    routes_json = serialize(
+        "geojson",
+        routes,
+        geometry_field="geo_representation",
+        fields=("route_name", "color"),
+    )
+
+    # stations
+    # TODO: consider passing these in with serialized geoJSON instead of
+    # creating lst_coords separately
+    stations = TransitStation.objects.values().filter(
+        city=CITY_CONTEXT[city]["DB_Name"]
+    )
 
     lst_coords = [
         [point["location"].x, point["location"].y, point["station_name"]]
