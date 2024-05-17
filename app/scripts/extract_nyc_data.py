@@ -64,7 +64,6 @@ def make_request(url: str, params: Dict, session: Callable = None) -> Response:
 def extract_daily_data(
     dataset: str, date: datetime.datetime, app_token=DATA_PORTAL_APP_TOKEN
 ) -> List:
-
     # 1. Extract parameters
     url = DATASETS[dataset]["URL"]
     obs_level = DATASETS[dataset]["OBS_LEVEL"]
