@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import sys
 
 load_dotenv()
 
@@ -105,6 +106,10 @@ DATABASES = {
         "HOST": DB_HOST,
     },
 }
+
+# Covers regular testing and django-coverage
+if "test" in sys.argv or "test_coverage" in sys.argv:
+    DATABASES["default"]["ENGINE"] = "django.db.backends.sqlite3"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
