@@ -41,7 +41,7 @@ class ExtractGTFS(TestCase):
 
     def test_get_gtfs_component_dfs_metra(self):
         # Metra feed has neither transfers.txt nor geometrizable routes
-        feed_city, _ , feed = self.metra_feed
+        feed_city, _, feed = self.metra_feed
         components_dict = get_gtfs_component_dfs(feed_city, feed)
         components = components_dict.keys()
         assert "routes" in components
@@ -53,7 +53,7 @@ class ExtractGTFS(TestCase):
 
     def test_get_gtfs_component_dfs_cta(self):
         """TODO: refactor this so it is DRY"""
-        feed_city, _ , feed = self.cta_feed
+        feed_city, _, feed = self.cta_feed
         components_dict = get_gtfs_component_dfs(feed_city, feed)
         components = components_dict.keys()
         assert "routes" in components
