@@ -8,12 +8,16 @@ from django.views import generic
 from django.utils import timezone
 from django.core.serializers import serialize
 from django.templatetags.static import static
-
+from django.contrib.gis.geos import GEOSGeometry, MultiLineString, LineString
 
 from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT
 from route_rangers_api.models import TransitRoute, TransitStation
 
 import json
+
+
+def test(request):
+    return HttpResponse("""This is a test route without any html/JS/static stuff""")
 
 
 def home(request):
@@ -35,12 +39,18 @@ def dashboard(request, city: str):
     # get commute
 
     # get paths
-    routes = TransitRoute.objects.filter(city=CITY_CONTEXT[city]["DB_Name"])  # .values(
-    # MultiLineString needs to be serialized into a GeoJson object for Leaflet to
-    # work with it.
-    # to serialize into GeoJson, need to get out entire Django model object, not just
-    # the .values("geo_representation", "route_name", "color")
-    # with .values() you get "AttributeError: 'dict' has no component 'meta'"
+    routes = TransitRoute.objects.filter(city=CITY_CONTEXT[city]["DB_Name"])
+    # reduce load time and data transfer size by overwriting model attribute
+    TOLERANCE = 0.00005
+    for route in routes:
+        simple_geo_representation = route.geo_representation.simplify(
+            tolerance=TOLERANCE, preserve_topology=True
+        )
+        # simplify() might alter the GEOS type; can't allow that
+        if isinstance(simple_geo_representation, LineString):
+            simple_geo_representation = MultiLineString(simple_geo_representation)
+        route.geo_representation = simple_geo_representation
+
     routes_json = serialize(
         "geojson",
         routes,
@@ -49,6 +59,8 @@ def dashboard(request, city: str):
     )
 
     # stations
+    # TODO: consider passing these in with serialized geoJSON instead of
+    # creating lst_coords separately
     stations = TransitStation.objects.values().filter(
         city=CITY_CONTEXT[city]["DB_Name"]
     )
