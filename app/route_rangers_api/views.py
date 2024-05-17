@@ -10,11 +10,14 @@ from django.core.serializers import serialize
 from django.templatetags.static import static
 from django.contrib.gis.geos import GEOSGeometry, MultiLineString, LineString
 
-
 from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT
 from route_rangers_api.models import TransitRoute, TransitStation
 
 import json
+
+
+def test(request):
+    return HttpResponse("""This is a test route without any html/JS/static stuff""")
 
 
 def home(request):
