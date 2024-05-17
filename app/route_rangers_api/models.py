@@ -240,51 +240,51 @@ class SurveyAnswer(models.Model):
     city = models.CharField(max_length=30)
     survey = models.ForeignKey(Survey, on_delete=models.PROTECT)
 
-    #Page 1:
+    # Page 1:
     BOOL_CHOICES = {"Y": "Yes", "N": "No"}
     frequent_transit = models.CharField(choices=BOOL_CHOICES)
     car_owner = models.CharField(choices=BOOL_CHOICES)
-    #Page 2:
+    # Page 2:
     TRIP_FREQ = {
-    "daily": "Everyday",
-    "weekdays": "Weekdays",
-    "weekends": "Weekends",
-    "few_week": "A few times per week",
-    "few_month": "A few times per month",
-    "few_year": "A few times per year",
+        "daily": "Everyday",
+        "weekdays": "Weekdays",
+        "weekends": "Weekends",
+        "few_week": "A few times per week",
+        "few_month": "A few times per month",
+        "few_year": "A few times per year",
     }
     trip_frequency = models.CharField(choices=TRIP_FREQ)
 
     TIME_OF_DAY = {"peak": "Peak commute hours", "day": "Daytime", "night": "Nighttime"}
-    trip_tod = models.CharField(choices = TIME_OF_DAY)
+    trip_tod = models.CharField(choices=TIME_OF_DAY)
     trip_time = models.IntegerField()
 
     MODES_OF_TRANIST = {
-    "bus": "Bus",
-    "train": "Train",
-    "car": "Car",
-    "bike": "Bike",
-    "walking": "Walking",
-    "rideshare": "Rideshare",
-}
+        "bus": "Bus",
+        "train": "Train",
+        "car": "Car",
+        "bike": "Bike",
+        "walking": "Walking",
+        "rideshare": "Rideshare",
+    }
 
     modes_of_transit = models.CharField(choices=MODES_OF_TRANIST)
-    #Page 3:
+    # Page 3:
     SATISFIED = {"1": 1, "2": 2, "3": 3, "4": 4, "5": 5}
     satisfied = models.CharField(choices=SATISFIED)
 
-    transit_improvement_service = models.CharField(choices = BOOL_CHOICES)
-    transit_improvement_schedule = models.CharField(choices = BOOL_CHOICES)
-    transit_improvement_transfers = models.CharField(choices = BOOL_CHOICES)
-    transit_improvement_safety = models.CharField(choices = BOOL_CHOICES)
-    #Page 4:
+    transit_improvement_service = models.CharField(choices=BOOL_CHOICES)
+    transit_improvement_schedule = models.CharField(choices=BOOL_CHOICES)
+    transit_improvement_transfers = models.CharField(choices=BOOL_CHOICES)
+    transit_improvement_safety = models.CharField(choices=BOOL_CHOICES)
+    # Page 4:
     SWITCH_TO_TRANSIT = {
-    "stops": "There are stops near you",
-    "schedule": "There are many scheduled departures",
-    "length": "It doesn't take significantly longer than driving",
-    "seats": "There are enough seats for all riders",
-    "safe": "It feels safe at the station and onboard",
-    "cost": "It will save me money",
+        "stops": "There are stops near you",
+        "schedule": "There are many scheduled departures",
+        "length": "It doesn't take significantly longer than driving",
+        "seats": "There are enough seats for all riders",
+        "safe": "It feels safe at the station and onboard",
+        "cost": "It will save me money",
     }
     switch_to_transit = models.CharField(choices=SWITCH_TO_TRANSIT)
 

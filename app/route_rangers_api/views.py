@@ -9,10 +9,16 @@ from django.utils import timezone
 from django.core.serializers import serialize
 from django.templatetags.static import static
 
+import uuid
 
 from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT
-from route_rangers_api.models import TransitRoute, TransitStation
-from .forms import RiderSurvey1, RiderSurvey2, RiderSurvey3, RiderSurvey4
+from route_rangers_api.models import TransitRoute, TransitStation, SurveyAnswer
+from route_rangers_api.forms import (
+    RiderSurvey1,
+    RiderSurvey2,
+    RiderSurvey3,
+    RiderSurvey4,
+)
 
 import json
 
@@ -192,11 +198,17 @@ def dashboard(request, city: str):
 
 def survey_p1(request, city):
     url = "2"
+    request.session["uuid"] = str(uuid.uuid4())
     if request.method == "POST":
         form = RiderSurvey1(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect(url)
+        # if form.is_valid():
+        # create new object
+        survey_answer = SurveyAnswer(user_id=request.session["uuid"], city=city)
+        # update and save
+        survey_answer = form.save(instance=survey_answer)
+        print("survey answer", survey_answer)
+        survey_answer.save()
+        return redirect(url)
     else:
         form = RiderSurvey1()
 
@@ -220,6 +232,9 @@ def survey_p2(request, city: str):
     if request.method == "POST":
         form = RiderSurvey2(request.POST)
         if form.is_valid():
+            # return survey answer object
+            # get
+            # update and save
             form.save()
             return redirect(url)
     else:
@@ -285,6 +300,22 @@ def survey_p4(request, city: str):
         "url": url,
     }
     return render(request, "survey_p4.html", context)
+
+
+def thanks(request, city: str):
+    url = "thanks"
+
+    context = {
+        "City": CITY_CONTEXT[city]["CityName"],
+        "City_NoSpace": city,
+        "cities_class": "cs-li-link",
+        "policy_class": "cs-li-link ",
+        "survey_class": "cs-li-link cs-active",
+        "feedback_class": "cs-li-link",
+        "Coordinates": CITY_CONTEXT[city]["Coordinates"],
+        "url": url,
+    }
+    return render(request, "thanks.html", context)
 
 
 def responses(request, city: str):
