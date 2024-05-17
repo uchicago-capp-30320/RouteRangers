@@ -1,5 +1,5 @@
 from django.db.models import F
-from django.shortcuts import render, get_object_or_404,redirect
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.http import Http404, JsonResponse
@@ -191,14 +191,13 @@ def dashboard(request, city: str):
     return render(request, "dashboard.html", context)
 
 
-def survey_p1(request, city: str):
+def survey_p1(request, city):
+    url = "2"
     if request.method == "POST":
         form = RiderSurvey1(request.POST)
         if form.is_valid():
-            # Process the form data
-            # ...
-            # Redirect to page 2
-            return redirect("survey_p2",city=city)
+            form.save()
+            return redirect(url)
     else:
         form = RiderSurvey1()
 
@@ -211,17 +210,19 @@ def survey_p1(request, city: str):
         "feedback_class": "cs-li-link",
         "Coordinates": CITY_CONTEXT[city]["Coordinates"],
         "form": form,
+        "url": url,
     }
+
     return render(request, "survey.html", context)
 
 
 def survey_p2(request, city: str):
+    url = "3"
     if request.method == "POST":
         form = RiderSurvey2(request.POST)
         if form.is_valid():
-            # Process the form data
-            # ...
-            return HttpResponseRedirect("/thanks/")
+            form.save()
+            return redirect(url)
     else:
         form = RiderSurvey2()
 
@@ -234,17 +235,18 @@ def survey_p2(request, city: str):
         "feedback_class": "cs-li-link",
         "Coordinates": CITY_CONTEXT[city]["Coordinates"],
         "form": form,
+        "url": url,
     }
     return render(request, "survey_p2.html", context)
 
 
 def survey_p3(request, city: str):
+    url = "4"
     if request.method == "POST":
         form = RiderSurvey3(request.POST)
         if form.is_valid():
-            # Process the form data
-            # ...
-            return HttpResponseRedirect("/thanks/")
+            form.save()
+            return redirect(url)
     else:
         form = RiderSurvey3()
 
@@ -257,17 +259,18 @@ def survey_p3(request, city: str):
         "feedback_class": "cs-li-link",
         "Coordinates": CITY_CONTEXT[city]["Coordinates"],
         "form": form,
+        "url": url,
     }
     return render(request, "survey_p3.html", context)
 
 
 def survey_p4(request, city: str):
+    url = "thanks"
     if request.method == "POST":
         form = RiderSurvey4(request.POST)
         if form.is_valid():
-            # Process the form data
-            # ...
-            return HttpResponseRedirect("/thanks/")
+            form.save()
+            return redirect(url)
     else:
         form = RiderSurvey4()
 
@@ -280,6 +283,7 @@ def survey_p4(request, city: str):
         "feedback_class": "cs-li-link",
         "Coordinates": CITY_CONTEXT[city]["Coordinates"],
         "form": form,
+        "url": url,
     }
     return render(request, "survey_p4.html", context)
 

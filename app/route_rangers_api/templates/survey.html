@@ -11,11 +11,15 @@
     {% block map %}
     {% endblock %}
     {% block survey %}
-    <form action="/survey/" method="post">
-        {% csrf_token %}
-        {{ form }}
-        <input type="submit" value="Next">
-    </form>
+    <div class="survey-block"></div>
+        <form method="post" action="{{url}}">
+            {% csrf_token %}
+            {{ form }}
+            <div style="text-align: right;">
+                <button type="submit" style="margin-top: 25px;">Next</button>
+            </div>
+        </form>
+    </div>
     {% endblock %}
 
 {% endblock %}
