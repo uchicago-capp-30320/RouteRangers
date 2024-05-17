@@ -198,6 +198,8 @@ def dashboard(request, city: str):
 
 def survey_p1(request, city):
     url = "2"
+    #url = ""
+    #Gen unique user id with uuid
     request.session["uuid"] = str(uuid.uuid4())
     if request.method == "POST":
         form = RiderSurvey1(request.POST)
@@ -207,22 +209,12 @@ def survey_p1(request, city):
         # update and save
         survey_answer = form.save(instance=survey_answer)
         print("survey answer", survey_answer)
-        survey_answer.save()
-        return redirect(url)
+        return redirect(reverse("app:survey_p2", kwargs={"city": city}))
     else:
         form = RiderSurvey1()
 
-    context = {
-        "City": CITY_CONTEXT[city]["CityName"],
-        "City_NoSpace": city,
-        "cities_class": "cs-li-link",
-        "policy_class": "cs-li-link ",
-        "survey_class": "cs-li-link cs-active",
-        "feedback_class": "cs-li-link",
-        "Coordinates": CITY_CONTEXT[city]["Coordinates"],
-        "form": form,
-        "url": url,
-    }
+    
+    context = get_city_context(city,form)
 
     return render(request, "survey.html", context)
 
@@ -236,21 +228,12 @@ def survey_p2(request, city: str):
             # get
             # update and save
             form.save()
-            return redirect(url)
+            return redirect(reverse("app:survey_p2", kwargs={"city": city}))
     else:
         form = RiderSurvey2()
 
-    context = {
-        "City": CITY_CONTEXT[city]["CityName"],
-        "City_NoSpace": city,
-        "cities_class": "cs-li-link",
-        "policy_class": "cs-li-link ",
-        "survey_class": "cs-li-link cs-active",
-        "feedback_class": "cs-li-link",
-        "Coordinates": CITY_CONTEXT[city]["Coordinates"],
-        "form": form,
-        "url": url,
-    }
+    context = get_city_context(city,form)
+
     return render(request, "survey_p2.html", context)
 
 
@@ -264,17 +247,7 @@ def survey_p3(request, city: str):
     else:
         form = RiderSurvey3()
 
-    context = {
-        "City": CITY_CONTEXT[city]["CityName"],
-        "City_NoSpace": city,
-        "cities_class": "cs-li-link",
-        "policy_class": "cs-li-link ",
-        "survey_class": "cs-li-link cs-active",
-        "feedback_class": "cs-li-link",
-        "Coordinates": CITY_CONTEXT[city]["Coordinates"],
-        "form": form,
-        "url": url,
-    }
+    context = get_city_context(city,form)
     return render(request, "survey_p3.html", context)
 
 
@@ -288,17 +261,7 @@ def survey_p4(request, city: str):
     else:
         form = RiderSurvey4()
 
-    context = {
-        "City": CITY_CONTEXT[city]["CityName"],
-        "City_NoSpace": city,
-        "cities_class": "cs-li-link",
-        "policy_class": "cs-li-link ",
-        "survey_class": "cs-li-link cs-active",
-        "feedback_class": "cs-li-link",
-        "Coordinates": CITY_CONTEXT[city]["Coordinates"],
-        "form": form,
-        "url": url,
-    }
+    context = get_city_context(city,form)
     return render(request, "survey_p4.html", context)
 
 
@@ -332,3 +295,17 @@ def responses(request, city: str):
         "coordinates": CITY_CONTEXT[city]["Coordinates"],
     }
     return render(request, "responses.html", context)
+
+
+def get_city_context(city,form):
+    context = {
+        "City": CITY_CONTEXT[city]["CityName"],
+        "City_NoSpace": city,
+        "cities_class": "cs-li-link",
+        "policy_class": "cs-li-link ",
+        "survey_class": "cs-li-link cs-active",
+        "feedback_class": "cs-li-link",
+        "Coordinates": CITY_CONTEXT[city]["Coordinates"],
+        "form": form,
+    }
+    return context
