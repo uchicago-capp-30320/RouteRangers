@@ -9,7 +9,6 @@ from django.utils import timezone
 from django.core.serializers import serialize
 from django.templatetags.static import static
 import uuid
-import pdb
 
 from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT, CITIES_CHOICES_SURVEY
 from route_rangers_api.models import TransitRoute, TransitStation, SurveyAnswer
@@ -86,15 +85,15 @@ def dashboard(request, city: str):
     return render(request, "dashboard.html", context)
 
 
-def survey_p1(request, city):
+def survey_p1(request, city:str):
     #url = ""
     #Gen unique user id with uuid
     request.session["uuid"] = str(uuid.uuid4())
-    print(request.method)
+    user_id = request.session["uuid"]
+    print(f'user_id:{request.session["uuid"]} - page 1')
     if request.method == "POST":
-        # # create new object
-        city_survey = CITIES_CHOICES_SURVEY[str(city)]
-        print(f"City passed to obs:{city_survey}")
+        # create new object
+        city_survey = CITIES_CHOICES_SURVEY[city]
         survey_answer = SurveyAnswer(user_id=request.session["uuid"], city=city_survey)
         update_survey = RiderSurvey1(request.POST,instance=survey_answer)
         # update and save
@@ -110,17 +109,15 @@ def survey_p1(request, city):
     return render(request, "survey.html", context)
 
 
-def survey_p2(request, city: str):
-
+def survey_p2(request, city: str,user_id:str=None):
     print(request.method)
+    user_id = request.session.get("uuid") 
+    print(f'user_id:{request.session["uuid"]} - page 1')
     if request.method == "POST":
-        form = RiderSurvey2(request.POST)
-        if form.is_valid():
-            # return survey answer object
-            # get
-            # update and save
-            form.save()
-            return redirect(reverse("app:survey_p2", kwargs={"city": city}))
+        survey_answer = SurveyAnswer.objects.get(user_id=user_id)
+        update_survey = RiderSurvey2(request.POST,instance=survey_answer)
+        update_survey.save()
+        return redirect(reverse("app:survey_p3", kwargs={"city": city}))
     else:
         form = RiderSurvey2()
 
@@ -130,28 +127,29 @@ def survey_p2(request, city: str):
 
 
 def survey_p3(request, city: str):
-    url = "4"
+    user_id = request.session.get("uuid") 
     print(request.method)
     if request.method == "POST":
-        form = RiderSurvey3(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect(url)
+        survey_answer = SurveyAnswer.objects.get(user_id=user_id)
+        update_survey = RiderSurvey3(request.POST,instance=survey_answer)
+        update_survey.save()
+        return redirect(reverse("app:survey_p4", kwargs={"city": city}))
     else:
         form = RiderSurvey3()
 
     context = get_city_context(city,form)
+
     return render(request, "survey_p3.html", context)
 
 
 def survey_p4(request, city: str):
-    url = "thanks"
+    user_id = request.session.get("uuid") 
     print(request.method)
     if request.method == "POST":
-        form = RiderSurvey4(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect(url)
+        survey_answer = SurveyAnswer.objects.get(user_id=user_id)
+        update_survey = RiderSurvey4(request.POST,instance=survey_answer)
+        update_survey.save()
+        return redirect(reverse("app:thanks"))
     else:
         form = RiderSurvey4()
 

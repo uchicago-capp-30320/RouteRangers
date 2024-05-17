@@ -99,17 +99,17 @@ class RiderSurvey2(ModelForm):
 
 
 class RiderSurvey3(ModelForm):
-    transit_improvement = forms.MultipleChoiceField(
-        label=QUESTIONS["p3"]["transit_improvement"],
-        choices=TRANSIT_IMPROVEMENT,
-        widget=forms.RadioSelect,
-    )
+    # transit_improvement = forms.MultipleChoiceField(
+    #     label=QUESTIONS["p3"]["transit_improvement"],
+    #     choices=TRANSIT_IMPROVEMENT,
+    #     widget=forms.RadioSelect,
+    # )
 
     class Meta:
         model = SurveyAnswer
         fields = ["satisfied"]
         labels = {
-            "trip_frequency": _(QUESTIONS["p3"]["satisfied"]),
+            "satisfied": _(QUESTIONS["p3"]["satisfied"]),
         }
 
 
