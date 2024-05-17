@@ -9,17 +9,59 @@ CITY_CONTEXT = {
         "City_NoSpace": "Chicago",
         "Coordinates": [41.8781, -87.6298],
         "DB_Name": "CHI",
+        "csv": "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/barplot_change_data.csv",
+        "lineplot": "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_connectedscatter.csv",
+        "geojsonfilepath": "ChicagoCensus.geojson",
     },
     "NewYork": {
         "CityName": "New York",
         "City_NoSpace": "NewYork",
         "Coordinates": [40.7128, -74.0060],
         "DB_Name": "NYC",
+        "csv": "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/barplot_change_data.csv",
+        "lineplot": "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_connectedscatter.csv",
+        "geojsonfilepath": "newyork.geojson",
     },
     "Portland": {
         "CityName": "Portland",
         "City_NoSpace": "Portland",
         "Coordinates": [45.5051, -122.6750],
         "DB_Name": "PDX",
+        "csv": "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/barplot_change_data.csv",
+        "lineplot": "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_connectedscatter.csv",
+        "geojsonfilepath": "portland.geojson",
     },
 }
+
+TRIP_FREQ = {
+    1: "Everyday",
+    2: "Weekdays",
+    3: "Weekends",
+    4: "A few times per week",
+    5: "A few times per month",
+    6: "A few times per year",
+}
+
+MODES_OF_TRANIST = {
+    1: "Bus",
+    2: "Train",
+    3: "Car",
+    4: "Bike",
+    5: "Walking",
+    6: "Rideshare",
+}
+
+SWITCH_TO_TRANSIT = {
+    1: "There are stops near you",
+    2: "There are many scheduled departures",
+    3: "It doesn't take significantly longer than driving",
+    4: "There are enough seats for all riders",
+    5: "It feels safe at the station and onboard",
+    6: "It will save me money",
+}
+
+TIME_OF_DAY = {1: "Peak commute hours", 2: "Daytime", 3: "Nighttime"}
+
+BOOL_CHOICES = {1: "Yes", 2: "No"}
+
+SATISFIED = {1: "1", 2: "2", 3: "3", 4: "4", 5: "5"}

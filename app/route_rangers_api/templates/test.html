@@ -1,0 +1,46 @@
+<body>
+    <svg id="my_dataviz" width="400" height="300"></svg>
+
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+    <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+    <script>
+        // The svg
+        var svg = d3.select("svg"),
+            width = +svg.attr("width"),
+            height = +svg.attr("height");
+
+        var projection = d3.geoMercator()
+            .scale(50000) // Adjust the scale for a more zoomed-in view
+            .center([-87.6298, 41.8781]) // Set the center to the longitude and latitude of the city (e.g., Chicago)
+            .translate([width / 2, height / 2]);
+
+        // Load external data and boot
+        d3.queue()
+            .defer(d3.json, "https://data.cityofchicago.org/api/geospatial/gdcf-axmw?method=export&format=GeoJSON")
+            .await(ready);
+
+        function ready(error, topo) {
+            if (error) {
+                console.error("Error loading data:", error);
+                return;
+            }
+
+            // Draw the map
+            svg.append("g")
+                .selectAll("path")
+                .data(topo.features)
+                .enter()
+                .append("path")
+                // draw each country
+                .attr("d", d3.geoPath()
+                    .projection(projection)
+                )
+                // set the color of each country
+                .attr("fill", function (d) {
+                    d.total = data.get(d.id) || 0;
+                    return colorScale(d.total);
+                });
+        }
+    </script>
+</body>
