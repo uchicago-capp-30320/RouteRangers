@@ -110,6 +110,7 @@ DATABASES = {
 # Covers regular testing and django-coverage
 if "test" in sys.argv or "test_coverage" in sys.argv:
     DATABASES["default"]["ENGINE"] = "django.db.backends.sqlite3"
+    DATABASES["default"]["NAME"] = "db.sqlite3"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
