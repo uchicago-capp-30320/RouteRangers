@@ -50,6 +50,15 @@ export function initializeMap(coordinates, stations, iconUrl, routes) {
 
   map.addLayer(routesJSON);
 
+  // Adjust width of routes with zoom level
+  function updateRouteWidth() {
+    var zoom = map.getZoom();
+    routesJSON.eachLayer(function (layer) {
+      layer.setStyle({ weight: zoom / 5 });
+    });
+  }
+  map.on("zoom", updateRouteWidth);
+
   var baseMaps = {
     "base": tileLayer
   }
