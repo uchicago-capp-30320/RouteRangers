@@ -2,7 +2,7 @@
 map = L.map('map').setView([41.8781, -87.6298], 13);
 
 // Layer design
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     maxZoom: 15,
 }).addTo(map);
 
@@ -40,3 +40,37 @@ L.Routing.control({
     routeWhileDragging: true,
 }).addTo(map);
 
+// Export route button
+function addExportButton() {
+    const buttonContainer = document.querySelector('.leaflet-routing-container');
+    if (buttonContainer) {
+        const exportButton = document.createElement('button');
+        exportButton.className = 'leaflet-bar export-button';
+        exportButton.innerText = 'Export Route';
+        exportButton.addEventListener('click', function() {
+            const waypoints = control.getWaypoints().map(wp => ({
+                lat: wp.latLng.lat,
+                lng: wp.latLng.lng
+            }));
+
+            fetch('https://your-backend-endpoint/api/route', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ waypoints })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Route exported successfully:', data);
+            })
+            .catch(error => {
+                console.error('Error exporting route:', error);
+            });
+        });
+        buttonContainer.appendChild(exportButton);
+    } else {
+        setTimeout(addExportButton, 60);
+    }
+}
+addExportButton();
