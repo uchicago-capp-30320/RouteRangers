@@ -60,6 +60,7 @@ class ExtractNYData(TestCase):
             results = extract_daily_data(dataset=dataset, date=date)
         except ReadTimeout as e:
             print(f"{e} request timed out, retry if critical")
+            pass
         self.assertIs(len(results) == n_obs, True)
         self.assertIs(
             int(float(results[0]["total_ridership"])) == first_station_ridership, True
@@ -103,4 +104,5 @@ class ExtractChiData(TestCase):
             resp = extract_daily_data(url, date)
         except ReadTimeout as e:
             print(f"{e} request timed out, retry if critical")
+            pass
         self.assertIs(len(resp) == expected, True)
