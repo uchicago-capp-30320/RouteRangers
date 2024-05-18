@@ -8,6 +8,7 @@ from django.contrib import admin
 app_name = "app"
 
 urlpatterns = [
+    path("test", views.test, name="test"),
     path("", views.home, name="home"),
     path("about/", views.about, name="about"),
     path("dashboard/<str:city>", views.dashboard, name="dashboard"),
