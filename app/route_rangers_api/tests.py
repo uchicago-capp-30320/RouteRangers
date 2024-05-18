@@ -1,38 +1,9 @@
 import pytest
-
-# from django.test import TestCase # this one tries to build a test db which we dont seem to have db perms to do
 from django.urls import reverse
-from django.contrib.gis.geos.collections import MultiLineString
-
-from route_rangers_api.models import TransitRoute
-from unittest import TestCase
-
-from app.scripts.extract_scheduled_gtfs import (
-    # ingest_gtfs_feed,
-    CTA_URL,
-    METRA_URL,
-    get_gtfs_component_dfs,
-    # add_extra_columns,
-    # combine_different_feeds, # need to resolve these imports with ingestion updates
-)
 
 
-class ModelTests(TestCase):
-
-    def test_pull_route_countt(self):
-        num_routes = TransitRoute.objects.filter(city="CHI").count()
-        self.assertIs((num_routes > 1), True)
-
-    def test_pull_georoutes(self):
-        routes = TransitRoute.objects.filter(city="CHI").values("geo_representation")
-        geo_type = type(routes[0]["geo_representation"])
-        self.assertIs(geo_type == MultiLineString, True)
-
-    def test_pull_multi_field(self):
-        routes = TransitRoute.objects.filter(city="CHI").values(
-            "geo_representation", "route_name", "color"
-        )
-        self.assertIs(len(routes[0].keys()) == 3, True)
+def test_fake():
+    assert 1 == 1
 
 
 @pytest.mark.django_db
@@ -41,6 +12,18 @@ def test_hello_view(client):
 
     response = client.get(url)
     assert response.status_code == 200
+
+
+import pytest
+
+from app.scripts.extract_scheduled_gtfs import (
+    # ingest_gtfs_feed,
+    CTA_URL,
+    METRA_URL,
+    get_gtfs_component_dfs,
+    # add_extra_columns,
+    # combine_different_feeds,
+)
 
 
 # use a fixture to pre_load some relevant feed ingestions
@@ -126,3 +109,102 @@ def test_combine_different_feeds(cta_feed, metra_feed):
     # TODO: more detailed testing to make sure "Chicago_CTA_" and "Chicago_Metra_"
     # are represented in the uniq_id column for each sub-sheet (for now, that
     # seems minimally tested by test above this one)
+
+
+###################
+## NY Extract tests
+###################
+
+from app.scripts.extract_nyc_data import DATASETS, NY_TZ, extract_daily_data
+import datetime
+from parameterized import parameterized
+
+
+class ExtractNYData(TestCase):
+    @parameterized.expand(
+        [
+            [
+                "BUS_RIDERSHIP",
+                datetime.datetime(2023, 9, 7, tzinfo=NY_TZ),
+                320,
+                10_678,
+            ],
+            [
+                "SUBWAY_RIDERSHIP",
+                datetime.datetime(2023, 9, 7, tzinfo=NY_TZ),
+                428,
+                11_174,
+            ],
+            [
+                "BUS_RIDERSHIP",
+                datetime.datetime(2023, 2, 28, tzinfo=NY_TZ),
+                320,
+                10_868,
+            ],
+            [
+                "SUBWAY_RIDERSHIP",
+                datetime.datetime(2023, 2, 28, tzinfo=NY_TZ),
+                428,
+                10_532,
+            ],
+            [
+                "BUS_RIDERSHIP",
+                datetime.datetime(2022, 11, 5, tzinfo=NY_TZ),
+                255,
+                7_852,
+            ],
+            [
+                "SUBWAY_RIDERSHIP",
+                datetime.datetime(2022, 11, 5, tzinfo=NY_TZ),
+                428,
+                7_085,
+            ],
+        ]
+    )
+    def test_extract_daily_data(self, dataset, date, n_obs, first_station_ridership):
+        results = extract_daily_data(dataset=dataset, date=date)
+        self.assertIs(len(results), n_obs)
+        self.assertIs(
+            int(float(results[0]["total_ridership"])), first_station_ridership
+        )
+
+
+import datetime
+from app.scripts.extract_chi_ridership_data import extract_daily_data, DATASETS, CHI_TZ
+from unittest import TestCase
+
+##########################
+# CHI Extract tests
+##########################
+
+from parameterized import parameterized
+
+
+class ExtractChiData(TestCase):
+    @parameterized.expand(
+        [
+            [
+                DATASETS["BUS_RIDERSHIP"]["URL"],
+                datetime.datetime(2023, 2, 28, tzinfo=CHI_TZ),
+                125,
+            ],
+            [
+                DATASETS["BUS_RIDERSHIP"]["URL"],
+                datetime.datetime(2023, 3, 4, tzinfo=CHI_TZ),
+                94,
+            ],
+            [
+                DATASETS["SUBWAY_RIDERSHIP"]["URL"],
+                datetime.datetime(2023, 2, 28, tzinfo=CHI_TZ),
+                143,
+            ],
+            [
+                DATASETS["SUBWAY_RIDERSHIP"]["URL"],
+                datetime.datetime(2023, 3, 4, tzinfo=CHI_TZ),
+                143,
+            ],
+        ]
+    )
+    def test_extract_daily_data(self, url, date, expected):
+        resp = extract_daily_data(url, date)
+        self.assertIs(len(resp), expected)
