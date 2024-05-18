@@ -85,9 +85,9 @@ def dashboard(request, city: str):
     return render(request, "dashboard.html", context)
 
 
-def survey_p1(request, city:str):
-    #url = ""
-    #Gen unique user id with uuid
+def survey_p1(request, city: str):
+    # url = ""
+    # Gen unique user id with uuid
     request.session["uuid"] = str(uuid.uuid4())
     user_id = request.session["uuid"]
     print(f'user_id:{request.session["uuid"]} - page 1')
@@ -95,7 +95,7 @@ def survey_p1(request, city:str):
         # create new object
         city_survey = CITIES_CHOICES_SURVEY[city]
         survey_answer = SurveyAnswer(user_id=request.session["uuid"], city=city_survey)
-        update_survey = RiderSurvey1(request.POST,instance=survey_answer)
+        update_survey = RiderSurvey1(request.POST, instance=survey_answer)
         # update and save
         update_survey.save()
         print("survey answer", survey_answer)
@@ -103,57 +103,74 @@ def survey_p1(request, city:str):
     else:
         form = RiderSurvey1()
 
-    
-    context = get_city_context(city,form)
+    context = get_survey_context(city, form)
 
     return render(request, "survey.html", context)
 
 
-def survey_p2(request, city: str,user_id:str=None):
+def survey_p2(request, city: str, user_id: str = None):
     print(request.method)
-    user_id = request.session.get("uuid") 
+    user_id = request.session.get("uuid")
     print(f'user_id:{request.session["uuid"]} - page 1')
     if request.method == "POST":
         survey_answer = SurveyAnswer.objects.get(user_id=user_id)
-        update_survey = RiderSurvey2(request.POST,instance=survey_answer)
+        update_survey = RiderSurvey2(request.POST, instance=survey_answer)
         update_survey.save()
         return redirect(reverse("app:survey_p3", kwargs={"city": city}))
     else:
         form = RiderSurvey2()
 
-    context = get_city_context(city,form)
+    context = get_survey_context(city, form)
+
+    return render(request, "survey_p2.html", context)
+
+
+def survey_p2(request, city: str, user_id: str = None):
+    print(request.method)
+    user_id = request.session.get("uuid")
+    print(f'user_id:{request.session["uuid"]} - page 1')
+    if request.method == "POST":
+        survey_answer = SurveyAnswer.objects.get(user_id=user_id)
+        update_survey = RiderSurvey2(request.POST, instance=survey_answer)
+        update_survey.save()
+        return redirect(reverse("app:survey_p3", kwargs={"city": city}))
+    else:
+        form = RiderSurvey2()
+
+    context = get_survey_context(city, form)
 
     return render(request, "survey_p2.html", context)
 
 
 def survey_p3(request, city: str):
-    user_id = request.session.get("uuid") 
+    user_id = request.session.get("uuid")
     print(request.method)
     if request.method == "POST":
         survey_answer = SurveyAnswer.objects.get(user_id=user_id)
-        update_survey = RiderSurvey3(request.POST,instance=survey_answer)
+        update_survey = RiderSurvey3(request.POST, instance=survey_answer)
         update_survey.save()
         return redirect(reverse("app:survey_p4", kwargs={"city": city}))
     else:
         form = RiderSurvey3()
 
-    context = get_city_context(city,form)
+    context = get_survey_context(city, form)
 
     return render(request, "survey_p3.html", context)
 
 
 def survey_p4(request, city: str):
-    user_id = request.session.get("uuid") 
+    user_id = request.session.get("uuid")
     print(request.method)
     if request.method == "POST":
         survey_answer = SurveyAnswer.objects.get(user_id=user_id)
-        update_survey = RiderSurvey4(request.POST,instance=survey_answer)
+        update_survey = RiderSurvey4(request.POST, instance=survey_answer)
         update_survey.save()
-        return redirect(reverse("app:thanks"))
+        return redirect(reverse("app:thanks", kwargs={"city": city}))
     else:
         form = RiderSurvey4()
 
-    context = get_city_context(city,form)
+    context = get_survey_context(city, form)
+
     return render(request, "survey_p4.html", context)
 
 
@@ -189,7 +206,7 @@ def responses(request, city: str):
     return render(request, "responses.html", context)
 
 
-def get_city_context(city,form):
+def get_survey_context(city, form):
     context = {
         "City": CITY_CONTEXT[city]["CityName"],
         "City_NoSpace": city,
