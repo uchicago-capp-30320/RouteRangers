@@ -7,8 +7,6 @@ import gtfs_kit as gk
 import re
 from datetime import datetime
 
-import pdb
-
 from django.contrib.gis.geos import GEOSGeometry, LineString, Point, MultiLineString
 from route_rangers_api.models import TransitStation, TransitRoute, StationRouteRelation
 from django.db.utils import IntegrityError
@@ -129,6 +127,7 @@ def get_gtfs_component_dfs(
         gtfs_dataframe_dict["transfers"] = transfers
     else:
         print(f"This {feed_city} GTFS feed has no transfers.txt file.")
+        pass
 
     # Add city column
     for key in gtfs_dataframe_dict.keys():
