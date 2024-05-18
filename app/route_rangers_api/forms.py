@@ -57,7 +57,7 @@ QUESTIONS = {
     },
     "p3": {
         "satisfied": "How satisfied are you with the public transit options \
-            for this route?",
+            for this route? Consider 1 to be 'Very Unstisfied' and 5 'Very Satisfied",
         "transit_improvement": "How could this public transit route be \
               improved?",
     },
@@ -99,17 +99,19 @@ class RiderSurvey2(ModelForm):
 
 
 class RiderSurvey3(ModelForm):
-    # transit_improvement = forms.MultipleChoiceField(
-    #     label=QUESTIONS["p3"]["transit_improvement"],
-    #     choices=TRANSIT_IMPROVEMENT,
-    #     widget=forms.RadioSelect,
-    # )
+    transit_improvement = forms.MultipleChoiceField(
+        label=QUESTIONS["p3"]["transit_improvement"],
+        choices=TRANSIT_IMPROVEMENT
+    )
 
     class Meta:
         model = SurveyAnswer
         fields = ["satisfied"]
         labels = {
             "satisfied": _(QUESTIONS["p3"]["satisfied"]),
+        }
+        widgets = {
+            "satisfied": RadioSelect(attrs={"class": "form-radio"})
         }
 
 
@@ -118,5 +120,8 @@ class RiderSurvey4(ModelForm):
         model = SurveyAnswer
         fields = ["switch_to_transit"]
         labels = {
-            "trip_frequency": _(QUESTIONS["p4"]["switch"]),
+            "switch_to_transit": _(QUESTIONS["p4"]["switch"]),
+        }
+        widgets = {
+            "switch_to_transit": RadioSelect(attrs={"class": "form-radio"})
         }
