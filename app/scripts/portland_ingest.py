@@ -32,6 +32,11 @@ from datetime import datetime
 import pytz
 from typing import List, Dict, Any
 from django.db.utils import IntegrityError
+from dotenv import load_dotenv
+
+load_dotenv()
+
+json_file_path = os.getenv("JSON_FILE_PATH")
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(current_dir, ".."))
@@ -99,14 +104,14 @@ def ingest_pdx_ridership_data(
                         station_id=foreign_key,
                     )
 
-                    print(
-                        f"Ingesting ridership data for station {record['station_id']}..."
-                    )
+                    if foreign_key % 10 == 0:
+                        print(f"Ingesting ridership data for key {foreign_key}...")
+                        # print info every 10 records
 
                     ridership_obj.save()
                 else:
                     print(
-                        f"Skipping ingestion for station {record['station_id']}, foreign key not found in TransitStation"
+                        f"Skipping ingestion for key {foreign_key}, foreign key not found in TransitStation"
                     )
 
         except TransitStation.DoesNotExist:
@@ -125,20 +130,13 @@ def ingest_pdx_ridership_data(
 
     print("Ingestion complete")
 
-    # Print the station IDs that didn't match
-    if stations_not_matched:
-        print("The following station IDs did not match any TransitStation:")
-        print(", ".join(stations_not_matched))
-
 
 def run():
     """
     Ingest PDX ridership data into Django db
     """
-    start_date = datetime(2023, 5, 9)
-    end_date = datetime(2023, 5, 31)
-    json_file_path = "/Users/jimenasalinas/Library/CloudStorage/Box-Box/Route Rangers/Transit dataset exploration/Portland Ridership Data/portland_ridership/Portland_ridership.json"
-    transit_station_ids = get_transit_station_ids_pdx()
+    start_date = datetime(2023, 7, 2)
+    end_date = datetime(2023, 7, 31)
     ingest_pdx_ridership_data(json_file_path, start_date, end_date)
 
 
