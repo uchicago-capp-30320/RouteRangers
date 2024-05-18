@@ -1,5 +1,5 @@
 CITIES_CHOICES = {"CHI": "Chicago", "NYC": "New York", "PDX": "Portland"}
-CITIES_CHOICES_SURVEY = {"Chicago":"CHI","NewYork":"NYC","Portland":"PDX"}
+CITIES_CHOICES_SURVEY = {"Chicago": "CHI", "NewYork": "NYC", "Portland": "PDX"}
 # keying by "nospace" naming scheme b/c that is how things will be passed via the url
 # TODO this should probably be turned into a dataclass
 
@@ -58,7 +58,7 @@ SWITCH_TO_TRANSIT = {
     4: "There are enough seats for all riders",
     5: "It feels safe at the station and onboard",
     6: "It will save me money",
-    7: "I would not be willing to switch to transit"
+    7: "I would not be willing to switch to transit",
 }
 
 TRANSIT_IMPROVEMENT = {
@@ -66,7 +66,7 @@ TRANSIT_IMPROVEMENT = {
     2: "More accurate schedule times",
     3: "Fewer transfers or a more direct route",
     4: "It feels safe at the station and onboard",
-    5: "No improvement needed"
+    5: "No improvement needed",
 }
 
 TIME_OF_DAY = {1: "Peak commute hours", 2: "Daytime", 3: "Nighttime"}

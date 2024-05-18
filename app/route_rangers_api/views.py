@@ -26,7 +26,6 @@ from route_rangers_api.models import TransitRoute, TransitStation
 import json
 
 
-
 def test(request):
     return HttpResponse("""This is a test route without any html/JS/static stuff""")
 

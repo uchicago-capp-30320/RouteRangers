@@ -1,7 +1,7 @@
 # ask JP why we're importing like this instead of:
 # from django import forms
 from django.contrib.gis import forms
-from route_rangers_api.models import SurveyResponse,SurveyUser
+from route_rangers_api.models import SurveyResponse, SurveyUser
 from django.forms import ModelForm, RadioSelect
 from django.utils.translation import gettext_lazy as _
 
@@ -102,13 +102,11 @@ class RiderSurvey3(ModelForm):
 
     class Meta:
         model = SurveyResponse
-        fields = ["satisfied","transit_improvement"]
+        fields = ["satisfied", "transit_improvement"]
         labels = {
             "satisfied": _(QUESTIONS["p3"]["satisfied"]),
         }
-        widgets = {
-            "satisfied": RadioSelect(attrs={"class": "form-radio"})
-        }
+        widgets = {"satisfied": RadioSelect(attrs={"class": "form-radio"})}
 
 
 class RiderSurvey4(ModelForm):
@@ -118,6 +116,4 @@ class RiderSurvey4(ModelForm):
         labels = {
             "switch_to_transit": _(QUESTIONS["p4"]["switch"]),
         }
-        widgets = {
-            "switch_to_transit": RadioSelect(attrs={"class": "form-radio"})
-        }
+        widgets = {"switch_to_transit": RadioSelect(attrs={"class": "form-radio"})}

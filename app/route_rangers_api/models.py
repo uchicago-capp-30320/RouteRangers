@@ -7,7 +7,7 @@ from app.route_rangers_api.utils.city_mapping import (
     TIME_OF_DAY,
     BOOL_CHOICES,
     SATISFIED,
-    TRANSIT_IMPROVEMENT
+    TRANSIT_IMPROVEMENT,
 )
 
 #################################
@@ -226,6 +226,7 @@ class SurveyUser(models.Model):
     """
     Class that represents users that answer a survey
     """
+
     user_id = models.CharField(max_length=128, primary_key=True)
     city = models.CharField(max_length=30, choices=CITIES_CHOICES)
 
@@ -238,14 +239,15 @@ class SurveyResponse(models.Model):
     """
     Class that represents answers to survey questions related to a route
     """
+
     id = models.AutoField(primary_key=True)
 
-    user_id = models.ForeignKey(SurveyUser,on_delete=models.PROTECT)
+    user_id = models.ForeignKey(SurveyUser, on_delete=models.PROTECT)
     route_id = models.CharField(max_length=128)
     response_date = models.DateTimeField("Survey response date", auto_now_add=True)
     city = models.CharField(max_length=30, choices=CITIES_CHOICES)
 
-    #Map:
+    # Map:
     route = models.LineStringField(null=True)
     starting_point = models.PointField(null=True)
     end_point = models.PointField(null=True)
@@ -266,9 +268,7 @@ class SurveyResponse(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(
-                fields=["user_id", "route_id"], name="survey_route"
-            )
+            models.UniqueConstraint(fields=["user_id", "route_id"], name="survey_route")
         ]
 
 
