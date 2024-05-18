@@ -58,6 +58,15 @@ SWITCH_TO_TRANSIT = {
     4: "There are enough seats for all riders",
     5: "It feels safe at the station and onboard",
     6: "It will save me money",
+    7: "I would not be willing to switch to transit"
+}
+
+TRANSIT_IMPROVEMENT = {
+    1: "More frequent service",
+    2: "More accurate schedule times",
+    3: "Fewer transfers or a more direct route",
+    4: "It feels safe at the station and onboard",
+    5: "No improvement needed"
 }
 
 TIME_OF_DAY = {1: "Peak commute hours", 2: "Daytime", 3: "Nighttime"}
