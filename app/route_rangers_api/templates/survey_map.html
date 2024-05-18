@@ -9,12 +9,14 @@
             This feedback will be used to assess gaps in current transit routes. We will ask you some follow-up questions to better understand whether a new transit route would make this trip easier for you. Please enter up to three routes.</p>
     </div>
     {% block map %}
+    <p class="inline">MAP HERE</p>
+
     {% endblock %}
     {% block survey %}
     <div class="survey-block"></div>
         <form method="post">
             {% csrf_token %}
-            {{ form }}
+            <!-- {{ form }} -->
             <div style="text-align: right;">
                 <button type="submit" style="margin-top: 25px;">Next</button>
             </div>
