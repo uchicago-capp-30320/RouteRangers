@@ -96,7 +96,7 @@ def dashboard(request, city: str):
         "survey_class": "cs-li-link",
         "feedback_class": "cs-li-link",
         "coordinates": CITY_CONTEXT[city]["Coordinates"],
-        # "stations": lst_coords,
+        "stations": lst_coords,
         "csv": CITY_CONTEXT[city]["csv"],
         "lineplot": CITY_CONTEXT[city]["lineplot"],
         "geojsonfilepath": static(CITY_CONTEXT[city]["geojsonfilepath"]),
