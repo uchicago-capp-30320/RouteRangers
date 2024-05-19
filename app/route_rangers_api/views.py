@@ -40,7 +40,7 @@ def home(request):
 
 def about(request):
     context = {"cities_class": "cs-li-link", "about_class": "cs-li-link cs-active"}
-    return render(request, "test.html", context)
+    return render(request, "about.html", context)
 
 
 def dashboard(request, city: str):

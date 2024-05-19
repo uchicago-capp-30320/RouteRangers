@@ -1,13 +1,5 @@
 from django.contrib.gis.db import models
-from app.route_rangers_api.utils.city_mapping import (
-    CITIES_CHOICES,
-    TRIP_FREQ,
-    MODES_OF_TRANIST,
-    SWITCH_TO_TRANSIT,
-    TIME_OF_DAY,
-    BOOL_CHOICES,
-    SATISFIED,
-)
+from app.route_rangers_api.utils.city_mapping import CITIES_CHOICES
 
 #################################
 ###### DEMOGRAPHIC MODELS #######
@@ -226,8 +218,9 @@ class Survey(models.Model):
     Class that represents surveys deployed
     """
 
-    name = models.CharField(max_length=64, primary_key=True)
+    name = models.CharField(max_length=30)
     created_at = models.DateTimeField("Created at", auto_now_add=True)
+    questionnaire = models.JSONField()
 
 
 class SurveyAnswer(models.Model):
@@ -235,59 +228,11 @@ class SurveyAnswer(models.Model):
     Class that represents answers to surveys
     """
 
-    user_id = models.CharField(max_length=128, primary_key=True)
+    user_id = models.CharField(max_length=30)
     response_date = models.DateTimeField("Survey response date", auto_now_add=True)
-
     city = models.CharField(max_length=30)
     survey = models.ForeignKey(Survey, on_delete=models.PROTECT)
-
-    # Page 1:
-    BOOL_CHOICES = {"Y": "Yes", "N": "No"}
-    frequent_transit = models.CharField(max_length=1, choices=BOOL_CHOICES)
-    car_owner = models.CharField(max_length=1, choices=BOOL_CHOICES)
-    # Page 2:
-    TRIP_FREQ = {
-        "daily": "Everyday",
-        "weekdays": "Weekdays",
-        "weekends": "Weekends",
-        "few_week": "A few times per week",
-        "few_month": "A few times per month",
-        "few_year": "A few times per year",
-    }
-    trip_frequency = models.CharField(max_length=20, choices=TRIP_FREQ)
-
-    TIME_OF_DAY = {"peak": "Peak commute hours", "day": "Daytime", "night": "Nighttime"}
-    trip_tod = models.CharField(max_length=20, choices=TIME_OF_DAY)
-    trip_time = models.IntegerField()
-
-    MODES_OF_TRANIST = {
-        "bus": "Bus",
-        "train": "Train",
-        "car": "Car",
-        "bike": "Bike",
-        "walking": "Walking",
-        "rideshare": "Rideshare",
-    }
-
-    modes_of_transit = models.CharField(max_length=20, choices=MODES_OF_TRANIST)
-    # Page 3:
-    SATISFIED = {"1": 1, "2": 2, "3": 3, "4": 4, "5": 5}
-    satisfied = models.CharField(max_length=1, choices=SATISFIED)
-
-    transit_improvement_service = models.CharField(max_length=1, choices=BOOL_CHOICES)
-    transit_improvement_schedule = models.CharField(max_length=1, choices=BOOL_CHOICES)
-    transit_improvement_transfers = models.CharField(max_length=1, choices=BOOL_CHOICES)
-    transit_improvement_safety = models.CharField(max_length=1, choices=BOOL_CHOICES)
-    # Page 4:
-    SWITCH_TO_TRANSIT = {
-        "stops": "There are stops near you",
-        "schedule": "There are many scheduled departures",
-        "length": "It doesn't take significantly longer than driving",
-        "seats": "There are enough seats for all riders",
-        "safe": "It feels safe at the station and onboard",
-        "cost": "It will save me money",
-    }
-    switch_to_transit = models.CharField(max_length=50, choices=SWITCH_TO_TRANSIT)
+    answers = models.JSONField()
 
 
 class PlannedRoute(models.Model):
@@ -298,5 +243,3 @@ class PlannedRoute(models.Model):
     user_id = models.CharField(max_length=30)
     response_date = models.DateTimeField("Survey response date", auto_now_add=True)
     route = models.LineStringField()
-    starting_point = models.PointField(null=True)
-    end_point = models.PointField(null=True)
