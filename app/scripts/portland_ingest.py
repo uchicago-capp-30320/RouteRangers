@@ -46,7 +46,6 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "geodjango.settings")
 
 django.setup()
 
-
 from route_rangers_api.models import TransitStation, RidershipStation
 
 
