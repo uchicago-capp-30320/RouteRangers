@@ -201,10 +201,10 @@ def dashboard(request, city: str):
         # "stations": lst_coords,
         "csv": CITY_CONTEXT[city]["csv"],
         "lineplot": CITY_CONTEXT[city]["lineplot"],
-        "geojsonfilepath": static(CITY_CONTEXT[city]["geojsonfilepath"]),
+        'geojsonfilepath': static(CITY_CONTEXT[city]['geojsonfilepath']),
         'heatmapscale':  [0, 10, 20, 50, 100, 200, 500, 1000],
-        'heat_map_variable': 'density'
-        # "routes": routes_json,
+        'heat_map_variable': 'density',
+         "routes": routes_json
     }
     return render(request, "dashboard.html", context)
 
