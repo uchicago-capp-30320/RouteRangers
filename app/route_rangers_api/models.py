@@ -257,7 +257,7 @@ class SurveyAnswer(models.Model):
     trip_frequency = models.CharField(max_length=20, choices=TRIP_FREQ)
 
     TIME_OF_DAY = {"peak": "Peak commute hours", "day": "Daytime", "night": "Nighttime"}
-    trip_tod = models.CharField(choices=TIME_OF_DAY)
+    trip_tod = models.CharField(max_length=20, choices=TIME_OF_DAY)
     trip_time = models.IntegerField()
 
     MODES_OF_TRANIST = {
@@ -272,7 +272,7 @@ class SurveyAnswer(models.Model):
     modes_of_transit = models.CharField(max_length=20, choices=MODES_OF_TRANIST)
     # Page 3:
     SATISFIED = {"1": 1, "2": 2, "3": 3, "4": 4, "5": 5}
-    satisfied = models.CharField(choices=SATISFIED)
+    satisfied = models.CharField(max_length=1, choices=SATISFIED)
 
     transit_improvement_service = models.CharField(max_length=1, choices=BOOL_CHOICES)
     transit_improvement_schedule = models.CharField(max_length=1, choices=BOOL_CHOICES)
