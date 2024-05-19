@@ -159,8 +159,49 @@
     Maps of showing variation in transit, environmental, and socio-economic
     variables across census tracts
   </p>
-  <div id="heatmap" style="width: 600px; height: 400px"></div>
+  <div id="heatmap" class="mx-auto" style="width: 90%; height: 600px;"></div>
 </div>
+
+<div class="card-container row mx-3">
+  <div class="col-12 col-md-3 col-lg-3">
+    <button
+      class="btn btn-secondary dropdown-toggle"
+      type="button"
+      id="heatmapTypeDropdown"
+      data-bs-toggle="dropdown"
+      aria-expanded="false"
+    >
+      Select Heat Map
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="heatmapTypeDropdown">
+      <li>
+        <a
+          class="dropdown-item"
+          href=""
+          onclick="heatmaps('{{geojsonfilepath}}', {{coordinates}}, '{{heatmaplabel}}',{{heatmapscale}}, '{{heat_map_variable}}' )"
+          >Chicago Population</a
+        >
+      </li>
+      <li>
+        <a
+          class="dropdown-item"
+          href=""
+          onclick="heatmaps('{{geojsonfilepath}}', {{coordinates}}, 'Median Income',{{heatmapscale}}, '{{heat_map_variable}}' )"
+          >Median Income</a
+        >
+      </li>
+      <li>
+        <a
+          class="dropdown-item"
+          href=""
+          onclick="heatmaps('{{geojsonfilepath}}', {{coordinates}}, 'Commute Time',{{heatmapscale}}, '{{heat_map_variable}}' )"
+          >Commute Time</a
+        >
+      </li>
+    </ul>
+  </div>
+
+  
 
 <div class="headers">
   <h2>Trends Over Time</h2>
@@ -219,7 +260,7 @@
   drawgraph("{{csv}}","group","var1");
   drawTrends("{{lineplot}}");
   drawhorizontalgraph("{{csv}}","group","var1");
-  heatmaps("{{geojsonfilepath}}", {{coordinates}}, '{{heatmaplabel}}',{{heatmapscale}}, '{{heat_map_variable}}' );
+  heatmaps("{{geojsonfilepath}}", {{coordinates}}, '{{heatmaplabel}}',{{heatmapscale}}, '{{heat_map_variable}}');
 </script>
 <script>
   // Card update variables
