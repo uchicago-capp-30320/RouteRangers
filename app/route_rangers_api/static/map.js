@@ -1,4 +1,5 @@
 export function initializeMap(coordinates, stations, iconUrl, routes) {
+
   // Add a tile layer
   var tileLayer = L.tileLayer(
     "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
@@ -12,6 +13,7 @@ export function initializeMap(coordinates, stations, iconUrl, routes) {
 
   // Initialize the map at center of city
   var map = L.map("map", { layers: [tileLayer] }).setView(coordinates, 13);
+
 
   // Custom icon for smaller markers
   var smallIcon = L.icon({
@@ -46,12 +48,15 @@ export function initializeMap(coordinates, stations, iconUrl, routes) {
     },
     onEachFeature: function (feature, layer) {
       layer.bindPopup(feature.properties.route_name);
+
     },
+
   });
 
   map.addLayer(routesJSON);
 
   var baseMaps = {
+
     base: tileLayer,
   };
 

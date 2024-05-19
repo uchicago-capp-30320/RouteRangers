@@ -20,9 +20,13 @@ from route_rangers_api.forms import (
     RiderSurvey3,
     RiderSurvey4,
 )
+=======
+from django.contrib.gis.geos import GEOSGeometry, MultiLineString, LineString
+
+from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT
+from route_rangers_api.models import TransitRoute, TransitStation
 
 import json
-
 
 def test(request):
     return HttpResponse("""This is a test route without any html/JS/static stuff""")
@@ -116,6 +120,9 @@ def survey_p1(request, city: str):
         update_survey = RiderSurvey1(request.POST, instance=survey_answer)
         # update and save
         survey_answer = form.save(instance=survey_answer)
+
+        update_survey.save()
+
         print("survey answer", survey_answer)
         return redirect(reverse("app:survey_p2", kwargs={"city": city}))
     else:

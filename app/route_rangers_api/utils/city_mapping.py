@@ -1,5 +1,5 @@
 CITIES_CHOICES = {"CHI": "Chicago", "NYC": "New York", "PDX": "Portland"}
-
+CITIES_CHOICES_SURVEY = {"Chicago":"CHI","NewYork":"NYC","Portland":"PDX"}
 # keying by "nospace" naming scheme b/c that is how things will be passed via the url
 # TODO this should probably be turned into a dataclass
 
@@ -30,6 +30,7 @@ CITY_CONTEXT = {
         "csv": "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/barplot_change_data.csv",
         "lineplot": "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_connectedscatter.csv",
         "geojsonfilepath": "portland.geojson",
+
     },
 }
 
@@ -176,5 +177,3 @@ CARD_DATA = {
                 "AverageCommuteTime": "91 minutes",
             }
         }
-    },
-}

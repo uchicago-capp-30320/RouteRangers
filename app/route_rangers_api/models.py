@@ -237,6 +237,7 @@ class SurveyAnswer(models.Model):
 
     user_id = models.CharField(max_length=128, primary_key=True)
     response_date = models.DateTimeField("Survey response date", auto_now_add=True)
+
     city = models.CharField(max_length=30)
     survey = models.ForeignKey(Survey, on_delete=models.PROTECT)
 
@@ -287,6 +288,7 @@ class SurveyAnswer(models.Model):
         "cost": "It will save me money",
     }
     switch_to_transit = models.CharField(choices=SWITCH_TO_TRANSIT)
+
 
 
 class PlannedRoute(models.Model):
