@@ -11,7 +11,7 @@ from django.templatetags.static import static
 import uuid
 
 from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT, CITIES_CHOICES_SURVEY
-from route_rangers_api.models import TransitRoute, TransitStation, SurveyAnswer
+from route_rangers_api.models import TransitRoute, TransitStation, SurveyResponse
 from route_rangers_api.forms import (
     RiderSurvey1,
     RiderSurvey2,
@@ -24,7 +24,6 @@ from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT
 from route_rangers_api.models import TransitRoute, TransitStation
 
 import json
-
 
 
 def test(request):
