@@ -38,7 +38,7 @@ function heatmaps(filepath, coordinates, label, scale, variable, colorscale = ['
 
     function style(feature) {
         return {
-            fillColor: getColor(feature.properties.variable),
+            fillColor: getColor(feature.properties[variable]),
             weight: 2,
             opacity: 1,
             color: 'white',
