@@ -1,65 +1,60 @@
-{% extends 'basetemplate_internal.html' %}
-{% load static %}
-{% block content %}
+{% extends 'basetemplate_internal.html' %} {% load static %} {% block content %}
 
+<div class="headers">
+  <h1>{{ City }} Rider Survey Results</h1>
+  <p class="inline">
+    Feedback collected from people in {{City}} through rider survey. This data
+    will be used by transit agencies to prioritize transit projects.
+  </p>
+</div>
+<div class="card-container row mx-3">
+  <div class="col-12 col-md-4 col-lg-4">
+    <div class="card">
+      <div class="card-content">
+        <p class="card-title">Total Number of Responses</p>
+        <p class="card-text">{{Response}}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-md-4 col-lg-4">
+    <div class="card">
+      <div class="card-content">
+        <p class="card-title">People who ride transit regularly</p>
+        <p class="card-text">{{Riders}}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-md-4 col-lg-4">
+    <div class="card">
+      <div class="card-content">
+        <p class="card-title">Percentage of people who own cars</p>
+        <p class="card-text">{{Cars}}</p>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <div class="headers">
-        <h1> {{ City }} Rider Survey Results</h1>
-        <p class="inline">Feedback collected from people in {{City}} through rider survey. This data will be used by transit agencies to prioritize transit projects. </p>
-    </div>
-    <div class="card-container row mx-3 ">
-        <div class="col-12 col-md-4 col-lg-4">
-            <div class="card">
-                <div class="card-content">
-                    <p class="card-title">Total Number of Responses</p>
-                    <p class="card-text">{{Response}} </p>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-md-4 col-lg-4">
-            <div class="card">
-                <div class="card-content">
-                    <p class="card-title">People who ride transit regularly</p>
-                    <p class="card-text">{{Riders}}</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-md-4 col-lg-4">
-            <div class="card">
-                <div class="card-content">
-                    <p class="card-title">Percentage of people who own cars</p>
-                    <p class="card-text">{{Cars}}</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="headers">
-        <h2 >Rider Trips</h2>
-        <p class="inline">Map showing all transit routes in your city</p>
-    </div>
-    {% block rider_graphs%}
-    {% endblock %}
-    <div class="headers">
-        <h2 >Feedback from Transit Riders</h2>
-        <p class="inline"> Answers from people about trips on public transit. </p>
-    </div>
-    {% block transit_graphs%}
-    {% endblock %}
-    <div class="headers">
-        <h2 >Feedback from drivers</h2>
-        <p class="inline">Answers from people about trips in cars and rideshares.</p>
-    </div>
-    {% block driver_graphs%}
-    {% endblock %}
-    <div class="headers">
-        <h2 >Spatial Analysis</h2>
-        <p class="inline">Analysis of spatial data reported through rider survey. /p>
-            {% block map%}
-            {% endblock %}
-            {% block heat_map%}
-            {% endblock %}
-        </div>
-
+<div class="headers">
+  <h2>Rider Trips</h2>
+  <p class="inline">Map showing all transit routes in your city</p>
+</div>
+{% block rider_graphs%} {% endblock %}
+<div class="headers">
+  <h2>Feedback from Transit Riders</h2>
+  <p class="inline">Answers from people about trips on public transit.</p>
+</div>
+{% block transit_graphs%} {% endblock %}
+<div class="headers">
+  <h2>Feedback from drivers</h2>
+  <p class="inline">Answers from people about trips in cars and rideshares.</p>
+</div>
+{% block driver_graphs%} {% endblock %}
+<div class="headers">
+  <h2>Spatial Analysis</h2>
+  <p class="inline">
+    Analysis of spatial data reported through rider survey. /p> {% block map%}
+    {% endblock %} {% block heat_map%} {% endblock %}
+  </p>
+</div>
 
 {% endblock %}

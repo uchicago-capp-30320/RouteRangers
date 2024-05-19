@@ -26,7 +26,6 @@ def cta_feed():
 
 
 class ExtractGTFS(TestCase):
-
     # I think this is the django version of fixtures?
     def setUp(self):
         self.metra_feed = metra_feed()

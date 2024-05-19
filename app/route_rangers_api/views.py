@@ -12,7 +12,7 @@ from django.contrib.gis.geos import GEOSGeometry, MultiLineString, LineString
 
 import uuid
 
-from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT
+from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT, CARD_DATA
 from route_rangers_api.models import TransitRoute, TransitStation, SurveyAnswer
 from route_rangers_api.forms import (
     RiderSurvey1,
@@ -79,116 +79,10 @@ def dashboard(request, city: str):
 
     city_name = CITY_CONTEXT[city]["CityName"]
 
-
-    citydata = {"Bus": {
-        "Fall": {
-            "Weekdays": {
-                "TotalRiders": 5000,
-                "TotalRoutes": 30,
-                "AverageCommuteTime": "45 minutes"
-            },
-            "Weekends": {
-                "TotalRiders": 6000,
-                "TotalRoutes": 35,
-                "AverageCommuteTime": "50 minutes"
-            }
-        },
-        "Winter": {
-                "Weekdays": {
-                "TotalRiders": 5500,
-                "TotalRoutes": 32,
-                "AverageCommuteTime": "48 minutes"
-            },
-            "Weekends": {
-                "TotalRiders": 5800,
-                "TotalRoutes": 33,
-                "AverageCommuteTime": "47 minutes"
-            },
-        },
-        "Spring": {
-             "Weekdays": {
-                "TotalRiders": 6200,
-                "TotalRoutes": 37,
-                "AverageCommuteTime": "52 minutes"
-            },
-                "Weekends": {
-                "TotalRiders": 1,
-                "TotalRoutes": 2,
-                "AverageCommuteTime": "3 minutes"
-            },
-        },
-        "Summer": {
-                         "Weekdays": {
-                "TotalRiders": 4,
-                "TotalRoutes": 5,
-                "AverageCommuteTime": "6 minutes"
-            },
-                "Weekends": {
-                "TotalRiders": 7,
-                "TotalRoutes": 8,
-                "AverageCommuteTime": "9 minutes"
-            },
-        }
-    },
-    "Train": {
-        "Fall": {
-            "Weekdays": {
-                "TotalRiders": 50020,
-                "TotalRoutes": 320,
-                "AverageCommuteTime": "415 minutes"
-            },
-            "Weekends": {
-                "TotalRiders": 60100,
-                "TotalRoutes": 315,
-                "AverageCommuteTime": "510 minutes"
-            }
-        },
-        "Winter": {
-                "Weekdays": {
-                "TotalRiders": 51500,
-                "TotalRoutes": 312,
-                "AverageCommuteTime": "418 minutes"
-            },
-            "Weekends": {
-                "TotalRiders": 5100,
-                "TotalRoutes": 33,
-                "AverageCommuteTime": "417 minutes"
-            },
-        },
-        "Spring": {
-             "Weekdays": {
-                "TotalRiders": 62010,
-                "TotalRoutes": 317,
-                "AverageCommuteTime": "512 minutes"
-            },
-                "Weekends": {
-                "TotalRiders": 11,
-                "TotalRoutes": 21,
-                "AverageCommuteTime": "31 minutes"
-            },
-        },
-        "Summer": {
-                         "Weekdays": {
-                "TotalRiders": 41,
-                "TotalRoutes": 51,
-                "AverageCommuteTime": "6 minutes"
-            },
-                "Weekends": {
-                "TotalRiders": 71,
-                "TotalRoutes": 81,
-                "AverageCommuteTime": "91 minutes"
-            },
-        }},
-        "all":{"all":{"all": {
-                "TotalRiders": 71,
-                "TotalRoutes": 81,
-                "AverageCommuteTime": "91 minutes"
-            }}}}
-
     context = {
         "City": CITY_CONTEXT[city]["CityName"],
         "City_NoSpace": city,
-        "citydata" : citydata,
+        "citydata": CARD_DATA,
         "heatmaplabel": f"{city_name} Population Density",
         "TotalRiders": "104,749",
         "TotalRoutes": num_routes,
@@ -201,10 +95,10 @@ def dashboard(request, city: str):
         # "stations": lst_coords,
         "csv": CITY_CONTEXT[city]["csv"],
         "lineplot": CITY_CONTEXT[city]["lineplot"],
-        'geojsonfilepath': static(CITY_CONTEXT[city]['geojsonfilepath']),
-        'heatmapscale':  [0, 10, 20, 50, 100, 200, 500, 1000],
-        'heat_map_variable': 'density',
-         "routes": routes_json
+        "geojsonfilepath": static(CITY_CONTEXT[city]["geojsonfilepath"]),
+        "heatmapscale": [0, 10, 20, 50, 100, 200, 500, 1000],
+        "heat_map_variable": "density",
+        "routes": routes_json,
     }
     return render(request, "dashboard.html", context)
 

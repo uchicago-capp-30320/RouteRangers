@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("route_rangers_api", "0004_alter_bikestation_station_id_and_more"),
     ]
