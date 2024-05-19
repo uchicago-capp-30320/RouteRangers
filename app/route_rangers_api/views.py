@@ -20,13 +20,14 @@ from route_rangers_api.forms import (
     RiderSurvey3,
     RiderSurvey4,
 )
-=======
+
 from django.contrib.gis.geos import GEOSGeometry, MultiLineString, LineString
 
 from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT
 from route_rangers_api.models import TransitRoute, TransitStation
 
 import json
+
 
 def test(request):
     return HttpResponse("""This is a test route without any html/JS/static stuff""")

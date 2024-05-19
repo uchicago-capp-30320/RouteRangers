@@ -290,7 +290,6 @@ class SurveyAnswer(models.Model):
     switch_to_transit = models.CharField(choices=SWITCH_TO_TRANSIT)
 
 
-
 class PlannedRoute(models.Model):
     """
     Class that represents answers to 'Plan your route' feature

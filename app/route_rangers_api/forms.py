@@ -100,9 +100,7 @@ class RiderSurvey2(ModelForm):
 
 class RiderSurvey3(ModelForm):
     transit_improvement = forms.MultipleChoiceField(
-        label=QUESTIONS["p3"]["transit_improvement"],
-        choices=TRANSIT_IMPROVEMENT
-
+        label=QUESTIONS["p3"]["transit_improvement"], choices=TRANSIT_IMPROVEMENT
     )
 
     class Meta:
@@ -124,4 +122,3 @@ class RiderSurvey4(ModelForm):
         }
 
         widgets = {"switch_to_transit": RadioSelect(attrs={"class": "form-radio"})}
-
