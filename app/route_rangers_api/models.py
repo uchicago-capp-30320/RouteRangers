@@ -243,8 +243,8 @@ class SurveyAnswer(models.Model):
 
     # Page 1:
     BOOL_CHOICES = {"Y": "Yes", "N": "No"}
-    frequent_transit = models.CharField(choices=BOOL_CHOICES)
-    car_owner = models.CharField(choices=BOOL_CHOICES)
+    frequent_transit = models.CharField(max_length=1, choices=BOOL_CHOICES)
+    car_owner = models.CharField(max_length=1, choices=BOOL_CHOICES)
     # Page 2:
     TRIP_FREQ = {
         "daily": "Everyday",
@@ -254,7 +254,7 @@ class SurveyAnswer(models.Model):
         "few_month": "A few times per month",
         "few_year": "A few times per year",
     }
-    trip_frequency = models.CharField(choices=TRIP_FREQ)
+    trip_frequency = models.CharField(max_length=20, choices=TRIP_FREQ)
 
     TIME_OF_DAY = {"peak": "Peak commute hours", "day": "Daytime", "night": "Nighttime"}
     trip_tod = models.CharField(choices=TIME_OF_DAY)
@@ -269,15 +269,15 @@ class SurveyAnswer(models.Model):
         "rideshare": "Rideshare",
     }
 
-    modes_of_transit = models.CharField(choices=MODES_OF_TRANIST)
+    modes_of_transit = models.CharField(max_length=20, choices=MODES_OF_TRANIST)
     # Page 3:
     SATISFIED = {"1": 1, "2": 2, "3": 3, "4": 4, "5": 5}
     satisfied = models.CharField(choices=SATISFIED)
 
-    transit_improvement_service = models.CharField(choices=BOOL_CHOICES)
-    transit_improvement_schedule = models.CharField(choices=BOOL_CHOICES)
-    transit_improvement_transfers = models.CharField(choices=BOOL_CHOICES)
-    transit_improvement_safety = models.CharField(choices=BOOL_CHOICES)
+    transit_improvement_service = models.CharField(max_length=1, choices=BOOL_CHOICES)
+    transit_improvement_schedule = models.CharField(max_length=1, choices=BOOL_CHOICES)
+    transit_improvement_transfers = models.CharField(max_length=1, choices=BOOL_CHOICES)
+    transit_improvement_safety = models.CharField(max_length=1, choices=BOOL_CHOICES)
     # Page 4:
     SWITCH_TO_TRANSIT = {
         "stops": "There are stops near you",
@@ -287,7 +287,7 @@ class SurveyAnswer(models.Model):
         "safe": "It feels safe at the station and onboard",
         "cost": "It will save me money",
     }
-    switch_to_transit = models.CharField(choices=SWITCH_TO_TRANSIT)
+    switch_to_transit = models.CharField(max_length=50, choices=SWITCH_TO_TRANSIT)
 
 
 class PlannedRoute(models.Model):
