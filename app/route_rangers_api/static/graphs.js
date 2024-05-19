@@ -11,7 +11,7 @@ function drawgraph(csv,xaxis,yaxis) {
     // Append SVG and set dimensions
     bargraph_bus = bargraph_bus
         .append("svg")
-        .attr("width", width + margin.left + margin.right)
+        .attr("width", "100%")
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -70,7 +70,7 @@ function drawTrends(csv) {
 
     var trend = d3.select("#trend_dataviz")
         .append("svg")
-        .attr("width", width + margin.left + margin.right)
+        .attr("width", "100%")
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -172,4 +172,69 @@ function drawTrends(csv) {
                 d3.selectAll("." + d.name).transition().style("opacity", currentOpacity == 1 ? 0 : 1);
             });
     });
+}
+
+function drawhorizontalgraph(csv,xaxis,yaxis) {
+    var margin = {top: 30, right: 30, bottom: 70, left: 60},
+        width = 460 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
+
+    var bargraph = d3.select("#horizontaldataviz");
+
+    // Remove existing SVG elements
+    bargraph.selectAll("*").remove();
+
+    // Append SVG and set dimensions
+    bargraph = bargraph
+        .append("svg")
+        .attr("width", "100%")
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // Initialize the X axis
+    var y = d3.scaleBand()  // Changed to scaleBand for horizontal bars
+        .range([0, height])
+        .padding(0.2);
+    var yAxis = bargraph.append("g")
+        .attr("transform", "translate(0,0)"); // Adjusted translation for horizontal bars
+
+    // Initialize the Y axis
+    var x = d3.scaleLinear() // Changed to scaleLinear for horizontal bars
+        .range([0, width]);
+    var xAxis = bargraph.append("g")
+        .attr("class", "myXaxis") // Changed class for styling purposes
+
+    // A function that create / update the plot for a given variable:
+    function update(selectedVar) {
+        // Parse the Data
+        d3.csv(csv, function(data) {
+            // X axis
+            x.domain([0, d3.max(data, function(d) { return +d[selectedVar]; })]);
+            xAxis.transition().duration(1000).call(d3.axisBottom(x)); // Changed to axisBottom for horizontal bars
+
+            // Add Y axis
+            y.domain(data.map(function(d) { return d.group; }));
+            yAxis.transition().duration(1000).call(d3.axisLeft(y));
+
+            // variable u: map data to existing bars
+            var map = bargraph.selectAll("rect")
+                .data(data);
+
+            // update bars
+            map.enter()
+                .append("rect")
+                .merge(map)
+                .transition()
+                .duration(500)
+                .attr("y", function(d) { return y(d[xaxis]); }) 
+                .attr("x", 0) 
+                .attr("height", y.bandwidth()) 
+                .attr("width", function(d) { return x(d[selectedVar]); })
+                .attr("fill", "#566C4B");
+        });
+    }
+
+    // Initialize plot
+    update(yaxis);
 }

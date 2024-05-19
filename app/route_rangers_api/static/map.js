@@ -25,7 +25,7 @@ export function initializeMap(coordinates, stations, iconUrl, routes) {
     var station = stations[i];
     var marker = L.marker([station[0], station[1]], { icon: smallIcon });
     marker.bindTooltip(station[2]);
-    console.log(station[2]);
+    // console.log(station[2]);
     markers.addLayer(marker);
   };
 

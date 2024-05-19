@@ -544,6 +544,14 @@ color: var(--bodyTextColor);
        margin: 4vw;
        }
 
+       .graphs{
+        margin: 4vw;
+        position: relative;
+        align-items: left;
+        text-align: left;
+        }
+
+
        h1 {
        font-family: "Inter", 'Roboto', Arial, sans-serif;
        font-size-adjust: 3rem;
