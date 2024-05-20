@@ -60,11 +60,15 @@ QUESTIONS = {
             for this route? Consider 1 to be 'Very Unstisfied' and 5 'Very Satisfied",
         "transit_improvement": "How could this public transit route be \
               improved?",
+        "transit_improvement_open": "Other suggestions on how this transit \
+            route could be improved:",
+        "another_trip": "Do you have another trip you would like to report?",
     },
     "p4": {
-        "switch": """Assuming that a new transit route is built connecting these \
+        "switch": "Assuming that a new transit route is built connecting these \
             stops, what factor would most motivate you to choose to take \
-                public transit?"""
+                public transit?",
+        "another_trip": "Do you have another trip you would like to report?",
     },
     "p5": {"feedback", "Any other feedback or comments:"},
 }
@@ -73,6 +77,10 @@ BOOL_CHOICES = ((True, "Yes"), (False, "No"))
 
 
 class RiderSurvey1(ModelForm):
+    """
+    Survey intro page
+    """
+
     class Meta:
         model = SurveyUser
         fields = ["frequent_transit", "car_owner"]
@@ -87,6 +95,10 @@ class RiderSurvey1(ModelForm):
 
 
 class RiderSurvey2(ModelForm):
+    """
+    Question about trip
+    """
+
     class Meta:
         model = SurveyResponse
         fields = ["trip_frequency", "trip_tod", "trip_time", "modes_of_transit"]
@@ -99,21 +111,38 @@ class RiderSurvey2(ModelForm):
 
 
 class RiderSurvey3(ModelForm):
-    transit_improvement = forms.MultipleChoiceField(
-        label=QUESTIONS["p3"]["transit_improvement"], choices=TRANSIT_IMPROVEMENT
+    """
+    Questions for transit riders
+    """
+
+    another_trip = forms.ChoiceField(
+        label=QUESTIONS["p3"]["another_trip"],
+        choices=BOOL_CHOICES,
+        widget=RadioSelect(attrs={"class": "form-radio"}),
     )
 
     class Meta:
         model = SurveyResponse
-        fields = ["satisfied", "transit_improvement"]
+        fields = ["satisfied", "transit_improvement", "transit_improvement_open"]
         labels = {
             "satisfied": _(QUESTIONS["p3"]["satisfied"]),
+            "transit_improvement": _(QUESTIONS["p3"]["transit_improvement"]),
         }
 
         widgets = {"satisfied": RadioSelect(attrs={"class": "form-radio"})}
 
 
 class RiderSurvey4(ModelForm):
+    """
+    Questions for drivers and rider share
+    """
+
+    another_trip = forms.ChoiceField(
+        label=QUESTIONS["p4"]["another_trip"],
+        choices=BOOL_CHOICES,
+        widget=RadioSelect(attrs={"class": "form-radio"}),
+    )
+
     class Meta:
         model = SurveyResponse
         fields = ["switch_to_transit"]

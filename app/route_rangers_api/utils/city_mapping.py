@@ -42,7 +42,7 @@ TRIP_FREQ = {
     6: "A few times per year",
 }
 
-MODES_OF_TRANIST = {
+MODES_OF_TRANSIT = {
     1: "Bus",
     2: "Train",
     3: "Car",
