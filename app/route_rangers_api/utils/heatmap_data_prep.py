@@ -12,6 +12,7 @@ from shapely import wkt
 import geopandas as gpd
 from geopandas import GeoDataFrame
 import json
+from shapely.geometry import MultiPolygon
 
 
 def setup_django() -> None:
@@ -179,6 +180,11 @@ def main():
 
     # split gdfs by city
     chicago_gdf = demographics_gdf[demographics_gdf["state"] == "17"]
+    # convert geo to multipolygon to match geojson
+    chicago_gdf["geographic_delimitation"] = chicago_gdf[
+        "geographic_delimitation"
+    ].apply(lambda x: MultiPolygon([x]) if x.geom_type == "Polygon" else x)
+
     newyork_gdf = demographics_gdf[demographics_gdf["state"] == "36"]
     portland_gdf = demographics_gdf[demographics_gdf["state"] == "41"]
 
@@ -190,20 +196,31 @@ def main():
 
     print("CHICAGO DATAAA", chicago_data["geometry"].head())
     print("CHHICAGO GEOPANDASS", chicago_gdf["geographic_delimitation"].head())
-    chicago_merged = chicago_data.merge(
-        chicago_gdf, how="inner", left_on="geometry", right_on="geographic_delimitation"
+
+    chicago_merged = gpd.sjoin(
+        chicago_data, chicago_gdf, how="left", predicate="intersects"
     )
-    newyork_merged = newyork_data.merge(
-        newyork_gdf, how="inner", left_on="geometry", right_on="geographic_delimitation"
+
+    newyork_merged = gpd.sjoin(
+        newyork_data, newyork_gdf, how="left", predicate="intersects"
     )
-    portland_merged = portland_data.merge(
-        portland_gdf,
-        how="inner",
-        left_on="geometry",
-        right_on="geographic_delimitation",
+
+    portland_merged = gpd.sjoin(
+        portland_data, portland_gdf, how="left", predicate="intersects"
     )
 
     print("CHICAGO MERGED", chicago_merged)
+    print("NY MERGED", newyork_merged)
+    print("PDX MERGED", portland_merged)
+
+    chicago_merged_path = os.path.join(static_folder, "ChicagoCensus_merged.geojson")
+    chicago_merged.to_file(chicago_merged_path, driver="GeoJSON")
+
+    newyork_merged_path = os.path.join(static_folder, "NewYorkCensus_merged.geojson")
+    newyork_merged.to_file(newyork_merged_path, driver="GeoJSON")
+
+    portland_merged_path = os.path.join(static_folder, "PortlandCensus_merged.geojson")
+    portland_merged.to_file(portland_merged_path, driver="GeoJSON")
 
 
 if __name__ == "__main__":
