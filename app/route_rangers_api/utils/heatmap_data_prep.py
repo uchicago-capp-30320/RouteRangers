@@ -3,6 +3,11 @@ import sys
 import django
 from dotenv import load_dotenv
 import pandas as pd
+from shapely import wkt
+import geopandas as gpd
+from shapely.geometry import Polygon
+import re
+from shapely.wkt import loads
 
 
 load_dotenv()
@@ -19,8 +24,7 @@ django.setup()
 # import models
 from route_rangers_api.models import Demographics
 
-
-demographics = Demographics.objects.all().values(
+demographics_queryset = Demographics.objects.all().values(
     "census_tract",
     "state",
     "county",
@@ -35,15 +39,27 @@ demographics = Demographics.objects.all().values(
     "transportation_to_work_bus",
     "transportation_to_work_subway",
     "population",
+    "geographic_delimitation",
 )
 
-data = list(demographics.values())
 
-demographics_df = pd.DataFrame(data)
+# Convert queryset to DataFrame
+demographics_df = pd.DataFrame(demographics_queryset)
 
+# Remove SRID prefix from WKT strings
+demographics_df["geographic_delimitation"] = (
+    demographics_df["geographic_delimitation"].str.replace(r"^SRID=\d+;", "").fillna("")
+)
 
-# Calculate weighted avg commute time
+# Convert WKT strings to Shapely geometries
+demographics_df["geographic_delimitation"] = demographics_df[
+    "geographic_delimitation"
+].apply(lambda x: wkt.loads(x) if x else None)
 
+# Create GeoDataFrame
+demographics_df = gpd.GeoDataFrame(
+    demographics_df, geometry="geographic_delimitation", crs="EPSG:4326"
+)
 
 # Calculate weighted commute time for each category
 demographics_df["weighted_commute_15_29"] = (
@@ -108,14 +124,14 @@ columns_to_drop = [
     "weighted_commute_60_89",
     "weighted_commute_less_15",
     "weighted_commute_over_90",
-    "id",
-    "transportation_to_work",
-    "transportation_to_work_car",
 ]
 
 demographics_df1 = demographics_df.drop(columns=columns_to_drop)
 
-# Print the DataFrame
-print(demographics_df1.head(10))
+demographics_df1 = demographics_df1.copy()
+
+print(demographics_df1.head(1))
 
 print(demographics_df1.columns)
+
+print(type(demographics_df1))
