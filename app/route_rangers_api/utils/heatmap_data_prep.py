@@ -148,7 +148,7 @@ def drop_columns(demographics_df) -> GeoDataFrame:
     return demographics_df.drop(columns=columns_to_drop)
 
 
-def main():
+def main() -> None:
     setup_django()
     # configuration to save output
     current_dir = os.path.dirname(os.path.abspath(__file__))
