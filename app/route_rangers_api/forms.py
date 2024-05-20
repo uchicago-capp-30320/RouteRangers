@@ -102,6 +102,7 @@ class RiderSurvey3(ModelForm):
     transit_improvement = forms.MultipleChoiceField(
         label=QUESTIONS["p3"]["transit_improvement"], choices=TRANSIT_IMPROVEMENT
     )
+
     class Meta:
         model = SurveyResponse
         fields = ["satisfied", "transit_improvement"]
