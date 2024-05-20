@@ -60,10 +60,9 @@ def preprocess_demographics_df(demographics_df) -> GeoDataFrame:
     demographics_df["geographic_delimitation"] = (
         demographics_df["geographic_delimitation"]
         .astype(str)
-        .str[10:]  # Remove the first 10 characters
+        .str[10:]  # Remove the first 10 characters with SRID info
         .fillna("")
     )
-    print("AFTER FIRST PASS", demographics_df["geographic_delimitation"])
     # WKT strings to Shapely geometries
     demographics_df["geographic_delimitation"] = demographics_df[
         "geographic_delimitation"
@@ -76,8 +75,11 @@ def calculate_weighted_commute_times(demographics_df) -> GeoDataFrame:
     """
     Takes in a GeoDataFrame with commute time information by time
     category from the Census and returns a GeoDataFrame with a weighted
-    average commute time
+    average commute time and percentage of people by transit mode
     """
+
+    demographics_df = demographics_df[demographics_df["population"] != 0].copy()
+
     # weighted commute time for each category
     # the weighted_commute_... columns show number of people who take
     # between x and x minutes in their commute
@@ -101,14 +103,16 @@ def calculate_weighted_commute_times(demographics_df) -> GeoDataFrame:
     ) / demographics_df["population"]
 
     demographics_df["percentage_public_to_work"] = (
-        demographics_df["transportation_to_work_public"] / demographics_df["population"]
+        demographics_df["transportation_to_work_public"]
+        / demographics_df["population"]
+        * 100
     )
     demographics_df["percentage_bus_to_work"] = (
         demographics_df["transportation_to_work_bus"] / demographics_df["population"]
-    )
+    ) * 100
     demographics_df["percentage_subway_to_work"] = (
         demographics_df["transportation_to_work_subway"] / demographics_df["population"]
-    )
+    ) * 100
 
     # weighted average commute time
     demographics_df["total_weighted_commute_time"] = (
@@ -146,6 +150,16 @@ def drop_columns(demographics_df) -> GeoDataFrame:
 
 def main():
     setup_django()
+    # configuration to save output
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    parent_dir = os.path.abspath(os.path.join(current_dir, "../../"))
+    sys.path.append(parent_dir)
+    static_folder = os.path.join(parent_dir, "route_rangers_api/static")
+    chicago_merged_path = os.path.join(static_folder, "ChicagoCensus_2020.geojson")
+    newyork_merged_path = os.path.join(static_folder, "NewYorkCensus_2020.geojson")
+    portland_merged_path = os.path.join(static_folder, "PortlandCensus_2020.geojson")
+
+    # call demographic data functions
     demographics_df = fetch_demographics_data()
     demographics_df = preprocess_demographics_df(demographics_df)
     demographics_df = calculate_weighted_commute_times(demographics_df)
@@ -155,72 +169,15 @@ def main():
         demographics_df, geometry="geographic_delimitation", crs="EPSG:4326"
     )
 
-    print("ORGINAL GDFFFF", demographics_gdf["geographic_delimitation"])
-    print(demographics_gdf.columns)
-    print(type(demographics_gdf))
-
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    parent_dir = os.path.abspath(os.path.join(current_dir, "../../"))
-    sys.path.append(parent_dir)
-
-    static_folder = os.path.join(parent_dir, "route_rangers_api/static")
-
-    chicago_geojson_path = os.path.join(static_folder, "ChicagoCensus.geojson")
-    newyork_geojson_path = os.path.join(static_folder, "newyork.geojson")
-    portland_geojson_path = os.path.join(static_folder, "portland.geojson")
-
-    with open(chicago_geojson_path, "r") as chicago_file:
-        chicago_data = gpd.read_file(chicago_file)
-
-    with open(newyork_geojson_path, "r") as newyork_file:
-        newyork_data = gpd.read_file(newyork_file)
-
-    with open(portland_geojson_path, "r") as portland_file:
-        portland_data = gpd.read_file(portland_file)
-
     # split gdfs by city
     chicago_gdf = demographics_gdf[demographics_gdf["state"] == "17"]
-    # convert geo to multipolygon to match geojson
-    chicago_gdf["geographic_delimitation"] = chicago_gdf[
-        "geographic_delimitation"
-    ].apply(lambda x: MultiPolygon([x]) if x.geom_type == "Polygon" else x)
-
     newyork_gdf = demographics_gdf[demographics_gdf["state"] == "36"]
     portland_gdf = demographics_gdf[demographics_gdf["state"] == "41"]
 
-    print("PORTLAND GDF", portland_gdf.head(1))
-
-    # merge geojsons with geopandas dfs (spatial join)
-    print("crs 1", chicago_gdf.crs)
-    print("crs 2", chicago_data.crs)
-
-    print("CHICAGO DATAAA", chicago_data["geometry"].head())
-    print("CHHICAGO GEOPANDASS", chicago_gdf["geographic_delimitation"].head())
-
-    chicago_merged = gpd.sjoin(
-        chicago_data, chicago_gdf, how="left", predicate="intersects"
-    )
-
-    newyork_merged = gpd.sjoin(
-        newyork_data, newyork_gdf, how="left", predicate="intersects"
-    )
-
-    portland_merged = gpd.sjoin(
-        portland_data, portland_gdf, how="left", predicate="intersects"
-    )
-
-    print("CHICAGO MERGED", chicago_merged)
-    print("NY MERGED", newyork_merged)
-    print("PDX MERGED", portland_merged)
-
-    chicago_merged_path = os.path.join(static_folder, "ChicagoCensus_merged.geojson")
-    chicago_merged.to_file(chicago_merged_path, driver="GeoJSON")
-
-    newyork_merged_path = os.path.join(static_folder, "NewYorkCensus_merged.geojson")
-    newyork_merged.to_file(newyork_merged_path, driver="GeoJSON")
-
-    portland_merged_path = os.path.join(static_folder, "PortlandCensus_merged.geojson")
-    portland_merged.to_file(portland_merged_path, driver="GeoJSON")
+    # Save geojsons for visualizing heat map
+    chicago_gdf.to_file(chicago_merged_path, driver="GeoJSON")
+    newyork_gdf.to_file(newyork_merged_path, driver="GeoJSON")
+    portland_gdf.to_file(portland_merged_path, driver="GeoJSON")
 
 
 if __name__ == "__main__":
