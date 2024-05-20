@@ -3,7 +3,7 @@
   <h1>{{ City }} Transit Ecosystem</h1>
   <p class="inline">Overview of Transit in Your City</p>
 </div>
-<div class="card-container row mx-3">
+<div class="card-container row">
   <div class="col-12 col-md-3 col-lg-3">
     <button
       class="btn btn-secondary dropdown-toggle"
@@ -20,6 +20,14 @@
           class="dropdown-item"
           href="#"
           onclick="updateCards('typeDropdown', this)"
+          >All</a
+        >
+      </li>
+      <li>
+        <a
+          class="dropdown-item"
+          href="#"
+          onclick="updateCards('typeDropdown', this)"
           >Bus</a
         >
       </li>
@@ -31,19 +39,11 @@
           >Train</a
         >
       </li>
-      <li>
-        <a
-          class="dropdown-item"
-          href="#"
-          onclick="updateCards('typeDropdown', this)"
-          >Regional</a
-        >
-      </li>
       <!-- Add more months as needed -->
     </ul>
   </div>
 
-  <div class="col-12 col-md-3 col-lg-3">
+  <!-- <div class="col-12 col-md-3 col-lg-3">
     <button
       class="btn btn-secondary dropdown-toggle"
       type="button"
@@ -87,9 +87,9 @@
         >
       </li>
     </ul>
-  </div>
+  </div> -->
 
-  <div class="col-12 col-md-3 col-lg-3">
+  <!-- <div class="col-12 col-md-3 col-lg-3">
     <button
       class="btn btn-secondary dropdown-toggle"
       type="button"
@@ -117,8 +117,9 @@
         >
       </li>
     </ul>
-  </div>
+  </div> -->
 </div>
+
 
 <div class="card-container row mx-3">
   <div class="col-12 col-md-4 col-lg-4" id="totalRidersCard">
@@ -137,11 +138,11 @@
       </div>
     </div>
   </div>
-  <div class="col-12 col-md-4 col-lg-4" id="averageCommuteTimeCard">
+  <div class="col-12 col-md-4 col-lg-4" id="pctOfCommutersCard">
     <div class="card">
       <div class="card-content">
-        <p class="card-title">Average Commute Time</p>
-        <p class="card-text" id="averageCommuteTimeText">{{Commute}}</p>
+        <p class="card-title">Percent of Commuters</p>
+        <p class="card-text" id="pctOfCommutersText">{{PercentOfCommuters}}</p>
       </div>
     </div>
   </div>
@@ -265,8 +266,14 @@
 <script>
   // Card update variables
   cityData = {{ citydata | safe }};
-  var days= "Weekdays";
-  var seasons= "Fall";
-  var type= "Train";
+  // var days= "Weekdays";
+  // var seasons= "Fall";
+  var type= "All";
+  document.getElementById("totalRidersText").textContent =
+    cityData[type]["TotalRiders"];
+  document.getElementById("totalRoutesText").textContent =
+    cityData[type]["TotalRoutes"];
+  document.getElementById("pctOfCommutersText").textContent =
+    cityData[type]["PercentOfCommuters"];
 </script>
 {% endblock %}

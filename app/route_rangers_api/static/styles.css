@@ -526,6 +526,8 @@ body {
 }
 
 .card-container {
+  margin-left: 4vw;
+  margin-right: 4vw;
   display: flex;
   justify-content: space-between;
 }

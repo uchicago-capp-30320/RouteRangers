@@ -25,6 +25,7 @@ from route_rangers_api.forms import (
 
 from django.contrib.gis.geos import GEOSGeometry, MultiLineString, LineString
 
+
 def test(request):
     return HttpResponse("""This is a test route without any html/JS/static stuff""")
 
@@ -40,11 +41,7 @@ def about(request):
 
 
 def dashboard(request, city: str):
-    # get num routes COMMENT OUT
-    num_routes = 4
-
-
-    # get commute
+    # get metrics for dashboard cards
     dashboard_dict = dashboard_metrics(city)
 
     # get paths
@@ -84,10 +81,8 @@ def dashboard(request, city: str):
     context = {
         "City": CITY_CONTEXT[city]["CityName"],
         "City_NoSpace": city,
-        "citydata": CARD_DATA,
+        "citydata": dashboard_dict,
         "heatmaplabel": f"{city_name} Population Density",
-        "TotalRiders": "104,749",
-        "TotalRoutes": num_routes,
         "Commute": "40 Min",
         "cities_class": "cs-li-link",
         "policy_class": "cs-li-link cs-active",

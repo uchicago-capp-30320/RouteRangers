@@ -21,17 +21,17 @@ def dashboard_metrics(city: str):
     all_commuters, bus_commuters, train_commuters = get_pct_riders(city)
     dashboard_card_data = {
         "All": {
-            "TotalRiders": all_ridership,
+            "TotalRiders": f'{format(all_ridership, ",")}',
             "TotalRoutes": all_routes,
             "PercentOfCommuters": f"{all_commuters}%",
         },
         "Bus": {
-            "TotalRiders": bus_ridership,
+            "TotalRiders": f'{format(bus_ridership, ",")}',
             "TotalRoutes": bus_routes,
             "PercentOfCommuters": f"{bus_commuters}%",
         },
         "Train": {
-            "TotalRiders": train_ridership,
+            "TotalRiders": f'{format(train_ridership, ",")}',
             "TotalRoutes": train_routes,
             "PercentOfCommuters": f"{train_commuters}%",
         },
