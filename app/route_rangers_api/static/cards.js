@@ -8,8 +8,6 @@ function updateCards(buttonId, element) {
   } else {
     type = buttonText;
   }
-  console.log(days, seasons, type);
-  console.log(cityData);
 
   document.getElementById("totalRidersText").textContent =
     cityData[type][seasons][days]["TotalRiders"];
