@@ -11,6 +11,7 @@ from django.templatetags.static import static
 import uuid
 
 from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT, CITIES_CHOICES_SURVEY
+from app.route_rangers_api.utils.metric_processing import dashboard_metrics
 from route_rangers_api.models import TransitRoute, TransitStation, SurveyAnswer
 from route_rangers_api.forms import (
     RiderSurvey1,
@@ -19,12 +20,6 @@ from route_rangers_api.forms import (
     RiderSurvey4,
 )
 from django.contrib.gis.geos import GEOSGeometry, MultiLineString, LineString
-
-from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT
-from route_rangers_api.models import TransitRoute, TransitStation
-
-import json
-
 
 
 def test(request):
@@ -44,10 +39,11 @@ def about(request):
 def dashboard(request, city: str):
     # get num riders
     print(city)
-    # get num routes
-    num_routes = TransitRoute.objects.filter(city=CITY_CONTEXT[city]["DB_Name"]).count()
+    # get num routes COMMENT OUT
+    num_routes = 4
 
     # get commute
+    dashboard_dict = dashboard_metrics(city)
 
     # get paths
     routes = TransitRoute.objects.filter(city=CITY_CONTEXT[city]["DB_Name"])

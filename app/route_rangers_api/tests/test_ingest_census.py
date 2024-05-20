@@ -9,13 +9,13 @@ from app.scripts.ingest_census_data import (
     get_census_data,
     # store_census_data,
     upload_census_data,
-    city_fips,
+    CITY_FIPS,
 )
 
 
 @pytest.fixture(scope="class")
 def supported_cities():
-    return list(city_fips.keys())
+    return list(CITY_FIPS.keys())
 
 
 ########################################################################################
