@@ -483,6 +483,7 @@ body {
   }
 }
 
+
 .card {
   width: 80%;
   margin: 3vw;
@@ -537,9 +538,17 @@ body {
 
 /* Standard Styles */
 
-.headers {
-  margin: 4vw;
-}
+       .headers{
+       margin: 4vw;
+       }
+
+       .graphs{
+        margin: 4vw;
+        position: relative;
+        align-items: left;
+        text-align: left;
+        }
+
 
 h1 {
   font-family: 'Inter', 'Roboto', Arial, sans-serif;

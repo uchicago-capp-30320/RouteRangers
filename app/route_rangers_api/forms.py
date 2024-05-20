@@ -1,7 +1,7 @@
 # ask JP why we're importing like this instead of:
 # from django import forms
 from django.contrib.gis import forms
-from route_rangers_api.models import SurveyAnswer
+from route_rangers_api.models import SurveyResponse, SurveyUser
 from django.forms import ModelForm, RadioSelect
 from django.utils.translation import gettext_lazy as _
 
@@ -74,7 +74,7 @@ BOOL_CHOICES = ((True, "Yes"), (False, "No"))
 
 class RiderSurvey1(ModelForm):
     class Meta:
-        model = SurveyAnswer
+        model = SurveyUser
         fields = ["frequent_transit", "car_owner"]
         labels = {
             "frequent_transit": _(QUESTIONS["p1"]["frequent_transit"]),
@@ -88,7 +88,7 @@ class RiderSurvey1(ModelForm):
 
 class RiderSurvey2(ModelForm):
     class Meta:
-        model = SurveyAnswer
+        model = SurveyResponse
         fields = ["trip_frequency", "trip_tod", "trip_time", "modes_of_transit"]
         labels = {
             "trip_frequency": _(QUESTIONS["p2"]["trip_freq"]),
@@ -100,28 +100,25 @@ class RiderSurvey2(ModelForm):
 
 class RiderSurvey3(ModelForm):
     transit_improvement = forms.MultipleChoiceField(
-        label=QUESTIONS["p3"]["transit_improvement"],
-        choices=TRANSIT_IMPROVEMENT
+        label=QUESTIONS["p3"]["transit_improvement"], choices=TRANSIT_IMPROVEMENT
     )
 
     class Meta:
-        model = SurveyAnswer
-        fields = ["satisfied"]
+        model = SurveyResponse
+        fields = ["satisfied", "transit_improvement"]
         labels = {
             "satisfied": _(QUESTIONS["p3"]["satisfied"]),
         }
-        widgets = {
-            "satisfied": RadioSelect(attrs={"class": "form-radio"})
-        }
+
+        widgets = {"satisfied": RadioSelect(attrs={"class": "form-radio"})}
 
 
 class RiderSurvey4(ModelForm):
     class Meta:
-        model = SurveyAnswer
+        model = SurveyResponse
         fields = ["switch_to_transit"]
         labels = {
             "switch_to_transit": _(QUESTIONS["p4"]["switch"]),
         }
-        widgets = {
-            "switch_to_transit": RadioSelect(attrs={"class": "form-radio"})
-        }
+
+        widgets = {"switch_to_transit": RadioSelect(attrs={"class": "form-radio"})}

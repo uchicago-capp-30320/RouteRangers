@@ -25,7 +25,6 @@ def supported_cities():
 
 @pytest.mark.usefixtures("supported_cities")
 class ExtractCensusData(TestCase):
-
     def setUp(self):
         self.monkeypatch = MonkeyPatch()
 
@@ -95,7 +94,6 @@ class ExtractCensusData(TestCase):
 
 
 class StoreCensusData(TestCase):
-
     def setUp(self):
         self.monkeypatch = MonkeyPatch()
         self.monkeypatch.setattr(os, "getcwd", lambda: "/fake/dir")

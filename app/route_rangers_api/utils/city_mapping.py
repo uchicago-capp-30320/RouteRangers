@@ -68,6 +68,15 @@ SWITCH_TO_TRANSIT = {
     4: "There are enough seats for all riders",
     5: "It feels safe at the station and onboard",
     6: "It will save me money",
+    7: "I would not be willing to switch to transit",
+}
+
+TRANSIT_IMPROVEMENT = {
+    1: "More frequent service",
+    2: "More accurate schedule times",
+    3: "Fewer transfers or a more direct route",
+    4: "It feels safe at the station and onboard",
+    5: "No improvement needed",
 }
 
 TIME_OF_DAY = {1: "Peak commute hours", 2: "Daytime", 3: "Nighttime"}
@@ -75,3 +84,116 @@ TIME_OF_DAY = {1: "Peak commute hours", 2: "Daytime", 3: "Nighttime"}
 BOOL_CHOICES = {1: "Yes", 2: "No"}
 
 SATISFIED = {1: "1", 2: "2", 3: "3", 4: "4", 5: "5"}
+
+
+CARD_DATA = {
+    "Bus": {
+        "Fall": {
+            "Weekdays": {
+                "TotalRiders": 5000,
+                "TotalRoutes": 30,
+                "AverageCommuteTime": "45 minutes",
+            },
+            "Weekends": {
+                "TotalRiders": 6000,
+                "TotalRoutes": 35,
+                "AverageCommuteTime": "50 minutes",
+            },
+        },
+        "Winter": {
+            "Weekdays": {
+                "TotalRiders": 5500,
+                "TotalRoutes": 32,
+                "AverageCommuteTime": "48 minutes",
+            },
+            "Weekends": {
+                "TotalRiders": 5800,
+                "TotalRoutes": 33,
+                "AverageCommuteTime": "47 minutes",
+            },
+        },
+        "Spring": {
+            "Weekdays": {
+                "TotalRiders": 6200,
+                "TotalRoutes": 37,
+                "AverageCommuteTime": "52 minutes",
+            },
+            "Weekends": {
+                "TotalRiders": 1,
+                "TotalRoutes": 2,
+                "AverageCommuteTime": "3 minutes",
+            },
+        },
+        "Summer": {
+            "Weekdays": {
+                "TotalRiders": 4,
+                "TotalRoutes": 5,
+                "AverageCommuteTime": "6 minutes",
+            },
+            "Weekends": {
+                "TotalRiders": 7,
+                "TotalRoutes": 8,
+                "AverageCommuteTime": "9 minutes",
+            },
+        },
+    },
+    "Train": {
+        "Fall": {
+            "Weekdays": {
+                "TotalRiders": 50020,
+                "TotalRoutes": 320,
+                "AverageCommuteTime": "415 minutes",
+            },
+            "Weekends": {
+                "TotalRiders": 60100,
+                "TotalRoutes": 315,
+                "AverageCommuteTime": "510 minutes",
+            },
+        },
+        "Winter": {
+            "Weekdays": {
+                "TotalRiders": 51500,
+                "TotalRoutes": 312,
+                "AverageCommuteTime": "418 minutes",
+            },
+            "Weekends": {
+                "TotalRiders": 5100,
+                "TotalRoutes": 33,
+                "AverageCommuteTime": "417 minutes",
+            },
+        },
+        "Spring": {
+            "Weekdays": {
+                "TotalRiders": 62010,
+                "TotalRoutes": 317,
+                "AverageCommuteTime": "512 minutes",
+            },
+            "Weekends": {
+                "TotalRiders": 11,
+                "TotalRoutes": 21,
+                "AverageCommuteTime": "31 minutes",
+            },
+        },
+        "Summer": {
+            "Weekdays": {
+                "TotalRiders": 41,
+                "TotalRoutes": 51,
+                "AverageCommuteTime": "6 minutes",
+            },
+            "Weekends": {
+                "TotalRiders": 71,
+                "TotalRoutes": 81,
+                "AverageCommuteTime": "91 minutes",
+            },
+        },
+    },
+    "all": {
+        "all": {
+            "all": {
+                "TotalRiders": 71,
+                "TotalRoutes": 81,
+                "AverageCommuteTime": "91 minutes",
+            }
+        }
+    },
+}
