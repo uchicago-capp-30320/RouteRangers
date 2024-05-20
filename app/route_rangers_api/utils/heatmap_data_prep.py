@@ -11,6 +11,7 @@ import pandas as pd
 from shapely import wkt
 import geopandas as gpd
 from geopandas import GeoDataFrame
+import json
 
 
 def setup_django() -> None:
@@ -57,10 +58,11 @@ def preprocess_demographics_df(demographics_df) -> GeoDataFrame:
     # remove SRID prefix and edit null vals
     demographics_df["geographic_delimitation"] = (
         demographics_df["geographic_delimitation"]
-        .str.replace(r"^SRID=\d+;", "")
+        .astype(str)
+        .str[10:]  # Remove the first 10 characters
         .fillna("")
     )
-
+    print("AFTER FIRST PASS", demographics_df["geographic_delimitation"])
     # WKT strings to Shapely geometries
     demographics_df["geographic_delimitation"] = demographics_df[
         "geographic_delimitation"
@@ -152,9 +154,56 @@ def main():
         demographics_df, geometry="geographic_delimitation", crs="EPSG:4326"
     )
 
-    print(demographics_gdf.head(1))
+    print("ORGINAL GDFFFF", demographics_gdf["geographic_delimitation"])
     print(demographics_gdf.columns)
     print(type(demographics_gdf))
+
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    parent_dir = os.path.abspath(os.path.join(current_dir, "../../"))
+    sys.path.append(parent_dir)
+
+    static_folder = os.path.join(parent_dir, "route_rangers_api/static")
+
+    chicago_geojson_path = os.path.join(static_folder, "ChicagoCensus.geojson")
+    newyork_geojson_path = os.path.join(static_folder, "newyork.geojson")
+    portland_geojson_path = os.path.join(static_folder, "portland.geojson")
+
+    with open(chicago_geojson_path, "r") as chicago_file:
+        chicago_data = gpd.read_file(chicago_file)
+
+    with open(newyork_geojson_path, "r") as newyork_file:
+        newyork_data = gpd.read_file(newyork_file)
+
+    with open(portland_geojson_path, "r") as portland_file:
+        portland_data = gpd.read_file(portland_file)
+
+    # split gdfs by city
+    chicago_gdf = demographics_gdf[demographics_gdf["state"] == "17"]
+    newyork_gdf = demographics_gdf[demographics_gdf["state"] == "36"]
+    portland_gdf = demographics_gdf[demographics_gdf["state"] == "41"]
+
+    print("PORTLAND GDF", portland_gdf.head(1))
+
+    # merge geojsons with geopandas dfs (spatial join)
+    print("crs 1", chicago_gdf.crs)
+    print("crs 2", chicago_data.crs)
+
+    print("CHICAGO DATAAA", chicago_data["geometry"].head())
+    print("CHHICAGO GEOPANDASS", chicago_gdf["geographic_delimitation"].head())
+    chicago_merged = chicago_data.merge(
+        chicago_gdf, how="inner", left_on="geometry", right_on="geographic_delimitation"
+    )
+    newyork_merged = newyork_data.merge(
+        newyork_gdf, how="inner", left_on="geometry", right_on="geographic_delimitation"
+    )
+    portland_merged = portland_data.merge(
+        portland_gdf,
+        how="inner",
+        left_on="geometry",
+        right_on="geographic_delimitation",
+    )
+
+    print("CHICAGO MERGED", chicago_merged)
 
 
 if __name__ == "__main__":
