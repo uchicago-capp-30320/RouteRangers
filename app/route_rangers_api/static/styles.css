@@ -367,7 +367,7 @@ body {
     box-sizing: border-box;
     padding: 0 1rem;
     background-color: #e5e5e5;
-    box-shadow: #555 0px 8px 24px;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
     z-index: 10000;
   }
   #cs-navigation .cs-container {
