@@ -8,9 +8,15 @@ from django.views import generic
 from django.utils import timezone
 from django.core.serializers import serialize
 from django.templatetags.static import static
+from django.contrib.gis.geos import GEOSGeometry, MultiLineString, LineString
+
 import uuid
 
-from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT, CITIES_CHOICES_SURVEY
+from app.route_rangers_api.utils.city_mapping import (
+    CITY_CONTEXT,
+    CITIES_CHOICES_SURVEY,
+    CARD_DATA,
+)
 from route_rangers_api.models import TransitRoute, TransitStation, SurveyResponse
 from route_rangers_api.forms import (
     RiderSurvey1,
@@ -18,6 +24,7 @@ from route_rangers_api.forms import (
     RiderSurvey3,
     RiderSurvey4,
 )
+
 from django.contrib.gis.geos import GEOSGeometry, MultiLineString, LineString
 
 from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT
@@ -42,7 +49,6 @@ def about(request):
 
 def dashboard(request, city: str):
     # get num riders
-    print(city)
     # get num routes
     num_routes = TransitRoute.objects.filter(city=CITY_CONTEXT[city]["DB_Name"]).count()
 
@@ -85,6 +91,7 @@ def dashboard(request, city: str):
     context = {
         "City": CITY_CONTEXT[city]["CityName"],
         "City_NoSpace": city,
+        "citydata": CARD_DATA,
         "heatmaplabel": f"{city_name} Population Density",
         "TotalRiders": "104,749",
         "TotalRoutes": num_routes,
@@ -98,6 +105,8 @@ def dashboard(request, city: str):
         "csv": CITY_CONTEXT[city]["csv"],
         "lineplot": CITY_CONTEXT[city]["lineplot"],
         "geojsonfilepath": static(CITY_CONTEXT[city]["geojsonfilepath"]),
+        "heatmapscale": [0, 10, 20, 50, 100, 200, 500, 1000],
+        "heat_map_variable": "density",
         "routes": routes_json,
     }
     return render(request, "dashboard.html", context)
@@ -115,7 +124,10 @@ def survey_p1(request, city: str):
         survey_answer = SurveyAnswer(user_id=request.session["uuid"], city=city_survey)
         update_survey = RiderSurvey1(request.POST, instance=survey_answer)
         # update and save
+        survey_answer = form.save(instance=survey_answer)
+
         update_survey.save()
+
         print("survey answer", survey_answer)
         return redirect(reverse("app:survey_p2", kwargs={"city": city}))
     else:
