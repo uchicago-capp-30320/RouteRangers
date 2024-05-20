@@ -6,7 +6,7 @@ from typing import List, Dict
 from dotenv import load_dotenv
 from django.db import IntegrityError
 from route_rangers_api.models import Demographics
-from route_rangers_api.utils import CITY_FIPS
+from route_rangers_api.utils.city_mapping import CITY_FIPS
 
 ###############################################################################
 # SETUP
