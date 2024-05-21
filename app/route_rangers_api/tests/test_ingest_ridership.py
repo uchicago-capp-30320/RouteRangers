@@ -13,6 +13,7 @@ from app.scripts.extract_nyc_data import DATASETS, NY_TZ, extract_daily_data
 ## I added the slow option to run slow tests such that they are not run on
 ## the Workflow in GitHub
 
+
 def pytest_addoption(parser):
     parser.addoption(
         "--runslow", action="store_true", default=False, help="run slow tests"
@@ -27,6 +28,7 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if "slow" in item.keywords:
             item.add_marker(skip_slow)
+
 
 ###################
 ## NY Extract tests
