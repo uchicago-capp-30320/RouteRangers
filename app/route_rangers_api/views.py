@@ -50,12 +50,6 @@ def about(request):
 
 
 def dashboard(request, city: str):
-    # get num riders
-    # get num routes
-    num_routes = TransitRoute.objects.filter(city=CITY_CONTEXT[city]["DB_Name"]).count()
-
-    # get commute
-
     # get paths
     routes = TransitRoute.objects.filter(city=CITY_CONTEXT[city]["DB_Name"])
     # reduce load time and data transfer size by overwriting model attribute
@@ -88,7 +82,6 @@ def dashboard(request, city: str):
         "City_NoSpace": city,
         "citydata": dashboard_dict,
         "heatmaplabel": f"{city_name} By Census Tract",
-        "TotalRoutes": num_routes,
         "cities_class": "cs-li-link",
         "policy_class": "cs-li-link cs-active",
         "survey_class": "cs-li-link",
@@ -98,7 +91,6 @@ def dashboard(request, city: str):
         "csv": CITY_CONTEXT[city]["csv"],
         "lineplot": CITY_CONTEXT[city]["lineplot"],
         "geojsonfilepath": static(CITY_CONTEXT[city]["geojsonfilepath"]),
-        "heatmapscale": [0, 10, 20, 50, 100, 200, 500, 1000],
         "routes": routes_json,
         "heatmap_categories": [
             "median_income",
@@ -310,7 +302,7 @@ def thanks(request, city: str):
     }
     return render(request, "thanks.html", context)
 
- 
+
 def responses(request, city: str):
     context = {
         "City": CITY_CONTEXT[city]["CityName"],
