@@ -12,15 +12,24 @@ from django.contrib.gis.geos import GEOSGeometry, MultiLineString, LineString
 
 import uuid
 
-from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT, CITIES_CHOICES_SURVEY
 from app.route_rangers_api.utils.metric_processing import dashboard_metrics
-from route_rangers_api.models import TransitRoute, TransitStation, SurveyResponse
-
+from app.route_rangers_api.utils.city_mapping import (
+    CITY_CONTEXT,
+    CITIES_CHOICES_SURVEY,
+    MODES_OF_TRANSIT,
+)
+from route_rangers_api.models import (
+    TransitRoute,
+    TransitStation,
+    SurveyResponse,
+    SurveyUser,
+)
 from route_rangers_api.forms import (
     RiderSurvey1,
     RiderSurvey2,
     RiderSurvey3,
     RiderSurvey4,
+    RiderSurvey5,
 )
 
 from django.contrib.gis.geos import GEOSGeometry, MultiLineString, LineString
@@ -101,24 +110,24 @@ def dashboard(request, city: str):
 
 
 def survey_p1(request, city: str):
-    # url = ""
+    """
+    Survey intro page
+    """
     # Gen unique user id with uuid
     request.session["uuid"] = str(uuid.uuid4())
-    user_id = request.session["uuid"]
-    print(f'user_id:{request.session["uuid"]} - page 1')
+    request.session["route_id"] = 1
+
     if request.method == "POST":
-        # create new object
+        # create new SurveyUser object
         city_survey = CITIES_CHOICES_SURVEY[city]
-        survey_answer = SurveyAnswer(user_id=request.session["uuid"], city=city_survey)
+        survey_answer = SurveyUser(user_id=request.session["uuid"], city=city_survey)
         update_survey = RiderSurvey1(request.POST, instance=survey_answer)
         # update and save
-        survey_answer = form.save(instance=survey_answer)
-
         update_survey.save()
 
-        print("survey answer", survey_answer)
         return redirect(reverse("app:survey_p2", kwargs={"city": city}))
-    else:
+
+    else:  # GET
         form = RiderSurvey1()
 
     context = get_survey_context(city, form)
@@ -127,32 +136,35 @@ def survey_p1(request, city: str):
 
 
 def survey_p2(request, city: str, user_id: str = None):
+    """
+    Question about trip
+    """
     print(request.method)
     user_id = request.session.get("uuid")
-    print(f'user_id:{request.session["uuid"]} - page 1')
+    route_id = request.session.get("route_id")
+
     if request.method == "POST":
-        survey_answer = SurveyAnswer.objects.get(user_id=user_id)
+        # check if route already exists
+        city_survey = CITIES_CHOICES_SURVEY[city]
+        survey_answer = SurveyResponse(
+            user_id_id=user_id, city=city_survey, route_id=route_id
+        )
         update_survey = RiderSurvey2(request.POST, instance=survey_answer)
+        # update and save
         update_survey.save()
-        return redirect(reverse("app:survey_p3", kwargs={"city": city}))
-    else:
-        form = RiderSurvey2()
 
-    context = get_survey_context(city, form)
+        # return selected mode of transit from form
+        selected_mode_index = update_survey.cleaned_data["modes_of_transit"]
+        selected_mode = MODES_OF_TRANSIT[selected_mode_index]
+        print("selected mode: ", selected_mode)
+        if selected_mode == "Train" or selected_mode == "Bus":
+            return redirect(reverse("app:survey_p3", kwargs={"city": city}))
+        elif selected_mode == "Car" or selected_mode == "Rideshare":
+            return redirect(reverse("app:survey_p4", kwargs={"city": city}))
+        else:
+            return redirect(reverse("app:survey_p5", kwargs={"city": city}))
 
-    return render(request, "survey_p2.html", context)
-
-
-def survey_p2(request, city: str, user_id: str = None):
-    print(request.method)
-    user_id = request.session.get("uuid")
-    print(f'user_id:{request.session["uuid"]} - page 1')
-    if request.method == "POST":
-        survey_answer = SurveyAnswer.objects.get(user_id=user_id)
-        update_survey = RiderSurvey2(request.POST, instance=survey_answer)
-        update_survey.save()
-        return redirect(reverse("app:survey_p3", kwargs={"city": city}))
-    else:
+    else:  # GET
         form = RiderSurvey2()
 
     context = get_survey_context(city, form)
@@ -161,14 +173,32 @@ def survey_p2(request, city: str, user_id: str = None):
 
 
 def survey_p3(request, city: str):
+    """
+    Questions for transit riders
+    """
     user_id = request.session.get("uuid")
+    route_id = request.session.get("route_id")
     print(request.method)
+
     if request.method == "POST":
-        survey_answer = SurveyAnswer.objects.get(user_id=user_id)
+        survey_answer = SurveyResponse.objects.get(
+            user_id_id=user_id, route_id=route_id
+        )
         update_survey = RiderSurvey3(request.POST, instance=survey_answer)
         update_survey.save()
-        return redirect(reverse("app:survey_p4", kwargs={"city": city}))
-    else:
+
+        # check if user has another trip to report
+        another_trip = update_survey.cleaned_data["another_trip"]
+
+        # Not recognizing T/F as booleans so using string
+        if another_trip == "True" and int(route_id) < 3:
+            route_id += 1
+            request.session["route_id"] = route_id
+            return redirect(reverse("app:survey_p2", kwargs={"city": city}))
+        else:
+            return redirect(reverse("app:thanks", kwargs={"city": city}))
+
+    else:  # GET
         form = RiderSurvey3()
 
     context = get_survey_context(city, form)
@@ -177,15 +207,60 @@ def survey_p3(request, city: str):
 
 
 def survey_p4(request, city: str):
+    """
+    Questions for drivers and rider share
+    """
     user_id = request.session.get("uuid")
+    route_id = request.session.get("route_id")
     print(request.method)
+
     if request.method == "POST":
-        survey_answer = SurveyAnswer.objects.get(user_id=user_id)
+        survey_answer = SurveyResponse.objects.get(
+            user_id_id=user_id, route_id=route_id
+        )
         update_survey = RiderSurvey4(request.POST, instance=survey_answer)
         update_survey.save()
-        return redirect(reverse("app:thanks", kwargs={"city": city}))
-    else:
+
+        # check if user has another trip to report
+        another_trip = update_survey.cleaned_data["another_trip"]
+
+        if another_trip == "True" and int(route_id) < 3:
+            route_id += 1
+            request.session["route_id"] = route_id
+            return redirect(reverse("app:survey_p2", kwargs={"city": city}))
+        else:
+            return redirect(reverse("app:thanks", kwargs={"city": city}))
+
+    else:  # GET
         form = RiderSurvey4()
+
+    context = get_survey_context(city, form)
+
+    return render(request, "survey_p4.html", context)
+
+
+def survey_p5(request, city: str):
+    """
+    Check if bikers and walkers have another trip to report.
+    """
+    route_id = request.session.get("route_id")
+    print(request.method)
+    if request.method == "POST":
+        form = RiderSurvey5(request.POST)
+        form.is_valid()
+
+        # check if user has another trip to report
+        another_trip = form.cleaned_data["another_trip"]
+
+        if another_trip == "True" and int(route_id) < 3:
+            route_id += 1
+            request.session["route_id"] = route_id
+            return redirect(reverse("app:survey_p2", kwargs={"city": city}))
+        else:
+            return redirect(reverse("app:thanks", kwargs={"city": city}))
+
+    else:  # GET
+        form = RiderSurvey5()
 
     context = get_survey_context(city, form)
 
