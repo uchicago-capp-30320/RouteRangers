@@ -17,21 +17,6 @@ from shapely.geometry import MultiPolygon
 from django.db.models import Avg, Count, Sum
 from typing import Dict
 
-
-def setup_django() -> None:
-    load_dotenv()
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "geodjango.settings")
-
-    # parent directory to find route_rangers_api
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    parent_dir = os.path.abspath(os.path.join(current_dir, "../../"))
-    sys.path.append(parent_dir)
-
-    django.setup()
-
-
-setup_django()
-
 from route_rangers_api.models import (
     SurveyUser,
     SurveyResponse,
@@ -188,12 +173,3 @@ def get_transit_improv_riders_dict(city: str) -> Dict:
         improv_count_dict[improv_name] = count_by_improv
 
     return improv_count_dict
-
-
-print(get_number_of_responses("NewYork"))
-print(get_rider_satisfaction("NewYork"))
-print(get_transit_use_pct("NewYork"))
-print(get_transit_mode_dict("NewYork"))
-print(get_trip_top_dict("NewYork"))
-print(get_transit_improv_drivers_dict("NewYork"))
-print(get_transit_improv_riders_dict("NewYork"))
