@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("route_rangers_api", "0006_demographics_population_and_more"),
     ]

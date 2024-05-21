@@ -204,7 +204,6 @@ def ingest_daily_subway_ridership(daily_subway_json, date: datetime.date) -> Non
     day of ridership
     """
     for row in daily_subway_json:
-
         try:
             print(
                 f"Ingesting ridership data for station {row['station_id']} - {row['date']}"

@@ -14,8 +14,6 @@ def test_hello_view(client):
     assert response.status_code == 200
 
 
-import pytest
-
 from app.scripts.extract_scheduled_gtfs import (
     # ingest_gtfs_feed,
     CTA_URL,
@@ -118,6 +116,7 @@ def test_combine_different_feeds(cta_feed, metra_feed):
 from app.scripts.extract_nyc_data import DATASETS, NY_TZ, extract_daily_data
 import datetime
 from parameterized import parameterized
+from unittest import TestCase
 
 
 class ExtractNYData(TestCase):
