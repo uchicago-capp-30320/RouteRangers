@@ -17,7 +17,7 @@ CITY_CONTEXT = {
         "DB_Name": "CHI",
         "csv": "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/barplot_change_data.csv",
         "lineplot": "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_connectedscatter.csv",
-        "geojsonfilepath": "ChicagoCensus.geojson",
+        "geojsonfilepath": "ChicagoCensus_2020.geojson",
         "fips_county": CITY_FIPS["chicago"]["county"],
     },
     "NewYork": {
@@ -27,7 +27,7 @@ CITY_CONTEXT = {
         "DB_Name": "NYC",
         "csv": "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/barplot_change_data.csv",
         "lineplot": "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_connectedscatter.csv",
-        "geojsonfilepath": "newyork.geojson",
+        "geojsonfilepath": "NewYorkCensus_2020.geojson",
         "fips_county": CITY_FIPS["nyc"]["county"],
     },
     "Portland": {
@@ -37,7 +37,7 @@ CITY_CONTEXT = {
         "DB_Name": "PDX",
         "csv": "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/barplot_change_data.csv",
         "lineplot": "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_connectedscatter.csv",
-        "geojsonfilepath": "portland.geojson",
+        "geojsonfilepath": "PortlandCensus_2020.geojson",
         "fips_county": CITY_FIPS["portland"]["county"],
     },
 }
