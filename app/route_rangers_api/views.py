@@ -71,7 +71,7 @@ def dashboard(request, city: str):
         "geojson",
         routes,
         geometry_field="geo_representation",
-        fields=("route_name", "color"),
+        fields=("route_name", "color", "mode"),
     )
 
     # stations
