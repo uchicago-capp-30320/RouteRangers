@@ -310,7 +310,7 @@ def thanks(request, city: str):
     }
     return render(request, "thanks.html", context)
 
-
+ 
 def responses(request, city: str):
     context = {
         "City": CITY_CONTEXT[city]["CityName"],

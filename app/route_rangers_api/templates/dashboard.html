@@ -42,82 +42,6 @@
       <!-- Add more months as needed -->
     </ul>
   </div>
-
-  <!-- <div class="col-12 col-md-3 col-lg-3">
-    <button
-      class="btn btn-secondary dropdown-toggle"
-      type="button"
-      id="seasonDropdown"
-      data-bs-toggle="dropdown"
-      aria-expanded="false"
-    >
-      Select Season
-    </button>
-    <ul class="dropdown-menu" aria-labelledby="seasonDropdown">
-      <li>
-        <a
-          class="dropdown-item"
-          href="#"
-          onclick="updateCards('seasonDropdown', this)"
-          >Fall</a
-        >
-      </li>
-      <li>
-        <a
-          class="dropdown-item"
-          href="#"
-          onclick="updateCards('seasonDropdown', this)"
-          >Winter</a
-        >
-      </li>
-      <li>
-        <a
-          class="dropdown-item"
-          href="#"
-          onclick="updateCards('seasonDropdown', this)"
-          >Spring</a
-        >
-      </li>
-      <li>
-        <a
-          class="dropdown-item"
-          href="#"
-          onclick="updateCards('seasonDropdown', this)"
-          >Summer</a
-        >
-      </li>
-    </ul>
-  </div> -->
-
-  <!-- <div class="col-12 col-md-3 col-lg-3">
-    <button
-      class="btn btn-secondary dropdown-toggle"
-      type="button"
-      id="daysDropdown"
-      data-bs-toggle="dropdown"
-      aria-expanded="false"
-    >
-      Select Day of Week
-    </button>
-    <ul class="dropdown-menu" aria-labelledby="daysDropdown">
-      <li>
-        <a
-          class="dropdown-item"
-          href="#"
-          onclick="updateCards('daysDropdown', this)"
-          >Weekdays</a
-        >
-      </li>
-      <li>
-        <a
-          class="dropdown-item"
-          href="#"
-          onclick="updateCards('daysDropdown', this)"
-          >Weekends</a
-        >
-      </li>
-    </ul>
-  </div> -->
 </div>
 
 <div class="card-container row mx-3">
@@ -225,7 +149,6 @@
 <script src="{% static 'graphs.js' %}"></script>
 <script src="{% static 'heatmap.js' %}"></script>
 <script src="{% static 'cards.js' %}"></script>
-<script src="https://leafletjs.com/examples/choropleth/us-states.js"></script>
 <script>
   drawgraph("{{csv}}","group","var1");
   drawTrends("{{lineplot}}");
