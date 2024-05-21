@@ -42,84 +42,7 @@
       <!-- Add more months as needed -->
     </ul>
   </div>
-
-  <!-- <div class="col-12 col-md-3 col-lg-3">
-    <button
-      class="btn btn-secondary dropdown-toggle"
-      type="button"
-      id="seasonDropdown"
-      data-bs-toggle="dropdown"
-      aria-expanded="false"
-    >
-      Select Season
-    </button>
-    <ul class="dropdown-menu" aria-labelledby="seasonDropdown">
-      <li>
-        <a
-          class="dropdown-item"
-          href="#"
-          onclick="updateCards('seasonDropdown', this)"
-          >Fall</a
-        >
-      </li>
-      <li>
-        <a
-          class="dropdown-item"
-          href="#"
-          onclick="updateCards('seasonDropdown', this)"
-          >Winter</a
-        >
-      </li>
-      <li>
-        <a
-          class="dropdown-item"
-          href="#"
-          onclick="updateCards('seasonDropdown', this)"
-          >Spring</a
-        >
-      </li>
-      <li>
-        <a
-          class="dropdown-item"
-          href="#"
-          onclick="updateCards('seasonDropdown', this)"
-          >Summer</a
-        >
-      </li>
-    </ul>
-  </div> -->
-
-  <!-- <div class="col-12 col-md-3 col-lg-3">
-    <button
-      class="btn btn-secondary dropdown-toggle"
-      type="button"
-      id="daysDropdown"
-      data-bs-toggle="dropdown"
-      aria-expanded="false"
-    >
-      Select Day of Week
-    </button>
-    <ul class="dropdown-menu" aria-labelledby="daysDropdown">
-      <li>
-        <a
-          class="dropdown-item"
-          href="#"
-          onclick="updateCards('daysDropdown', this)"
-          >Weekdays</a
-        >
-      </li>
-      <li>
-        <a
-          class="dropdown-item"
-          href="#"
-          onclick="updateCards('daysDropdown', this)"
-          >Weekends</a
-        >
-      </li>
-    </ul>
-  </div> -->
 </div>
-
 
 <div class="card-container row mx-3">
   <div class="col-12 col-md-4 col-lg-4" id="totalRidersCard">
@@ -154,55 +77,33 @@
   <div id="map"></div>
 </div>
 
+<div class="card container">
+  <h2 class="card-content">Top 10 Stations/Stops</h2>
+  <div class="card-content row">
+    <div class="col-12 col-md-4 col-lg-4">
+      <button onclick="drawhorizontalgraph('{{csv}}','group','var1')">
+        Bus
+      </button>
+      <button onclick="drawhorizontalgraph('{{csv}}','group','var2')">
+        Train
+      </button>
+      <div id="horizontaldataviz"></div>
+    </div>
+  </div>
+</div>
+
 <div class="headers">
   <h2>Heat Map</h2>
   <p class="inline">
     Maps of showing variation in transit, environmental, and socio-economic
-    variables across census tracts <br>
+    variables across census tracts <br />
   </p>
-  <div id="heatmap" class="mx-auto" style="width: 90%; height: 600px; margin-top: 5%;"></div>
+  <div
+    id="heatmap"
+    class="mx-auto"
+    style="width: 90%; height: 600px; margin-top: 5%"
+  ></div>
 </div>
-
-<div class="card-container row mx-3">
-  <div class="col-12 col-md-3 col-lg-3">
-    <button
-      class="btn btn-secondary dropdown-toggle"
-      type="button"
-      id="heatmapTypeDropdown"
-      data-bs-toggle="dropdown"
-      aria-expanded="false"
-    >
-      Select Heat Map
-    </button>
-    <ul class="dropdown-menu" aria-labelledby="heatmapTypeDropdown">
-      <li>
-        <a
-          class="dropdown-item"
-          href=""
-          onclick="heatmaps('{{geojsonfilepath}}', {{coordinates}}, '{{heatmaplabel}}',{{heatmapscale}}, '{{heat_map_variable}}' )"
-          >Chicago Population</a
-        >
-      </li>
-      <li>
-        <a
-          class="dropdown-item"
-          href=""
-          onclick="heatmaps('{{geojsonfilepath}}', {{coordinates}}, 'Median Income',{{heatmapscale}}, '{{heat_map_variable}}' )"
-          >Median Income</a
-        >
-      </li>
-      <li>
-        <a
-          class="dropdown-item"
-          href=""
-          onclick="heatmaps('{{geojsonfilepath}}', {{coordinates}}, 'Commute Time',{{heatmapscale}}, '{{heat_map_variable}}' )"
-          >Commute Time</a
-        >
-      </li>
-    </ul>
-  </div>
-
-  
 
 <div class="headers">
   <h2>Trends Over Time</h2>
@@ -215,27 +116,19 @@
 
 <div class="graphs container">
   <div class="row">
-    <div class="col-12 col-md-4 col-lg-4">
+    <div class="col-12 col-md-6 col-lg-6">
       <!-- Bar Graph -->
       <button onclick="drawgraph('{{csv}}','group','var1')">Bus</button>
       <button onclick="drawgraph('{{csv}}','group','var2')">Train</button>
       <div id="my_dataviz"></div>
     </div>
-    <div class="col-12 col-md-4 col-lg-4">
+    <div class="col-12 col-md-6 col-lg-6">
       <!-- Trends graph -->
       <div id="trend_dataviz"></div>
     </div>
-    <div class="col-12 col-md-4 col-lg-4">
-      <button onclick="drawhorizontalgraph('{{csv}}','group','var1')">
-        Bus
-      </button>
-      <button onclick="drawhorizontalgraph('{{csv}}','group','var2')">
-        Train
-      </button>
-      <div id="horizontaldataviz"></div>
-    </div>
   </div>
 </div>
+
 <!-- Map Scripts -->
 <!-- <script>src="{% static 'map.js' %}"</script> -->
 <script type="module">
@@ -256,18 +149,20 @@
 <script src="{% static 'graphs.js' %}"></script>
 <script src="{% static 'heatmap.js' %}"></script>
 <script src="{% static 'cards.js' %}"></script>
-<script src="https://leafletjs.com/examples/choropleth/us-states.js"></script>
 <script>
   drawgraph("{{csv}}","group","var1");
   drawTrends("{{lineplot}}");
   drawhorizontalgraph("{{csv}}","group","var1");
-  heatmaps("{{geojsonfilepath}}", {{coordinates}}, '{{heatmaplabel}}',{{heatmapscale}}, '{{heat_map_variable}}');
+  var heatmap_categories = {{ heatmap_categories | safe }};
+  var heatmap_units = {{ heatmap_units | safe }};
+  var heatmap_titles = {{ heatmap_titles | safe }};
+  var heatmap_titles_reversed = {{ heatmap_titles_reversed | safe }};
+
+  heatmaps("{{geojsonfilepath}}", {{coordinates}}, '{{heatmaplabel}}', heatmap_categories, heatmap_units, heatmap_titles, heatmap_titles_reversed);
 </script>
 <script>
   // Card update variables
   cityData = {{ citydata | safe }};
-  // var days= "Weekdays";
-  // var seasons= "Fall";
   var type= "All";
   document.getElementById("totalRidersText").textContent =
     cityData[type]["TotalRiders"];
