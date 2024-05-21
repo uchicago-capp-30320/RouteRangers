@@ -125,7 +125,7 @@ body {
     width: 100%;
     /* prevents padding and border from affecting height and width */
     box-sizing: border-box;
-    padding: 0.75rem 1rem; 
+    /* padding: 0.75rem 1rem; */
     background-color: #e5e5e5;
     font-family: 'Roboto', 'Arial', sans-serif;
     box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
@@ -469,7 +469,7 @@ body {
     content: '';
     width: 0%;
     height: 100%;
-    background: #555;
+    background: #000;
     opacity: 1;
     border-radius: 0.25rem;
     position: absolute;
@@ -490,7 +490,7 @@ body {
   border: 1px solid #ccc;
   position: relative;
   border-radius: 10px;
-  box-shadow: 0 2px 4px #555;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Cards */
@@ -526,8 +526,6 @@ body {
 }
 
 .card-container {
-  margin-left: 4vw;
-  margin-right: 4vw;
   display: flex;
   justify-content: space-between;
 }
@@ -557,9 +555,7 @@ h1 {
   font-size-adjust: 3rem;
   position: relative;
   display: flex;
-  color: #555;
 }
-
 .inline {
   margin-left: 0.5vw;
   font-size: 15px;
@@ -585,14 +581,5 @@ h2 {
   position: relative;
   display: flex;
   font-size-adjust: 2rem;
-  color: #555;
 }
-
-.btn {
-  border: 1px solid #ccc;
-  box-shadow: 0 2px 4px #555;
-}
-
-
-
 

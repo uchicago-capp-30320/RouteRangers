@@ -6,7 +6,6 @@ from typing import List, Dict
 from dotenv import load_dotenv
 from django.db import IntegrityError
 from route_rangers_api.models import Demographics
-from route_rangers_api.utils.city_mapping import CITY_FIPS
 
 ###############################################################################
 # SETUP
@@ -44,7 +43,11 @@ variable_ids = {
     "B08303_012E": "work_commute_time_60_to_89",
     "B08303_013E": "work_commute_time_90_or_more",
 }
-
+city_fips = {
+    "nyc": {"state": "36", "county": ["061", "047", "081", "005", "085"]},
+    "chicago": {"state": "17", "county": ["031"]},
+    "portland": {"state": "41", "county": ["051"]},
+}
 min_to_work = {
     "work_commute_time_less_15": [
         "work_commute_time_00_to_04",
@@ -185,8 +188,8 @@ def run():
     """
     supported_cities = ["portland", "chicago", "nyc"]
     for city in supported_cities:
-        state_code = CITY_FIPS[city]["state"]
-        county_codes = CITY_FIPS[city]["county"]
+        state_code = city_fips[city]["state"]
+        county_codes = city_fips[city]["county"]
         for county_code in county_codes:
             raw_data = get_census_data(variable_ids, state_code, county_code)
             clean_data = clean_census_data(raw_data)

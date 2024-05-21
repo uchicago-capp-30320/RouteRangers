@@ -3,10 +3,10 @@
   <h1>{{ City }} Transit Ecosystem</h1>
   <p class="inline">Overview of Transit in Your City</p>
 </div>
-<div class="card-container row">
+<div class="card-container row mx-3">
   <div class="col-12 col-md-3 col-lg-3">
     <button
-      class="btn btn-secondary-subtle dropdown-toggle"
+      class="btn btn-secondary dropdown-toggle"
       type="button"
       id="typeDropdown"
       data-bs-toggle="dropdown"
@@ -15,14 +15,6 @@
       Select Transit Type
     </button>
     <ul class="dropdown-menu" aria-labelledby="typeDropdown">
-      <li>
-        <a
-          class="dropdown-item"
-          href="#"
-          onclick="updateCards('typeDropdown', this)"
-          >All</a
-        >
-      </li>
       <li>
         <a
           class="dropdown-item"
@@ -39,11 +31,19 @@
           >Train</a
         >
       </li>
+      <li>
+        <a
+          class="dropdown-item"
+          href="#"
+          onclick="updateCards('typeDropdown', this)"
+          >Regional</a
+        >
+      </li>
       <!-- Add more months as needed -->
     </ul>
   </div>
 
-  <!-- <div class="col-12 col-md-3 col-lg-3">
+  <div class="col-12 col-md-3 col-lg-3">
     <button
       class="btn btn-secondary dropdown-toggle"
       type="button"
@@ -87,9 +87,9 @@
         >
       </li>
     </ul>
-  </div> -->
+  </div>
 
-  <!-- <div class="col-12 col-md-3 col-lg-3">
+  <div class="col-12 col-md-3 col-lg-3">
     <button
       class="btn btn-secondary dropdown-toggle"
       type="button"
@@ -117,15 +117,14 @@
         >
       </li>
     </ul>
-  </div> -->
+  </div>
 </div>
-
 
 <div class="card-container row mx-3">
   <div class="col-12 col-md-4 col-lg-4" id="totalRidersCard">
     <div class="card">
       <div class="card-content">
-        <p class="card-title">Average Daily Riders</p>
+        <p class="card-title">Total Riders</p>
         <p class="card-text" id="totalRidersText">{{TotalRiders}}</p>
       </div>
     </div>
@@ -138,11 +137,11 @@
       </div>
     </div>
   </div>
-  <div class="col-12 col-md-4 col-lg-4" id="pctOfCommutersCard">
+  <div class="col-12 col-md-4 col-lg-4" id="averageCommuteTimeCard">
     <div class="card">
       <div class="card-content">
-        <p class="card-title">Percent of Commuters</p>
-        <p class="card-text" id="pctOfCommutersText">{{PercentOfCommuters}}</p>
+        <p class="card-title">Average Commute Time</p>
+        <p class="card-text" id="averageCommuteTimeText">{{Commute}}</p>
       </div>
     </div>
   </div>
@@ -266,14 +265,8 @@
 <script>
   // Card update variables
   cityData = {{ citydata | safe }};
-  // var days= "Weekdays";
-  // var seasons= "Fall";
-  var type= "All";
-  document.getElementById("totalRidersText").textContent =
-    cityData[type]["TotalRiders"];
-  document.getElementById("totalRoutesText").textContent =
-    cityData[type]["TotalRoutes"];
-  document.getElementById("pctOfCommutersText").textContent =
-    cityData[type]["PercentOfCommuters"];
+  var days= "Weekdays";
+  var seasons= "Fall";
+  var type= "Train";
 </script>
 {% endblock %}

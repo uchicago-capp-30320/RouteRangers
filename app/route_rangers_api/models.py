@@ -2,7 +2,7 @@ from django.contrib.gis.db import models
 from app.route_rangers_api.utils.city_mapping import (
     CITIES_CHOICES,
     TRIP_FREQ,
-    MODES_OF_TRANSIT,
+    MODES_OF_TRANIST,
     SWITCH_TO_TRANSIT,
     TIME_OF_DAY,
     BOOL_CHOICES,
@@ -256,7 +256,7 @@ class SurveyResponse(models.Model):
     trip_frequency = models.IntegerField(choices=TRIP_FREQ, null=True)
     trip_tod = models.IntegerField(choices=TIME_OF_DAY, null=True)
     trip_time = models.IntegerField(null=True)
-    modes_of_transit = models.IntegerField(choices=MODES_OF_TRANSIT, null=True)
+    modes_of_transit = models.IntegerField(choices=MODES_OF_TRANIST, null=True)
 
     # Page 3:
     satisfied = models.IntegerField(choices=SATISFIED, null=True)
