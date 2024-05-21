@@ -116,7 +116,7 @@ def survey_p1(request, city: str):
     # Gen unique user id with uuid
     request.session["uuid"] = str(uuid.uuid4())
     request.session["route_id"] = 1
-    print(f'user_id:{request.session["uuid"]} - page 1')
+
     if request.method == "POST":
         # create new SurveyUser object
         city_survey = CITIES_CHOICES_SURVEY[city]
@@ -125,7 +125,6 @@ def survey_p1(request, city: str):
         # update and save
         update_survey.save()
 
-        print("survey answer", survey_answer)
         return redirect(reverse("app:survey_p2", kwargs={"city": city}))
 
     else:  # GET
@@ -144,7 +143,6 @@ def survey_p2(request, city: str, user_id: str = None):
     user_id = request.session.get("uuid")
     route_id = request.session.get("route_id")
 
-    print(f"user_id:{user_id} - page 2")
     if request.method == "POST":
         # check if route already exists
         city_survey = CITIES_CHOICES_SURVEY[city]
@@ -180,8 +178,8 @@ def survey_p3(request, city: str):
     """
     user_id = request.session.get("uuid")
     route_id = request.session.get("route_id")
-    print(f"user_id: {user_id} and route id: {route_id} - page 3")
     print(request.method)
+
     if request.method == "POST":
         survey_answer = SurveyResponse.objects.get(
             user_id_id=user_id, route_id=route_id
@@ -215,6 +213,7 @@ def survey_p4(request, city: str):
     user_id = request.session.get("uuid")
     route_id = request.session.get("route_id")
     print(request.method)
+
     if request.method == "POST":
         survey_answer = SurveyResponse.objects.get(
             user_id_id=user_id, route_id=route_id
