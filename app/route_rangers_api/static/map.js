@@ -19,15 +19,36 @@ export function initializeMap(coordinates, stations, iconUrl, routes) {
     iconAnchor: [6, 6],
   });
 
+  // Set level of zoom at which each kind of transit stop declusters,
+  // based on how spaced apart they usually are
+  var zoomEnd = {
+    0: 12,
+    1: 12,
+    2: 10,
+    3: 15,
+    6: 12
+  }
+
+  var routeNames = {
+    0: "(streetcar)",
+    1: "(subway)",
+    2: "(commuter rail)",
+    3: "(bus)",
+    6: "(aerial tram)"
+  }
+
   var markers = L.markerClusterGroup({
     disableClusteringAtZoom: 15
   });
 
   for (var i = 0; i < stations.length; i++) {
     var station = stations[i];
-    var marker = L.marker([station[0], station[1]], { icon: smallIcon });
-    marker.bindTooltip(station[2]);
-    console.log(station[2]);
+    var x = station[0];
+    var y = station[1];
+    var stationName = station[2];
+    var routeType = routeNames[station[3]];
+    var marker = L.marker([x, y], { icon: smallIcon });
+    marker.bindTooltip(stationName + '<br>' + routeType);
     markers.addLayer(marker);
   };
 

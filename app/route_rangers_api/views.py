@@ -82,7 +82,7 @@ def dashboard(request, city: str):
     )
 
     lst_coords = [
-        [point["location"].x, point["location"].y, point["station_name"]]
+        [point["location"].x, point["location"].y, point["station_name"], point["mode"]]
         for point in stations
     ]
 
