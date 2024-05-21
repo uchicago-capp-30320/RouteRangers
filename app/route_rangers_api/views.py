@@ -68,7 +68,7 @@ def dashboard(request, city: str):
         "geojson",
         routes,
         geometry_field="geo_representation",
-        fields=("route_name", "color"),
+        fields=("route_name", "color", "mode"),
     )
 
     # stations
@@ -79,7 +79,7 @@ def dashboard(request, city: str):
     )
     # topStations=get_top_stations(CITY_CONTEXT[city]["DB_Name"], top_n=10)
     lst_coords = [
-        [point["location"].x, point["location"].y, point["station_name"]]
+        [point["location"].x, point["location"].y, point["station_name"], point["mode"]]
         for point in stations
     ]
 

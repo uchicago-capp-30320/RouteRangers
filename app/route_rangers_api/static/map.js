@@ -1,5 +1,6 @@
 export function initializeMap(coordinates, stations, iconUrl, routes) {
   // Add a tile layer
+
   var tileLayer = L.tileLayer(
     "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
     {
@@ -32,11 +33,18 @@ export function initializeMap(coordinates, stations, iconUrl, routes) {
     markers.addLayer(marker);
   }
 
-  map.addLayer(markers);
+
+  var markerClustersLayer = L.layerGroup();
+  for (var routeType in markerClusterGroups) {
+    markerClustersLayer.addLayer(markerClusterGroups[routeType]);
+  }
+  map.addLayer(markerClustersLayer);
 
   // Add routes layer
 
-  var routesJSON = L.geoJSON(routes, {
+  var routeLayers = {};
+
+  L.geoJSON(routes, {
     style: function (feature) {
       return {
         color: "#" + feature.properties.color,
@@ -49,7 +57,17 @@ export function initializeMap(coordinates, stations, iconUrl, routes) {
     },
   });
 
-  map.addLayer(routesJSON);
+  // map.addLayer(routesJSON);
+
+  // Adjust width of routes with zoom level
+  function updateRouteWidth() {
+    var zoom = map.getZoom();
+    for (var rType in routeLayers) {
+      routeLayers[rType].eachLayer(function (layer) {
+        layer.setStyle({ weight: (zoom / 4) - 1 });
+      });
+    }
+  }
 
   var baseMaps = {
     base: tileLayer,
@@ -62,3 +80,4 @@ export function initializeMap(coordinates, stations, iconUrl, routes) {
 
   var layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
 }
+
