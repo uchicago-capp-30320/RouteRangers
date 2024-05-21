@@ -105,7 +105,7 @@ def get_rider_satisfaction(city: str) -> float:
 def get_transit_mode_dict(city: str) -> Dict:
     """
     Given a city, return a dictionary with a count
-    of users by transit mode. Legend for transit modes:
+    of responses by transit mode. Legend for transit modes:
     """
     MODES_OF_TRANSIT = {
         1: "Bus",
@@ -126,7 +126,24 @@ def get_transit_mode_dict(city: str) -> Dict:
     return mode_count_dict
 
 
+def get_trip_top_dict(city: str) -> Dict:
+    """
+    Given a city, return a dictionary with a count
+    of responses by time of day
+    """
+    TIME_OF_DAY = {1: "Peak commute hours", 2: "Daytime", 3: "Nighttime"}
+    tod_count_dict = {}
+    for tod_id, tod_name in TIME_OF_DAY.items():
+        count_by_tod = SurveyResponse.objects.filter(
+            city=CITY_CONTEXT[city]["DB_Name"], trip_tod=tod_id
+        ).count()
+        tod_count_dict[tod_name] = count_by_tod
+
+    return tod_count_dict
+
+
 print(get_number_of_responses("NewYork"))
 print(get_rider_satisfaction("NewYork"))
 print(get_transit_use_pct("NewYork"))
 print(get_transit_mode_dict("NewYork"))
+print(get_trip_top_dict("NewYork"))
