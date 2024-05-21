@@ -7,15 +7,14 @@ from unittest.mock import patch, mock_open
 from unittest import TestCase, skip
 from app.scripts.ingest_census_data import (
     get_census_data,
-    # store_census_data,
     upload_census_data,
-    city_fips,
 )
+from route_rangers_api.utils.city_mapping import CITY_FIPS
 
 
 @pytest.fixture(scope="class")
 def supported_cities():
-    return list(city_fips.keys())
+    return list(CITY_FIPS.keys())
 
 
 ########################################################################################
