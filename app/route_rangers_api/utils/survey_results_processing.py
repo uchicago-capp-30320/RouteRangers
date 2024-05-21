@@ -15,6 +15,7 @@ from geopandas import GeoDataFrame
 import json
 from shapely.geometry import MultiPolygon
 from django.db.models import Avg, Count, Sum
+from typing import Dict
 
 
 def setup_django() -> None:
@@ -61,20 +62,28 @@ def get_transit_use_pct(city: str) -> float:
         city=CITY_CONTEXT[city]["DB_Name"], frequent_transit=1
     ).aggregate(daily_ridership=(Sum("frequent_transit")))
 
-    percentage = (
-        use_transit["daily_ridership"]
-        / (
-            SurveyUser.objects.filter(city=CITY_CONTEXT[city]["DB_Name"])
-            .distinct("user_id")
-            .count()
+    if use_transit != 0:
+        percentage = (
+            use_transit["daily_ridership"]
+            / (
+                SurveyUser.objects.filter(city=CITY_CONTEXT[city]["DB_Name"])
+                .distinct("user_id")
+                .count()
+            )
+            * 100
         )
-        * 100
-    )
+    else:
+        return "No answers yet!"
 
     return round(percentage, 1)
 
 
 def get_rider_satisfaction(city: str) -> float:
+    """
+    Given a city return the avg transit satisfaction
+    rating for reponses that include an answer to that
+    question (e.g. exclude null responses)
+    """
     satisfied_responses = (
         SurveyResponse.objects.filter(city=CITY_CONTEXT[city]["DB_Name"])
         .exclude(satisfied=None)
@@ -88,28 +97,36 @@ def get_rider_satisfaction(city: str) -> float:
             .aggregate((Sum("satisfied")))
         )["satisfied__sum"] / satisfied_responses
     else:
-        "No ratings yet!"
+        "No satisfaction ratings yet!"
 
     return round(average, 1)
 
 
-# def get_rider_satisfaction(city: str) -> float:
-#     satisfied_responses = SurveyResponse.objects.filter(
-#         city=CITY_CONTEXT[city]["DB_Name"], satisfied>0
-#     ).count()
+def get_transit_mode_dict(city: str) -> Dict:
+    """
+    Given a city, return a dictionary with a count
+    of users by transit mode. Legend for transit modes:
+    """
+    MODES_OF_TRANSIT = {
+        1: "Bus",
+        2: "Train",
+        3: "Car",
+        4: "Bike",
+        5: "Walking",
+        6: "Rideshare",
+    }
 
-#     # else:
-# average = (
-#     SurveyResponse.objects.filter(
-#         city=CITY_CONTEXT[city]["DB_Name"], satisfied=True
-#     ).aggregate((Sum("satisfied")))
-#     #         / satisfied_responses
-#     #     )
+    mode_count_dict = {}
+    for mode_id, mode_name in MODES_OF_TRANSIT.items():
+        count_by_mode = SurveyResponse.objects.filter(
+            city=CITY_CONTEXT[city]["DB_Name"], modes_of_transit=mode_id
+        ).count()
+        mode_count_dict[mode_name] = count_by_mode
 
-#     return satisfied_responses  # Rounded to 1 decimal point
+    return mode_count_dict
 
 
 print(get_number_of_responses("NewYork"))
-
 print(get_rider_satisfaction("NewYork"))
 print(get_transit_use_pct("NewYork"))
+print(get_transit_mode_dict("NewYork"))
