@@ -9,10 +9,7 @@ from route_rangers_api.models import (
 )
 from django.contrib.gis.geos import Point
 from django.db import IntegrityError
-from app.scripts.utils import (
-    make_request,
-    process_daily_ridership_data
-)
+from app.scripts.utils import make_request, process_daily_ridership_data
 
 #########################
 # Load and define variables
@@ -77,7 +74,6 @@ def ingest_bike_stations() -> None:
             print(f"Observation{station['station_name']} already ingested")
         except Exception as e:
             print(f"Observation {station['station_name']} not ingested: {e}")
-        
 
 
 def create_daily_ridership_month(filepath: str) -> pd.DataFrame:
@@ -128,7 +124,7 @@ def ingest_trip_data():
             ingest_monthly_data(monthly_df)
 
 
-def run(data:str = "both"):
+def run(data: str = "both"):
     ingest_bike_stations()
     ingest_trip_data()
 

@@ -133,7 +133,7 @@ def ingest_citibike_ridership_data():
             ingest_monthly_data(monthly_df)
 
 
-def run(data:str="both"):
+def run(data: str = "both"):
     if data == "stations":
         ingest_bike_stations_data()
     elif data == "ridership":
@@ -143,4 +143,3 @@ def run(data:str="both"):
         ingest_citibike_ridership_data()
     else:
         print("Select one of the following options 'stations', 'ridership' or 'both'")
-

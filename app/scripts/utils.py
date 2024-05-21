@@ -44,9 +44,11 @@ def build_start_end_date_str(date: datetime.datetime, timezone) -> Tuple[str, st
 
     return start_date, end_date
 
+
 #######################
 ## Bike Ridership Utils
 #######################
+
 
 def extract_stations(url: str) -> List:
     """
@@ -83,5 +85,3 @@ def process_daily_ridership_data(monthly_df) -> pd.DataFrame:
     ridership_df["date"] = pd.to_datetime(ridership_df["date"])
 
     return ridership_df
-
-
