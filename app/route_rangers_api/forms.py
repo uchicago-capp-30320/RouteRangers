@@ -57,7 +57,8 @@ QUESTIONS = {
     },
     "p3": {
         "satisfied": "How satisfied are you with the public transit options \
-            for this route? Consider 1 to be 'Very Unstisfied' and 5 'Very Satisfied",
+            for this route? Consider 1 to be 'Very Unstisfied' \
+                  and 5 'Very Satisfied",
         "transit_improvement": "How could this public transit route be \
               improved?",
         "transit_improvement_open": "Other suggestions on how this transit \
