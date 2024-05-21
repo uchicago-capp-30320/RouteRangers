@@ -1,6 +1,5 @@
 import os
-from typing import List, Dict, Tuple
-from requests.models import Response
+from typing import List, Dict
 from collections.abc import Callable
 from django.db import IntegrityError
 import logging
@@ -10,6 +9,7 @@ import datetime
 import os
 import pytz
 from dotenv import load_dotenv
+from app.scripts.utils import make_request, build_start_end_date_str
 from route_rangers_api.models import (
     TransitRoute,
     RidershipRoute,
@@ -23,10 +23,6 @@ from route_rangers_api.models import (
 load_dotenv()
 
 DATA_PORTAL_APP_TOKEN = os.getenv("DATA_PORTAL_APP_TOKEN")
-
-REQUEST_DELAY = 1
-RESULTS_PER_PAGE = 50000  # Max number of results for API
-TIMEOUT = 30
 
 CHI_TZ = pytz.timezone("America/Chicago")
 START_DATE = datetime.datetime(2023, 1, 1, tzinfo=CHI_TZ)
@@ -45,27 +41,12 @@ DATASETS = {
 
 # Logging configuration
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 ###########################
 # Data extraction
 ###########################
-
-
-def make_request(url: str, params: Dict, session: Callable = None) -> Response:
-    """
-    Make a request to `url` and return the raw response.
-
-    This function ensure that the domain matches what is
-    expected and that the rate limit is obeyed.
-    """
-    time.sleep(REQUEST_DELAY)
-    print(f"Fetching {url}")
-    if session:
-        resp = session.get(url, params=params)
-    else:
-        resp = requests.get(url, params, timeout=TIMEOUT)
-    return resp
 
 
 def extract_daily_data(
@@ -77,11 +58,10 @@ def extract_daily_data(
 ) -> List:
     """
     Extract daily data from a Chicago Subway or Bus ridership endpoint
-    storing it in a list with partial responses subject to the limit parameter.
-    One item in the list has up to "limit" items
+    storing it in a list with dictionaries
     """
     # Create datetime objects for date query filter
-    start_date, end_date = build_start_end_date_str(date)
+    start_date, end_date = build_start_end_date_str(date, CHI_TZ)
 
     # Define parameters to pass into the request:
     where_clause = f"date >= '{start_date}' AND date < '{end_date}'"
@@ -123,20 +103,6 @@ def build_parameters(
         "$where": where_clause,
     }
     return params
-
-
-def build_start_end_date_str(date: datetime.datetime) -> Tuple[str, str]:
-    """
-    Creates two strings to pass as filters on the query for
-    a request to the Chicago data Portal
-    """
-    start_date = date.astimezone(CHI_TZ)
-    time_delta = datetime.timedelta(days=1)
-    end_date = start_date + time_delta
-    start_date = start_date.strftime("%Y-%m-%d")
-    end_date = end_date.strftime("%Y-%m-%d")
-
-    return start_date, end_date
 
 
 #####################
@@ -192,7 +158,9 @@ def ingest_daily_bus_ridership(daily_bus_json, date: datetime.date) -> None:
             )
 
 
-def ingest_subway_ridership(start_date: datetime.date = START_DATE, end_date: datetime.date = END_DATE) -> None:
+def ingest_subway_ridership(
+    start_date: datetime.date = START_DATE, end_date: datetime.date = END_DATE
+) -> None:
     """
     Ingest the Chicago subway ridership data to the RouteRidership table
     starting from start_date and ending at end_date (inclusive)
@@ -219,9 +187,9 @@ def ingest_daily_subway_ridership(daily_subway_json, date: datetime.date) -> Non
             print(
                 f"Ingesting ridership data for station {row['station_id']} - {row['date']}"
             )
-            obs_station = TransitStation.objects.filter(
+            obs_station = TransitStation.objects.get(
                 city="CHI", station_id=row["station_id"].strip()
-            ).first()
+            )
             obs_station_id = obs_station.id
             obs = RidershipStation(
                 station_id=obs_station_id, date=date, ridership=row["rides"]
