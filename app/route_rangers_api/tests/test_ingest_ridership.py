@@ -9,6 +9,25 @@ from app.scripts.extract_chi_ridership_data import extract_daily_data, DATASETS,
 from app.scripts.extract_nyc_data import DATASETS, NY_TZ, extract_daily_data
 
 
+## NYC data depends on API call that times out on GitHub, to test it locally
+## I added the slow option to run slow tests such that they are not run on
+## the Workflow in GitHub
+
+def pytest_addoption(parser):
+    parser.addoption(
+        "--runslow", action="store_true", default=False, help="run slow tests"
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    if config.getoption("--runslow"):
+        # --runslow given in cli: do not skip slow tests
+        return
+    skip_slow = pytest.mark.skip(reason="need --runslow option to run")
+    for item in items:
+        if "slow" in item.keywords:
+            item.add_marker(skip_slow)
+
 ###################
 ## NY Extract tests
 ###################
@@ -55,6 +74,7 @@ class ExtractNYData(TestCase):
             ],
         ]
     )
+    @pytest.mark.slow
     def test_extract_daily_data(self, dataset, date, n_obs, first_station_ridership):
         try:
             results = extract_daily_data(dataset=dataset, date=date)
