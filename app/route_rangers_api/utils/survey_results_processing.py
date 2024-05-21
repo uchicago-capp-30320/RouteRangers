@@ -142,8 +142,58 @@ def get_trip_top_dict(city: str) -> Dict:
     return tod_count_dict
 
 
+def get_transit_improv_drivers_dict(city: str) -> Dict:
+    """
+    Given a city, return a dictionary with a count
+    of responses by suggested improvement
+    """
+    TRANSIT_IMPROVEMENT = {
+        1: "More frequent service",
+        2: "More accurate schedule times",
+        3: "Fewer transfers or a more direct route",
+        4: "It feels safe at the station and onboard",
+        5: "No improvement needed",
+    }
+    improv_count_dict = {}
+    for improv_id, improv_name in TRANSIT_IMPROVEMENT.items():
+        count_by_improv = SurveyResponse.objects.filter(
+            city=CITY_CONTEXT[city]["DB_Name"],
+            transit_improvement=improv_id,
+            user_id_id__car_owner=1,  # Filter by car_owner
+        ).count()
+        improv_count_dict[improv_name] = count_by_improv
+
+    return improv_count_dict
+
+
+def get_transit_improv_riders_dict(city: str) -> Dict:
+    """
+    Given a city, return a dictionary with a count
+    of responses by suggested improvement
+    """
+    TRANSIT_IMPROVEMENT = {
+        1: "More frequent service",
+        2: "More accurate schedule times",
+        3: "Fewer transfers or a more direct route",
+        4: "It feels safe at the station and onboard",
+        5: "No improvement needed",
+    }
+    improv_count_dict = {}
+    for improv_id, improv_name in TRANSIT_IMPROVEMENT.items():
+        count_by_improv = SurveyResponse.objects.filter(
+            city=CITY_CONTEXT[city]["DB_Name"],
+            transit_improvement=improv_id,
+            user_id_id__car_owner=2,  # Filter by Non car_owner
+        ).count()
+        improv_count_dict[improv_name] = count_by_improv
+
+    return improv_count_dict
+
+
 print(get_number_of_responses("NewYork"))
 print(get_rider_satisfaction("NewYork"))
 print(get_transit_use_pct("NewYork"))
 print(get_transit_mode_dict("NewYork"))
 print(get_trip_top_dict("NewYork"))
+print(get_transit_improv_drivers_dict("NewYork"))
+print(get_transit_improv_riders_dict("NewYork"))
