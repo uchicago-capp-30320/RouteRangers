@@ -24,6 +24,7 @@ from route_rangers_api.models import (
     SurveyResponse,
     SurveyUser,
 )
+
 from route_rangers_api.forms import (
     RiderSurvey1,
     RiderSurvey2,
@@ -33,11 +34,6 @@ from route_rangers_api.forms import (
 )
 
 from django.contrib.gis.geos import GEOSGeometry, MultiLineString, LineString
-
-from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT
-from route_rangers_api.models import TransitRoute, TransitStation
-
-import json
 
 
 def test(request):
@@ -55,11 +51,8 @@ def about(request):
 
 
 def dashboard(request, city: str):
-    # get num riders
-    # get num routes
-    num_routes = TransitRoute.objects.filter(city=CITY_CONTEXT[city]["DB_Name"]).count()
-
-    # get commute
+    # get metrics for dashboard cards
+    dashboard_dict = dashboard_metrics(city)
 
     # get paths
     routes = TransitRoute.objects.filter(city=CITY_CONTEXT[city]["DB_Name"])
@@ -98,10 +91,8 @@ def dashboard(request, city: str):
     context = {
         "City": CITY_CONTEXT[city]["CityName"],
         "City_NoSpace": city,
-        "citydata": CARD_DATA,
+        "citydata": dashboard_dict,
         "heatmaplabel": f"{city_name} Population Density",
-        "TotalRiders": "104,749",
-        "TotalRoutes": num_routes,
         "Commute": "40 Min",
         "cities_class": "cs-li-link",
         "policy_class": "cs-li-link cs-active",
