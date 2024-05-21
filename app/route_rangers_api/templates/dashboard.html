@@ -81,10 +81,10 @@
   <h2 class="card-content">Top 10 Stations/Stops</h2>
   <div class="card-content row">
     <div class="col-12 col-md-4 col-lg-4">
-      <button onclick="drawhorizontalgraph('{{csv}}','group','var1')">
+      <button onclick="drawhorizontalgraph(jsonData,'group','var1')">
         Bus
       </button>
-      <button onclick="drawhorizontalgraph('{{csv}}','group','var2')">
+      <button onclick="drawhorizontalgraph(jsonData,'group','var2')">
         Train
       </button>
       <div id="horizontaldataviz"></div>
@@ -118,8 +118,8 @@
   <div class="row">
     <div class="col-12 col-md-6 col-lg-6">
       <!-- Bar Graph -->
-      <button onclick="drawgraph('{{csv}}','group','var1')">Bus</button>
-      <button onclick="drawgraph('{{csv}}','group','var2')">Train</button>
+      <button onclick="drawgraph(jsonData,'group','var1')">Bus</button>
+      <button onclick="drawgraph(jsonData,'group','var2')">Train</button>
       <div id="my_dataviz"></div>
     </div>
     <div class="col-12 col-md-6 col-lg-6">
@@ -150,9 +150,43 @@
 <script src="{% static 'heatmap.js' %}"></script>
 <script src="{% static 'cards.js' %}"></script>
 <script>
-  drawgraph("{{csv}}","group","var1");
-  drawTrends("{{lineplot}}");
-  drawhorizontalgraph("{{csv}}","group","var1");
+  const jsonData = [
+  {"group": "A", "var1": 12, "var2": 3},
+  {"group": "B", "var1": 23, "var2": 2},
+  {"group": "C", "var1": 4, "var2": 1},
+  {"group": "D", "var1": 8, "var2": 23},
+  {"group": "E", "var1": 9, "var2": 34},
+  {"group": "F", "var1": 10, "var2": 11},
+  {"group": "G", "var1": 2, "var2": 23},
+  {"group": "H", "var1": 3, "var2": 10},
+  {"group": "I", "var1": 12, "var2": 8},
+  {"group": "J", "var1": 22, "var2": 9}
+];
+
+  drawgraph(jsonData,"group","var1");
+  const j =[
+  {
+    "time": "1",
+    "valueA": "5",
+    "valueB": "8",
+    "valueC": "10"
+  },
+  {
+    "time": "2",
+    "valueA": "6",
+    "valueB": "9",
+    "valueC": "12"
+  },
+  {
+    "time": "3",
+    "valueA": "7",
+    "valueB": "11",
+    "valueC": "15"
+  }
+]
+var k= ["valueA","valueB","valueC"]
+  drawTrends(j,k );
+  drawhorizontalgraph(jsonData,"group","var1");
   var heatmap_categories = {{ heatmap_categories | safe }};
   var heatmap_units = {{ heatmap_units | safe }};
   var heatmap_titles = {{ heatmap_titles | safe }};

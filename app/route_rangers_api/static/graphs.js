@@ -1,4 +1,4 @@
-function drawgraph(csv, xaxis, yaxis) {
+function drawgraph(jsonData, xaxis, yaxis) {
   var margin = { top: 30, right: 30, bottom: 70, left: 60 },
     width = 460 - margin.left - margin.right,
     height = 400 - margin.top - margin.bottom;
@@ -28,94 +28,90 @@ function drawgraph(csv, xaxis, yaxis) {
 
   // A function that create / update the plot for a given variable:
   function update(selectedVar) {
-    // Parse the Data
-    d3.csv(csv, function (data) {
-      // X axis
-      x.domain(
-        data.map(function (d) {
-          return d.group;
-        }),
-      );
-      xAxis.transition().duration(1000).call(d3.axisTop(x));
+    // X axis
+    x.domain(jsonData.map(function (d) {
+      return d.group;
+    }));
+    xAxis.transition().duration(1000).call(d3.axisTop(x));
 
-      // Add Y axis
-      y.domain([
-        0,
-        d3.max(data, function (d) {
-          return +d[selectedVar];
-        }),
-      ]);
-      yAxis.transition().duration(1000).call(d3.axisLeft(y));
+    // Add Y axis
+    y.domain([0, d3.max(jsonData, function (d) {
+      return +d[selectedVar];
+    })]);
+    yAxis.transition().duration(1000).call(d3.axisLeft(y));
 
-      // variable u: map data to existing bars
-      var u = bargraph_bus.selectAll("rect").data(data);
+    // variable u: map data to existing bars
+    var u = bargraph_bus.selectAll("rect").data(jsonData);
 
-      // update bars
-      u.enter()
-        .append("rect")
-        .merge(u)
-        .transition()
-        .duration(5)
-        .attr("x", function (d) {
-          return x(d[xaxis]);
-        })
-        .attr("y", function (d) {
-          return y(d[selectedVar]);
-        })
-        .attr("width", x.bandwidth())
-        .attr("height", function (d) {
-          return height - y(d[selectedVar]);
-        })
-        .attr("fill", "#69b3a2");
-    });
+    // update bars
+    u.enter()
+      .append("rect")
+      .merge(u)
+      .transition()
+      .duration(5)
+      .attr("x", function (d) {
+        return x(d[xaxis]);
+      })
+      .attr("y", function (d) {
+        return y(d[selectedVar]);
+      })
+      .attr("width", x.bandwidth())
+      .attr("height", function (d) {
+        return height - y(d[selectedVar]);
+      })
+      .attr("fill", "#69b3a2");
   }
 
   // Initialize plot
-  update(yaxis);
-}
+  update(yaxis);}
 
-function drawTrends(csv) {
-  var margin = { top: 10, right: 100, bottom: 30, left: 30 },
-    width = 460 - margin.left - margin.right,
-    height = 400 - margin.top - margin.bottom;
-
-  var trend = d3
-    .select("#trend_dataviz")
-    .append("svg")
-    .attr("width", "100%")
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-  //Read the data
-  d3.csv(csv, function (data) {
-    // List of groups (here I have one group per column)
-    var allGroup = ["valueA", "valueB", "valueC"];
-
+  function drawTrends(jsonData, datasetLabels) {
+    var margin = { top: 10, right: 100, bottom: 30, left: 30 },
+      width = 460 - margin.left - margin.right,
+      height = 400 - margin.top - margin.bottom;
+  
+    var trend = d3
+      .select("#trend_dataviz")
+      .append("svg")
+      .attr("width", "100%")
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  
     // Reformat the data: we need an array of arrays of {x, y} tuples
-    var dataReady = allGroup.map(function (grpName) {
+    var dataReady = datasetLabels.map(function (grpName) {
       return {
         name: grpName,
-        values: data.map(function (d) {
+        values: jsonData.map(function (d) {
           return { time: d.time, value: +d[grpName] };
         }),
       };
     });
-
+  
     // A color scale: one color for each group
-    var myColor = d3.scaleOrdinal().domain(allGroup).range(d3.schemeSet2);
-
+    var myColor = d3.scaleOrdinal().domain(datasetLabels).range(d3.schemeSet2);
+  
     // Add X axis --> it is a date format
-    var x = d3.scaleLinear().domain([0, 10]).range([0, width]);
-    trend
-      .append("g")
+    var xDomain = d3.extent(jsonData, function(d) { return +d.time; });
+    var yMax = d3.max(dataReady, function (d) {
+      return d3.max(d.values, function (v) {
+        return v.value;
+      });
+    });
+  
+    // Define scales with dynamic domains
+    var x = d3.scaleLinear().domain(xDomain).range([0, width]);
+    var y = d3.scaleLinear().domain([0, yMax]).range([height, 0]);
+  
+    // Add X axis
+    trend.append("g")
       .attr("transform", "translate(0," + height + ")")
       .call(d3.axisBottom(x));
-
+  
     // Add Y axis
-    var y = d3.scaleLinear().domain([0, 20]).range([height, 0]);
-    trend.append("g").call(d3.axisLeft(y));
-
+    trend.append("g")
+      .call(d3.axisLeft(y));
+  
     // Add the lines
     var line = d3
       .line()
@@ -141,7 +137,7 @@ function drawTrends(csv) {
       })
       .style("stroke-width", 4)
       .style("fill", "none");
-
+  
     // Add the points
     trend
       .selectAll("myDots")
@@ -168,7 +164,7 @@ function drawTrends(csv) {
       })
       .attr("r", 5)
       .attr("stroke", "white");
-
+  
     // Add a label at the end of each line
     trend
       .selectAll("myLabels")
@@ -193,7 +189,7 @@ function drawTrends(csv) {
         return myColor(d.name);
       })
       .style("font-size", 15);
-
+  
     // Add a legend (interactive)
     trend
       .selectAll("myLegend")
@@ -220,10 +216,9 @@ function drawTrends(csv) {
           .transition()
           .style("opacity", currentOpacity == 1 ? 0 : 1);
       });
-  });
-}
+  }
 
-function drawhorizontalgraph(csv, xaxis, yaxis) {
+function drawhorizontalgraph(jsonData, xaxis, yaxis) {
   var margin = { top: 30, right: 30, bottom: 70, left: 60 },
     width = 460 - margin.left - margin.right,
     height = 400 - margin.top - margin.bottom;
@@ -256,45 +251,42 @@ function drawhorizontalgraph(csv, xaxis, yaxis) {
 
   // A function that create / update the plot for a given variable:
   function update(selectedVar) {
-    // Parse the Data
-    d3.csv(csv, function (data) {
-      // X axis
-      x.domain([
-        0,
-        d3.max(data, function (d) {
-          return +d[selectedVar];
-        }),
-      ]);
-      xAxis.transition().duration(1000).call(d3.axisBottom(x)); // Changed to axisBottom for horizontal bars
+    // X axis
+    x.domain([
+      0,
+      d3.max(jsonData, function (d) {
+        return +d[selectedVar];
+      }),
+    ]);
+    xAxis.transition().duration(1000).call(d3.axisBottom(x)); // Changed to axisBottom for horizontal bars
 
-      // Add Y axis
-      y.domain(
-        data.map(function (d) {
-          return d.group;
-        }),
-      );
-      yAxis.transition().duration(1000).call(d3.axisLeft(y));
+    // Add Y axis
+    y.domain(
+      jsonData.map(function (d) {
+        return d.group;
+      }),
+    );
+    yAxis.transition().duration(1000).call(d3.axisLeft(y));
 
-      // variable u: map data to existing bars
-      var map = bargraph.selectAll("rect").data(data);
+    // variable u: map data to existing bars
+    var map = bargraph.selectAll("rect").data(jsonData);
 
-      // update bars
-      map
-        .enter()
-        .append("rect")
-        .merge(map)
-        .transition()
-        .duration(500)
-        .attr("y", function (d) {
-          return y(d[xaxis]);
-        })
-        .attr("x", 0)
-        .attr("height", y.bandwidth())
-        .attr("width", function (d) {
-          return x(d[selectedVar]);
-        })
-        .attr("fill", "#566C4B");
-    });
+    // update bars
+    map
+      .enter()
+      .append("rect")
+      .merge(map)
+      .transition()
+      .duration(500)
+      .attr("y", function (d) {
+        return y(d[xaxis]);
+      })
+      .attr("x", 0)
+      .attr("height", y.bandwidth())
+      .attr("width", function (d) {
+        return x(d[selectedVar]);
+      })
+      .attr("fill", "#566C4B");
   }
 
   // Initialize plot
