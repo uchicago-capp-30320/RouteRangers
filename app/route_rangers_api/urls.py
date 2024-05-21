@@ -4,7 +4,6 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 
-
 app_name = "app"
 
 urlpatterns = [
