@@ -12,7 +12,39 @@
     enter up to three routes.
   </p>
 </div>
-{% block map %} {% endblock %} {% block survey %}
+<style>
+  .map {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+  }
+  .leaflet-routing-alternatives-container {
+      display: none;
+  }
+  .export-button {
+      background: #edeeed;
+      padding: 5px;
+      cursor: pointer;
+      margin-left: auto;
+      width: 100%;
+      text-align: center;
+      font-weight: bold;
+  }
+</style>
+{% block map %} 
+<div id="map" class="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+<script src="https://unpkg.com/leaflet-control-geocoder@latest/dist/Control.Geocoder.js"></script>
+<script src="{% static 'main.js' %}" ></script>
+<script type="module">
+  var coordinates = {{ coordinates | safe }};
+  console.log("coordinates: ", coordinates)
+  initializeUserRoute(coordinates);
+</script>
+{% endblock %} 
+{% block survey %}
 <form method="post" action="{{url}}">
   {% csrf_token %} {{ form }}
   <div style="text-align: right">
