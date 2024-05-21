@@ -13,10 +13,7 @@ from app.route_rangers_api.utils.metric_processing import dashboard_metrics
 
 import uuid
 
-from app.route_rangers_api.utils.city_mapping import (
-    CITY_CONTEXT,
-    CITIES_CHOICES_SURVEY
-)
+from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT, CITIES_CHOICES_SURVEY
 from route_rangers_api.models import TransitRoute, TransitStation, SurveyResponse
 from route_rangers_api.forms import (
     RiderSurvey1,
@@ -105,17 +102,39 @@ def dashboard(request, city: str):
         "geojsonfilepath": static(CITY_CONTEXT[city]["geojsonfilepath"]),
         "heatmapscale": [0, 10, 20, 50, 100, 200, 500, 1000],
         "routes": routes_json,
-        "heatmap_categories": ["median_income","total_weighted_commute_time","percentage_subway_to_work","percentage_bus_to_work","percentage_public_to_work","population"],
-        "heatmap_units": {"median_income": "dollars","total_weighted_commute_time":"minutes","percentage_subway_to_work":"%","percentage_bus_to_work":"%","percentage_public_to_work":"%" ,"population": "people"}, 
-        "heatmap_titles": {"median_income": "Median Income","total_weighted_commute_time":"Total Average Commute Time","percentage_subway_to_work":"Percent of People who Subway to Work","percentage_bus_to_work":"Percent of People who Bus to Work","percentage_public_to_work":"'%' of People who Commute Via Public Transit" ,"population": "Population"},
+        "heatmap_categories": [
+            "median_income",
+            "total_weighted_commute_time",
+            "percentage_subway_to_work",
+            "percentage_bus_to_work",
+            "percentage_public_to_work",
+            "population",
+        ],
+        "heatmap_units": {
+            "median_income": "dollars",
+            "total_weighted_commute_time": "minutes",
+            "percentage_subway_to_work": "%",
+            "percentage_bus_to_work": "%",
+            "percentage_public_to_work": "%",
+            "population": "people",
+        },
+        "heatmap_titles": {
+            "median_income": "Median Income",
+            "total_weighted_commute_time": "Total Average Commute Time",
+            "percentage_subway_to_work": "Percent of People who Subway to Work",
+            "percentage_bus_to_work": "Percent of People who Bus to Work",
+            "percentage_public_to_work": "'%' of People who Commute Via Public Transit",
+            "population": "Population",
+        },
         "heatmap_titles_reversed": {
-                "Median Income": "median_income",
-                "Total Average Commute Time": "total_weighted_commute_time",
-                "Percent of People who Subway to Work": "percentage_subway_to_work",
-                "Percent of People who Bus to Work": "percentage_bus_to_work",
-                "'%' of People who Commute Via Public Transit": "percentage_public_to_work",
-                "Population": "population"
-            }}
+            "Median Income": "median_income",
+            "Total Average Commute Time": "total_weighted_commute_time",
+            "Percent of People who Subway to Work": "percentage_subway_to_work",
+            "Percent of People who Bus to Work": "percentage_bus_to_work",
+            "'%' of People who Commute Via Public Transit": "percentage_public_to_work",
+            "Population": "population",
+        },
+    }
 
     return render(request, "dashboard.html", context)
 
@@ -257,17 +276,18 @@ def get_survey_context(city, form):
     }
     return context
 
+
 # from django.db.models import Sum
 # from .models import TransitStation, RidershipStation
 
 # def get_top_stations(city_db_name, top_n=10):
 #     """
 #     Returns the top N used stations for a given city.
-    
+
 #     Args:
 #         city_db_name (str): The database name of the city.
 #         top_n (int): The number of top stations to return. Defaults to 10.
-    
+
 #     Returns:
 #         list: A list of dictionaries containing station details and total ridership.
 #     """

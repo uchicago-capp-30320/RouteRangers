@@ -120,7 +120,6 @@
   </div> -->
 </div>
 
-
 <div class="card-container row mx-3">
   <div class="col-12 col-md-4 col-lg-4" id="totalRidersCard">
     <div class="card">
@@ -157,31 +156,30 @@
 <div class="card container">
   <h2 class="card-content">Top 10 Stations/Stops</h2>
   <div class="card-content row">
-  <div class="col-12 col-md-4 col-lg-4">
-    <button onclick="drawhorizontalgraph('{{csv}}','group','var1')">
-      Bus
-    </button>
-    <button onclick="drawhorizontalgraph('{{csv}}','group','var2')">
-      Train
-    </button>
-    <div id="horizontaldataviz"></div>
+    <div class="col-12 col-md-4 col-lg-4">
+      <button onclick="drawhorizontalgraph('{{csv}}','group','var1')">
+        Bus
+      </button>
+      <button onclick="drawhorizontalgraph('{{csv}}','group','var2')">
+        Train
+      </button>
+      <div id="horizontaldataviz"></div>
+    </div>
   </div>
-  </div>
-  </div>
-  
-
-
+</div>
 
 <div class="headers">
   <h2>Heat Map</h2>
   <p class="inline">
     Maps of showing variation in transit, environmental, and socio-economic
-    variables across census tracts <br>
+    variables across census tracts <br />
   </p>
-  <div id="heatmap" class="mx-auto" style="width: 90%; height: 600px; margin-top: 5%;"></div>
+  <div
+    id="heatmap"
+    class="mx-auto"
+    style="width: 90%; height: 600px; margin-top: 5%"
+  ></div>
 </div>
-
-
 
 <div class="headers">
   <h2>Trends Over Time</h2>
@@ -203,9 +201,10 @@
     <div class="col-12 col-md-6 col-lg-6">
       <!-- Trends graph -->
       <div id="trend_dataviz"></div>
-    </div></div>
+    </div>
   </div>
-   
+</div>
+
 <!-- Map Scripts -->
 <!-- <script>src="{% static 'map.js' %}"</script> -->
 <script type="module">

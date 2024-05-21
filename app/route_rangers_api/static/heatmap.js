@@ -15,7 +15,7 @@ function heatmaps(
     "#D7301F",
     "#B30000",
     "#7F0000",
-  ]
+  ],
 ) {
   // Initialize the map
   var heatmap = L.map("heatmap").setView(coordinates, 9);
@@ -27,12 +27,12 @@ function heatmaps(
       maxZoom: 19,
       attribution:
         '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    }
+    },
   ).addTo(heatmap);
 
   // Function to compute the dynamic scale and round to the nearest 10s
   function computeScale(data, variable) {
-    let values = data.features.map(f => Number(f.properties[variable]));
+    let values = data.features.map((f) => Number(f.properties[variable]));
     let min = Math.min(...values);
     let max = Math.max(...values);
     let interval = (max - min) / colorscale.length;
@@ -48,26 +48,26 @@ function heatmaps(
     return d > scale[6]
       ? colorscale[7]
       : d > scale[5]
-      ? colorscale[6]
-      : d > scale[4]
-      ? colorscale[5]
-      : d > scale[3]
-      ? colorscale[4]
-      : d > scale[2]
-      ? colorscale[3]
-      : d > scale[1]
-      ? colorscale[2]
-      : d > scale[0]
-      ? colorscale[1]
-      : colorscale[0];
+        ? colorscale[6]
+        : d > scale[4]
+          ? colorscale[5]
+          : d > scale[3]
+            ? colorscale[4]
+            : d > scale[2]
+              ? colorscale[3]
+              : d > scale[1]
+                ? colorscale[2]
+                : d > scale[0]
+                  ? colorscale[1]
+                  : colorscale[0];
   }
 
   // Define controls for info boxes, one for each variable
   var infoControls = {};
   var currentVariable = variables[0];
 
-  variables.forEach(variable => {
-    var info = L.control({ position: 'topright' });
+  variables.forEach((variable) => {
+    var info = L.control({ position: "topright" });
 
     info.onAdd = function () {
       this._div = L.DomUtil.create("div", "info");
@@ -85,10 +85,13 @@ function heatmaps(
       this._div.innerHTML =
         `<h4> ${label} - ${titles[variable]}</h4>` +
         (props
-          ? "<b>" + "Census Tract "+
+          ? "<b>" +
+            "Census Tract " +
             props["census_tract"] +
             "</b><br />" +
-            props[variable] + " " + variableunits[variable]
+            props[variable] +
+            " " +
+            variableunits[variable]
           : "Hover over a census tract");
     };
 
@@ -97,15 +100,17 @@ function heatmaps(
   });
 
   // Hide all info boxes initially
-  Object.values(infoControls).forEach(info => info._div.style.display = 'none');
-  infoControls[currentVariable]._div.style.display = 'block';
+  Object.values(infoControls).forEach(
+    (info) => (info._div.style.display = "none"),
+  );
+  infoControls[currentVariable]._div.style.display = "block";
 
   // Add legend control
   var legend = L.control({ position: "bottomright" });
 
   legend.onAdd = function () {
     var div = L.DomUtil.create("div", "legend");
-    div.innerHTML = '<h4>Legend</h4>';
+    div.innerHTML = "<h4>Legend</h4>";
     return div;
   };
 
@@ -114,7 +119,7 @@ function heatmaps(
   // Function to update the legend
   function updateLegend(scale) {
     var div = legend.getContainer();
-    div.innerHTML = '<h4>Legend</h4>'; // Reset legend content
+    div.innerHTML = "<h4>Legend</h4>"; // Reset legend content
 
     for (var i = 0; i < scale.length; i++) {
       div.innerHTML +=
@@ -132,8 +137,8 @@ function heatmaps(
     .then((data) => {
       var baseLayers = {}; // Initialize an object to hold base layers
       const layerNames = {
-        "median_income": "Median Income",
-      }
+        median_income: "Median Income",
+      };
 
       // Loop through variables to create base layers
       for (var i = 0; i < variables.length; i++) {
@@ -145,7 +150,7 @@ function heatmaps(
             onEachFeature(feature, layer, variable);
           },
         });
-        baseLayers[titles[variable]] = geojson; // Add each base layer to the baseLayers object        
+        baseLayers[titles[variable]] = geojson; // Add each base layer to the baseLayers object
         // Set the default layer to the first variable (or any condition you prefer)
         if (i === 0) {
           defaultLayer = geojson;
@@ -159,17 +164,21 @@ function heatmaps(
       }
 
       // Create a single layer control with radio buttons
-      var layerControl = L.control.layers(baseLayers, null, {
-        collapsed: true,
-      }).addTo(heatmap);
+      var layerControl = L.control
+        .layers(baseLayers, null, {
+          collapsed: true,
+        })
+        .addTo(heatmap);
 
       // Listen for the layerchange event to update the info box visibility and current variable
-      heatmap.on('baselayerchange', function (event) {
+      heatmap.on("baselayerchange", function (event) {
         // Hide all info boxes
-        Object.values(infoControls).forEach(info => info._div.style.display = 'none');
+        Object.values(infoControls).forEach(
+          (info) => (info._div.style.display = "none"),
+        );
         // Show the selected info box
-        currentVariable =   titles_reversed[event.name];
-        infoControls[currentVariable]._div.style.display = 'block';
+        currentVariable = titles_reversed[event.name];
+        infoControls[currentVariable]._div.style.display = "block";
         // Update the info box with the new layer name
         infoControls[currentVariable].update(null);
 
