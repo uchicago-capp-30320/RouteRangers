@@ -50,7 +50,7 @@ def fetch_demographics_data() -> pd.DataFrame:
     return pd.DataFrame(demographics_queryset)
 
 
-def preprocess_demographics_df(demographics_df) -> GeoDataFrame:
+def preprocess_demographics_df(demographics_df: pd.DataFrame) -> gpd.GeoDataFrame:
     """
     Takes in a Pandas dataframe with a demographic data from the datbase
     and a "geographic_delimitation" field and formats the
@@ -71,51 +71,54 @@ def preprocess_demographics_df(demographics_df) -> GeoDataFrame:
     return demographics_df
 
 
-def calculate_weighted_commute_times(demographics_df) -> GeoDataFrame:
+def calculate_demographic_metrics(
+    demographics_df: gpd.GeoDataFrame,
+) -> gpd.GeoDataFrame:
     """
     Takes in a GeoDataFrame with commute time information by time
     category from the Census and returns a GeoDataFrame with a weighted
-    average commute time and percentage of people by transit mode
+    average commute time and percentage of people by transit mode,
+    with all values rounded to 2 decimal points.
     """
 
     demographics_df = demographics_df[demographics_df["population"] != 0].copy()
 
     # weighted commute time for each category
     # the weighted_commute_... columns show number of people who take
-    # between x and x minutes in their commute
-    demographics_df["weighted_commute_15_29"] = (
+    # between x and x minutes in their commute, take the midpoint for each category
+    demographics_df.loc[:, "weighted_commute_15_29"] = (
         demographics_df["work_commute_time_15_29"] * 22
     ) / demographics_df["population"]
-    demographics_df["weighted_commute_30_44"] = (
+    demographics_df.loc[:, "weighted_commute_30_44"] = (
         demographics_df["work_commute_time_30_44"] * 37
     ) / demographics_df["population"]
-    demographics_df["weighted_commute_45_59"] = (
+    demographics_df.loc[:, "weighted_commute_45_59"] = (
         demographics_df["work_commute_time_45_59"] * 31.5
     ) / demographics_df["population"]
-    demographics_df["weighted_commute_60_89"] = (
+    demographics_df.loc[:, "weighted_commute_60_89"] = (
         demographics_df["work_commute_time_60_89"] * 74.5
     ) / demographics_df["population"]
-    demographics_df["weighted_commute_less_15"] = (
+    demographics_df.loc[:, "weighted_commute_less_15"] = (
         demographics_df["work_commute_time_less_15"] * 7.5
     ) / demographics_df["population"]
-    demographics_df["weighted_commute_over_90"] = (
+    demographics_df.loc[:, "weighted_commute_over_90"] = (
         demographics_df["work_commute_time_over_90"] * 104.5
     ) / demographics_df["population"]
 
-    demographics_df["percentage_public_to_work"] = (
+    demographics_df.loc[:, "percentage_public_to_work"] = (
         demographics_df["transportation_to_work_public"]
         / demographics_df["population"]
         * 100
     )
-    demographics_df["percentage_bus_to_work"] = (
+    demographics_df.loc[:, "percentage_bus_to_work"] = (
         demographics_df["transportation_to_work_bus"] / demographics_df["population"]
     ) * 100
-    demographics_df["percentage_subway_to_work"] = (
+    demographics_df.loc[:, "percentage_subway_to_work"] = (
         demographics_df["transportation_to_work_subway"] / demographics_df["population"]
     ) * 100
 
     # weighted average commute time
-    demographics_df["total_weighted_commute_time"] = (
+    demographics_df.loc[:, "total_weighted_commute_time"] = (
         demographics_df["weighted_commute_15_29"]
         + demographics_df["weighted_commute_30_44"]
         + demographics_df["weighted_commute_45_59"]
@@ -124,10 +127,28 @@ def calculate_weighted_commute_times(demographics_df) -> GeoDataFrame:
         + demographics_df["weighted_commute_over_90"]
     )
 
+    # round to 2 decimal points
+    columns_to_round = [
+        "weighted_commute_15_29",
+        "weighted_commute_30_44",
+        "weighted_commute_45_59",
+        "weighted_commute_60_89",
+        "weighted_commute_less_15",
+        "weighted_commute_over_90",
+        "percentage_public_to_work",
+        "percentage_bus_to_work",
+        "percentage_subway_to_work",
+        "total_weighted_commute_time",
+    ]
+
+    demographics_df.loc[:, columns_to_round] = demographics_df.loc[
+        :, columns_to_round
+    ].round(2)
+
     return demographics_df
 
 
-def drop_columns(demographics_df) -> GeoDataFrame:
+def drop_columns(demographics_df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     columns_to_drop = [
         "work_commute_time_15_29",
         "work_commute_time_30_44",
@@ -148,6 +169,19 @@ def drop_columns(demographics_df) -> GeoDataFrame:
     return demographics_df.drop(columns=columns_to_drop)
 
 
+def simplify_geojson(
+    gdf: gpd.GeoDataFrame, tolerance: float = 0.001
+) -> gpd.GeoDataFrame:
+    """
+    Simplify the geometries in the 'geographic_delimitation'
+    column to help with loading speed
+    """
+    gdf.loc[:, "geographic_delimitation"] = gdf["geographic_delimitation"].apply(
+        lambda geom: geom.simplify(tolerance, preserve_topology=True)
+    )
+    return gdf
+
+
 def main() -> None:
     setup_django()
     # configuration to save output
@@ -162,17 +196,17 @@ def main() -> None:
     # call demographic data functions
     demographics_df = fetch_demographics_data()
     demographics_df = preprocess_demographics_df(demographics_df)
-    demographics_df = calculate_weighted_commute_times(demographics_df)
+    demographics_df = calculate_demographic_metrics(demographics_df)
     demographics_df = drop_columns(demographics_df)
 
     demographics_gdf = gpd.GeoDataFrame(
         demographics_df, geometry="geographic_delimitation", crs="EPSG:4326"
     )
 
-    # split gdfs by city
-    chicago_gdf = demographics_gdf[demographics_gdf["state"] == "17"]
-    newyork_gdf = demographics_gdf[demographics_gdf["state"] == "36"]
-    portland_gdf = demographics_gdf[demographics_gdf["state"] == "41"]
+    # split gdfs by city and apply geo simplification
+    chicago_gdf = simplify_geojson(demographics_gdf[demographics_gdf["state"] == "17"])
+    newyork_gdf = simplify_geojson(demographics_gdf[demographics_gdf["state"] == "36"])
+    portland_gdf = simplify_geojson(demographics_gdf[demographics_gdf["state"] == "41"])
 
     # Save geojsons for visualizing heat map
     chicago_gdf.to_file(chicago_merged_path, driver="GeoJSON")
