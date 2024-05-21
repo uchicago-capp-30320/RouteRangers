@@ -87,7 +87,7 @@ def dashboard(request, city: str):
         "survey_class": "cs-li-link",
         "feedback_class": "cs-li-link",
         "coordinates": CITY_CONTEXT[city]["Coordinates"],
-        "stations": stations_json,
+        "stations": lst_coords,
         "csv": CITY_CONTEXT[city]["csv"],
         "lineplot": CITY_CONTEXT[city]["lineplot"],
         "geojsonfilepath": static(CITY_CONTEXT[city]["geojsonfilepath"]),
@@ -188,7 +188,7 @@ def survey_p2(request, city: str, user_id: str = None):
         form = RiderSurvey2()
 
     context = get_survey_context(city, form)
-
+    print(f"page 2 context: {context}")
     return render(request, "survey_p2.html", context)
 
 
@@ -233,7 +233,6 @@ def survey_p4(request, city: str):
     user_id = request.session.get("uuid")
     route_id = request.session.get("route_id")
     print(request.method)
-
     if request.method == "POST":
         survey_answer = SurveyResponse.objects.get(
             user_id_id=user_id, route_id=route_id
@@ -327,7 +326,7 @@ def get_survey_context(city, form):
         "policy_class": "cs-li-link ",
         "survey_class": "cs-li-link cs-active",
         "feedback_class": "cs-li-link",
-        "Coordinates": CITY_CONTEXT[city]["Coordinates"],
+        "coordinates": CITY_CONTEXT[city]["Coordinates"],
         "form": form,
     }
     return context
