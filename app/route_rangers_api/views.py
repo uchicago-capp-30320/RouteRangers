@@ -123,7 +123,7 @@ def dashboard(request, city: str):
             "total_weighted_commute_time": "Total Average Commute Time",
             "percentage_subway_to_work": "Percent of People who Subway to Work",
             "percentage_bus_to_work": "Percent of People who Bus to Work",
-            "percentage_public_to_work": "'%' of People who Commute Via Public Transit",
+            "percentage_public_to_work": "Percent of people who commute via subway",
             "population": "Population",
         },
         "heatmap_titles_reversed": {
@@ -131,7 +131,7 @@ def dashboard(request, city: str):
             "Total Average Commute Time": "total_weighted_commute_time",
             "Percent of People who Subway to Work": "percentage_subway_to_work",
             "Percent of People who Bus to Work": "percentage_bus_to_work",
-            "'%' of People who Commute Via Public Transit": "percentage_public_to_work",
+            "Percent of people who commute via subway": "percentage_public_to_work",
             "Population": "population",
         },
     }
