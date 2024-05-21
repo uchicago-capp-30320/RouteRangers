@@ -38,7 +38,8 @@ def about(request):
     return render(request, "about.html", context)
 
 
-@cache_page(60 * 60 * 72)  # caching for 72 hours since the data doesn't change often
+# caching for 6 hours since the data doesn't change often
+@cache_page(60 * 60 * 6)
 def dashboard(request, city: str):
     # get metrics for dashboard cards
     dashboard_dict = dashboard_metrics(city)

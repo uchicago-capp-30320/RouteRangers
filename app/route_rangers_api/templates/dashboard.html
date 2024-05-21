@@ -42,85 +42,7 @@
       <!-- Add more months as needed -->
     </ul>
   </div>
-
-  <!-- <div class="col-12 col-md-3 col-lg-3">
-    <button
-      class="btn btn-secondary dropdown-toggle"
-      type="button"
-      id="seasonDropdown"
-      data-bs-toggle="dropdown"
-      aria-expanded="false"
-    >
-      Select Season
-    </button>
-    <ul class="dropdown-menu" aria-labelledby="seasonDropdown">
-      <li>
-        <a
-          class="dropdown-item"
-          href="#"
-          onclick="updateCards('seasonDropdown', this)"
-          >Fall</a
-        >
-      </li>
-      <li>
-        <a
-          class="dropdown-item"
-          href="#"
-          onclick="updateCards('seasonDropdown', this)"
-          >Winter</a
-        >
-      </li>
-      <li>
-        <a
-          class="dropdown-item"
-          href="#"
-          onclick="updateCards('seasonDropdown', this)"
-          >Spring</a
-        >
-      </li>
-      <li>
-        <a
-          class="dropdown-item"
-          href="#"
-          onclick="updateCards('seasonDropdown', this)"
-          >Summer</a
-        >
-      </li>
-    </ul>
-  </div> -->
-
-  <!-- <div class="col-12 col-md-3 col-lg-3">
-    <button
-      class="btn btn-secondary dropdown-toggle"
-      type="button"
-      id="daysDropdown"
-      data-bs-toggle="dropdown"
-      aria-expanded="false"
-    >
-      Select Day of Week
-    </button>
-    <ul class="dropdown-menu" aria-labelledby="daysDropdown">
-      <li>
-        <a
-          class="dropdown-item"
-          href="#"
-          onclick="updateCards('daysDropdown', this)"
-          >Weekdays</a
-        >
-      </li>
-      <li>
-        <a
-          class="dropdown-item"
-          href="#"
-          onclick="updateCards('daysDropdown', this)"
-          >Weekends</a
-        >
-      </li>
-    </ul>
-  </div> -->
 </div>
-
-
 <div class="card-container row mx-3">
   <div class="col-12 col-md-4 col-lg-4" id="totalRidersCard">
     <div class="card">
@@ -147,6 +69,16 @@
     </div>
   </div>
 </div>
+<script>
+  cityData = {{ citydata | safe }};
+  var type= "All";
+  document.getElementById("totalRidersText").textContent =
+    cityData[type]["TotalRiders"];
+  document.getElementById("totalRoutesText").textContent =
+    cityData[type]["TotalRoutes"];
+  document.getElementById("pctOfCommutersText").textContent =
+    cityData[type]["PercentOfCommuters"];
+</script>
 
 <div class="headers">
   <h2>Transit Map</h2>
@@ -262,18 +194,5 @@
   drawTrends("{{lineplot}}");
   drawhorizontalgraph("{{csv}}","group","var1");
   heatmaps("{{geojsonfilepath}}", {{coordinates}}, '{{heatmaplabel}}',{{heatmapscale}}, '{{heat_map_variable}}');
-</script>
-<script>
-  // Card update variables
-  cityData = {{ citydata | safe }};
-  // var days= "Weekdays";
-  // var seasons= "Fall";
-  var type= "All";
-  document.getElementById("totalRidersText").textContent =
-    cityData[type]["TotalRiders"];
-  document.getElementById("totalRoutesText").textContent =
-    cityData[type]["TotalRoutes"];
-  document.getElementById("pctOfCommutersText").textContent =
-    cityData[type]["PercentOfCommuters"];
 </script>
 {% endblock %}
