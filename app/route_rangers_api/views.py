@@ -73,17 +73,10 @@ def dashboard(request, city: str):
         fields=("route_name", "color", "mode"),
     )
 
-    # stations
-    # TODO: consider passing these in with serialized geoJSON instead of
-    # creating lst_coords separately
-    stations = TransitStation.objects.values().filter(
-        city=CITY_CONTEXT[city]["DB_Name"]
+    stations = TransitStation.objects.filter(city=CITY_CONTEXT[city]["DB_Name"])
+    stations_json = serialize(
+        "geojson", stations, geometry_field="location", fields=("station_name", "mode")
     )
-
-    lst_coords = [
-        [point["location"].x, point["location"].y, point["station_name"], point["mode"]]
-        for point in stations
-    ]
 
     city_name = CITY_CONTEXT[city]["CityName"]
 
@@ -98,7 +91,7 @@ def dashboard(request, city: str):
         "survey_class": "cs-li-link",
         "feedback_class": "cs-li-link",
         "coordinates": CITY_CONTEXT[city]["Coordinates"],
-        "stations": lst_coords,
+        "stations": stations_json,
         "csv": CITY_CONTEXT[city]["csv"],
         "lineplot": CITY_CONTEXT[city]["lineplot"],
         "geojsonfilepath": static(CITY_CONTEXT[city]["geojsonfilepath"]),
