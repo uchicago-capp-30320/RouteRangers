@@ -6,7 +6,9 @@ import requests
 import time
 import datetime
 import pytz
+import logging
 from dotenv import load_dotenv
+from django.db import IntegrityError
 from route_rangers_api.models import (
     TransitRoute,
     RidershipRoute,
@@ -23,7 +25,7 @@ DATA_PORTAL_APP_TOKEN = os.getenv("DATA_PORTAL_APP_TOKEN")
 TEST_DATA_DIR = os.getenv("TEST_DATA_DIR")
 
 REQUEST_DELAY = 1
-TIMEOUT = 30
+TIMEOUT = 40
 
 DATASETS = {
     "BUS_RIDERSHIP": {
@@ -43,6 +45,10 @@ NY_TZ = pytz.timezone("America/New_York")
 START_DATE = datetime.datetime(2023, 1, 1, tzinfo=NY_TZ)
 END_DATE = datetime.datetime(2024, 1, 1, tzinfo=NY_TZ)
 
+# Logging configuration
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 # This function should be moved to a utils.py file
 def make_request(url: str, params: Dict, session: Callable = None) -> Response:
@@ -152,11 +158,15 @@ def ingest_daily_bus_ridership(daily_bus_json, date: datetime.date) -> None:
             ridership = int(float(row["total_ridership"]))
             obs = RidershipRoute(route_id=obs_route_id, date=date, ridership=ridership)
             obs.save()
-        except:
-            print(f"Ingesting {row['bus_route']} - {row['date']} unsuccesful")
+        except IntegrityError:
+            print(f"{row['bus_route']} - {row['date']} already ingested")
+        except Exception as e:
+            logging.info(f"Ingesting {row['bus_route']} - {row['date']} unsuccesful: {e}")
 
 
-def ingest_subway_ridership(start_date: datetime.date, end_date: datetime.date) -> None:
+def ingest_subway_ridership(
+    start_date: datetime.date = START_DATE, end_date: datetime.date = END_DATE
+) -> None:
     """
     Ingest the NYC subway ridership data to the RouteRidership table
     starting from start_date and ending at end_date (inclusive)
@@ -182,30 +192,43 @@ def ingest_daily_subway_ridership(daily_subway_json, date: datetime.date) -> Non
             print(
                 f"Ingesting ridership data for station {row['station_complex_id']} - {row['date']}"
             )
-            obs_station = TransitStation.objects.filter(
-                city="NYC", station_id=row["station_complex_id"]
-            ).first()
+            obs_station = TransitStation.objects.get(
+                city="NYC", station_id=row["station_complex_id"].strip()
+            )
             obs_station_id = obs_station.id
             ridership = int(float(row["total_ridership"]))
             obs = RidershipStation(
                 station_id=obs_station_id, date=date, ridership=ridership
             )
             obs.save()
-        except:
-            print(f"Ingesting {row['station_complex_id']} - {row['date']} unsuccesful")
+        except IntegrityError:
+            print(f"{row['station_complex_id']} - {row['date']} already ingested")
+        except Exception as e:
+            logging.info(
+                f"Ingesting {row['station_complex_id']} - {row['date']} unsuccesful: {e}"
+            )
 
 
-def run():
-    start = datetime.datetime(2023, 1, 1, tzinfo=NY_TZ)
-    end = datetime.datetime(2023, 2, 1, tzinfo=NY_TZ)
-    # print("Ingesting bus ridership data into RidershipRoute")
-    # ingest_bus_ridership(start_date=start,end_date=end)
-    print("Ingesting subway ridership data into RidershipStation")
-    ingest_subway_ridership(start_date=start, end_date=end)
+def run(
+    start_date_str: str = "2023-01-01",
+    end_date_str: str = "2024-01-02",
+    transit_type: str = "both",
+):
+    """
+    Run script ingesting ridership data for NY
+    """
+    # Convert arguments to datetime objects
+    start_date = datetime.datetime.strptime(start_date_str, "%Y-%m-%d").replace(
+        tzinfo=NY_TZ
+    )
+    end_date = datetime.datetime.strptime(end_date_str, "%Y-%m-%d").replace(
+        tzinfo=NY_TZ
+    )
 
+    if transit_type in ["subway", "both"]:
+        print("Ingesting subway ridership data into RidershipStation")
+        ingest_subway_ridership(start_date=start_date, end_date=end_date)
 
-if __name__ == "__main__":
-    date = datetime.datetime(2022, 12, 31)
-    results = extract_daily_data("SUBWAY_RIDERSHIP", date)
-    for r in results:
-        print(r["total_ridership"])
+    if transit_type in ["bus", "both"]:
+        print("Ingesting bus ridership data into RouteRidership")
+        ingest_bus_ridership(start_date=start_date, end_date=end_date)

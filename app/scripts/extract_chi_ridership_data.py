@@ -2,9 +2,10 @@ import os
 from typing import List, Dict, Tuple
 from requests.models import Response
 from collections.abc import Callable
+from django.db import IntegrityError
+import logging
 import requests
 import time
-import pandas as pd
 import datetime
 import os
 import pytz
@@ -41,6 +42,10 @@ DATASETS = {
         "ORDER_BY": "stationname",
     },
 }
+
+# Logging configuration
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 ###########################
 # Data extraction
@@ -170,18 +175,24 @@ def ingest_daily_bus_ridership(daily_bus_json, date: datetime.date) -> None:
                 f"Ingesting ridership data for route {str(row['route'])} - {row['date']}"
             )
             obs_route = TransitRoute.objects.filter(
-                city="CHI", route_id=row["route"]
+                city="CHI", route_id=row["route"].strip()
             ).first()
             obs_route_id = obs_route.id
             obs = RidershipRoute(
                 route_id=obs_route_id, date=date, ridership=row["rides"]
             )
             obs.save()
-        except:
-            print(f"Ingestion for row {row['route']} - {row['date']} not succesful")
+        except IntegrityError:
+            print(
+                f"Observation route {str(row['route'])} - {row['date']} already ingested"
+            )
+        except Exception as e:
+            logging.info(
+                f"Ingestion for row {row['route']} - {row['date']} not succesful: {e}"
+            )
 
 
-def ingest_subway_ridership(start_date: datetime.date, end_date: datetime.date) -> None:
+def ingest_subway_ridership(start_date: datetime.date = START_DATE, end_date: datetime.date = END_DATE) -> None:
     """
     Ingest the Chicago subway ridership data to the RouteRidership table
     starting from start_date and ending at end_date (inclusive)
@@ -209,29 +220,43 @@ def ingest_daily_subway_ridership(daily_subway_json, date: datetime.date) -> Non
                 f"Ingesting ridership data for station {row['station_id']} - {row['date']}"
             )
             obs_station = TransitStation.objects.filter(
-                city="CHI", station_id=row["station_id"]
+                city="CHI", station_id=row["station_id"].strip()
             ).first()
             obs_station_id = obs_station.id
             obs = RidershipStation(
                 station_id=obs_station_id, date=date, ridership=row["rides"]
             )
             obs.save()
-        except:
+        except IntegrityError:
             print(
-                f"Ingestion for row {row['station_id']} - {row['date']} not succesful"
+                f"Observation station {row['station_id']} - {row['date']} already ingested"
+            )
+        except Exception as e:
+            logging.info(
+                f"Ingestion for row {row['station_id']} - {row['date']} not succesful: {e}"
             )
 
 
-def run():
-    start = datetime.datetime(2023, 1, 1, tzinfo=CHI_TZ)
-    end = datetime.datetime(2023, 2, 1, tzinfo=CHI_TZ)
-    ingest_bus_ridership(start_date=start, end_date=end)
-    # ingest_subway_ridership(start_date=start, end_date=end)
+def run(
+    start_date_str: str = "2023-01-01",
+    end_date_str: str = "2024-01-02",
+    transit_type: str = "both",
+):
+    """
+    Run script ingesting ridership data for Chicago
+    """
+    # Convert arguments to datetime objects
+    start_date = datetime.datetime.strptime(start_date_str, "%Y-%m-%d").replace(
+        tzinfo=CHI_TZ
+    )
+    end_date = datetime.datetime.strptime(end_date_str, "%Y-%m-%d").replace(
+        tzinfo=CHI_TZ
+    )
 
+    if transit_type in ["subway", "both"]:
+        print("Ingesting subway ridership data into RidershipStation")
+        ingest_subway_ridership(start_date=start_date, end_date=end_date)
 
-# if __name__ == "__main__":
-#     date = datetime.datetime(2023,7,9)
-#     resp = extract_daily_data(DATASETS["BUS_RIDERSHIP"]["URL"],date)
-#     for r in resp[:10]:
-#         print(r)
-#         print(r["route"])
+    if transit_type in ["bus", "both"]:
+        print("Ingesting bus ridership data into RouteRidership")
+        ingest_bus_ridership(start_date=start_date, end_date=end_date)
