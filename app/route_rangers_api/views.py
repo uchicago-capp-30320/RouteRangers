@@ -12,10 +12,12 @@ from django.contrib.gis.geos import GEOSGeometry, MultiLineString, LineString
 
 import uuid
 
-from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT, CITIES_CHOICES_SURVEY
-from app.route_rangers_api.utils.metric_processing import dashboard_metrics
+from app.route_rangers_api.utils.city_mapping import (
+    CITY_CONTEXT,
+    CITIES_CHOICES_SURVEY,
+    CARD_DATA,
+)
 from route_rangers_api.models import TransitRoute, TransitStation, SurveyResponse
-
 from route_rangers_api.forms import (
     RiderSurvey1,
     RiderSurvey2,
@@ -24,6 +26,11 @@ from route_rangers_api.forms import (
 )
 
 from django.contrib.gis.geos import GEOSGeometry, MultiLineString, LineString
+
+from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT
+from route_rangers_api.models import TransitRoute, TransitStation
+
+import json
 
 
 def test(request):
@@ -37,12 +44,15 @@ def home(request):
 
 def about(request):
     context = {"cities_class": "cs-li-link", "about_class": "cs-li-link cs-active"}
-    return render(request, "about.html", context)
+    return render(request, "test.html", context)
 
 
 def dashboard(request, city: str):
-    # get metrics for dashboard cards
-    dashboard_dict = dashboard_metrics(city)
+    # get num riders
+    # get num routes
+    num_routes = TransitRoute.objects.filter(city=CITY_CONTEXT[city]["DB_Name"]).count()
+
+    # get commute
 
     # get paths
     routes = TransitRoute.objects.filter(city=CITY_CONTEXT[city]["DB_Name"])
@@ -70,7 +80,7 @@ def dashboard(request, city: str):
     stations = TransitStation.objects.values().filter(
         city=CITY_CONTEXT[city]["DB_Name"]
     )
-
+    # topStations=get_top_stations(CITY_CONTEXT[city]["DB_Name"], top_n=10)
     lst_coords = [
         [point["location"].x, point["location"].y, point["station_name"]]
         for point in stations
@@ -81,8 +91,10 @@ def dashboard(request, city: str):
     context = {
         "City": CITY_CONTEXT[city]["CityName"],
         "City_NoSpace": city,
-        "citydata": dashboard_dict,
-        "heatmaplabel": f"{city_name} Population Density",
+        "citydata": CARD_DATA,
+        "heatmaplabel": f"{city_name} By Census Tract",
+        "TotalRiders": "104,749",
+        "TotalRoutes": num_routes,
         "Commute": "40 Min",
         "cities_class": "cs-li-link",
         "policy_class": "cs-li-link cs-active",
@@ -96,7 +108,9 @@ def dashboard(request, city: str):
         "heatmapscale": [0, 10, 20, 50, 100, 200, 500, 1000],
         "heat_map_variable": "density",
         "routes": routes_json,
-    }
+        "heatmap_categories": ["median_income","total_weighted_commute_time","percentage_subway_to_work","percentage_bus_to_work","percentage_public_to_work","population"],
+        "heatmap_units": {"median_income": "dollars","total_weighted_commute_time":"minutes","percentage_subway_to_work":"%","percentage_bus_to_work":"%","percentage_public_to_work":"%" ,"population": "people"}, 
+        "heatmap_titles": {"median_income": "Median Income","total_weighted_commute_time":"Total Average Commute Time","percentage_subway_to_work":"Percent of People who Subway to Work","percentage_bus_to_work":"Percent of People who Bus to Work","percentage_public_to_work":"'%' of People who Commute Via Public Transit" ,"population": "Population"},}
     return render(request, "dashboard.html", context)
 
 
@@ -236,3 +250,48 @@ def get_survey_context(city, form):
         "form": form,
     }
     return context
+
+# from django.db.models import Sum
+# from .models import TransitStation, RidershipStation
+
+# def get_top_stations(city_db_name, top_n=10):
+#     """
+#     Returns the top N used stations for a given city.
+    
+#     Args:
+#         city_db_name (str): The database name of the city.
+#         top_n (int): The number of top stations to return. Defaults to 10.
+    
+#     Returns:
+#         list: A list of dictionaries containing station details and total ridership.
+#     """
+#     # Step 1: Filter TransitStations by city
+#     stations = TransitStation.objects.filter(city=city_db_name)
+
+#     # Step 2: Get the most used stations by joining with RidershipStation
+#     top_stations = (
+#         RidershipStation.objects
+#         .filter(station__in=stations)
+#         .values('station')
+#         .annotate(total_ridership=Sum('ridership'))
+#         .order_by('-total_ridership')[:top_n]
+#     )
+
+#     # Step 3: Get the station IDs from the top stations
+#     station_ids = [item['station'] for item in top_stations]
+
+#     # Step 4: Retrieve the detailed information for these stations
+#     top_station_details = TransitStation.objects.filter(id__in=station_ids)
+
+#     # Step 5: Combine the ridership data with station details
+#     station_ridership_map = {item['station']: item['total_ridership'] for item in top_stations}
+
+#     top_stations_with_details = [
+#         {
+#             'station': station,
+#             'total_ridership': station_ridership_map[station.id]
+#         }
+#         for station in top_station_details
+#     ]
+
+#     return top_stations_with_details
