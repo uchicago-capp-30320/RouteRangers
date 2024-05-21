@@ -17,11 +17,12 @@ from shapely.geometry import MultiPolygon
 from django.db.models import Avg, Count, Sum
 from typing import Dict
 
+
 from route_rangers_api.models import (
     SurveyUser,
     SurveyResponse,
 )
-from city_mapping import CITY_CONTEXT
+from route_rangers_api.utils.city_mapping import CITY_CONTEXT
 
 
 def get_number_of_responses(city: str) -> int:
