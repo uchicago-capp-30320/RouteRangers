@@ -4,12 +4,10 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.http import Http404, JsonResponse
 from django.urls import reverse
-from django.views import generic
-from django.utils import timezone
 from django.core.serializers import serialize
 from django.templatetags.static import static
 from django.contrib.gis.geos import GEOSGeometry, MultiLineString, LineString
-
+from django.views.decorators.cache import cache_page
 import uuid
 
 from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT, CITIES_CHOICES_SURVEY
@@ -40,6 +38,7 @@ def about(request):
     return render(request, "about.html", context)
 
 
+@cache_page(60 * 60 * 72)  # caching for 72 hours since the data doesn't change often
 def dashboard(request, city: str):
     # get metrics for dashboard cards
     dashboard_dict = dashboard_metrics(city)
