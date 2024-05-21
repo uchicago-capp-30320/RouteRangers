@@ -1,0 +1,1 @@
+web: pip install . && cd app && gunicorn geodjango.wsgi

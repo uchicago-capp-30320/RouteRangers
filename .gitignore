@@ -1,5 +1,6 @@
 .env
 *.env
+app/staticfiles/
 
 .DS_Store
 # Byte-compiled / optimized / DLL files

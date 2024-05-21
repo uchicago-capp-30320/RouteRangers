@@ -1,5 +1,14 @@
 from django.contrib.gis.db import models
-from app.route_rangers_api.utils.city_mapping import CITIES_CHOICES
+from app.route_rangers_api.utils.city_mapping import (
+    CITIES_CHOICES,
+    TRIP_FREQ,
+    MODES_OF_TRANSIT,
+    SWITCH_TO_TRANSIT,
+    TIME_OF_DAY,
+    BOOL_CHOICES,
+    SATISFIED,
+    TRANSIT_IMPROVEMENT,
+)
 
 #################################
 ###### DEMOGRAPHIC MODELS #######
@@ -213,26 +222,54 @@ class BikeRidership(models.Model):
 #################################
 
 
-class Survey(models.Model):
+class SurveyUser(models.Model):
     """
-    Class that represents surveys deployed
-    """
-
-    name = models.CharField(max_length=30)
-    created_at = models.DateTimeField("Created at", auto_now_add=True)
-    questionnaire = models.JSONField()
-
-
-class SurveyAnswer(models.Model):
-    """
-    Class that represents answers to surveys
+    Class that represents users that answer a survey
     """
 
-    user_id = models.CharField(max_length=30)
+    user_id = models.CharField(max_length=128, primary_key=True)
+    city = models.CharField(max_length=30, choices=CITIES_CHOICES)
+
+    # Updated from page 1 of survey:
+    frequent_transit = models.IntegerField(choices=BOOL_CHOICES, null=True)
+    car_owner = models.IntegerField(choices=BOOL_CHOICES, null=True)
+
+
+class SurveyResponse(models.Model):
+    """
+    Class that represents answers to survey questions related to a route
+    """
+
+    id = models.AutoField(primary_key=True)
+
+    user_id = models.ForeignKey(SurveyUser, on_delete=models.PROTECT)
+    route_id = models.CharField(max_length=128)
     response_date = models.DateTimeField("Survey response date", auto_now_add=True)
-    city = models.CharField(max_length=30)
-    survey = models.ForeignKey(Survey, on_delete=models.PROTECT)
-    answers = models.JSONField()
+    city = models.CharField(max_length=30, choices=CITIES_CHOICES)
+
+    # Map:
+    route = models.LineStringField(null=True)
+    starting_point = models.PointField(null=True)
+    end_point = models.PointField(null=True)
+
+    # Page 2:
+    trip_frequency = models.IntegerField(choices=TRIP_FREQ, null=True)
+    trip_tod = models.IntegerField(choices=TIME_OF_DAY, null=True)
+    trip_time = models.IntegerField(null=True)
+    modes_of_transit = models.IntegerField(choices=MODES_OF_TRANSIT, null=True)
+
+    # Page 3:
+    satisfied = models.IntegerField(choices=SATISFIED, null=True)
+    transit_improvement = models.IntegerField(choices=TRANSIT_IMPROVEMENT, null=True)
+    transit_improvement_open = models.CharField(max_length=128)
+
+    # Page 4:
+    switch_to_transit = models.IntegerField(choices=SWITCH_TO_TRANSIT, null=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user_id", "route_id"], name="survey_route")
+        ]
 
 
 class PlannedRoute(models.Model):
@@ -243,3 +280,5 @@ class PlannedRoute(models.Model):
     user_id = models.CharField(max_length=30)
     response_date = models.DateTimeField("Survey response date", auto_now_add=True)
     route = models.LineStringField()
+    starting_point = models.PointField(null=True)
+    end_point = models.PointField(null=True)

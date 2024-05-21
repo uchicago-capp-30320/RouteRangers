@@ -1,14 +1,15 @@
 import os
-from typing import List, Dict, Tuple
-from requests.models import Response
+from typing import List, Dict
 from collections.abc import Callable
+from django.db import IntegrityError
+import logging
 import requests
 import time
-import pandas as pd
 import datetime
 import os
 import pytz
 from dotenv import load_dotenv
+from app.scripts.utils import make_request, build_start_end_date_str
 from route_rangers_api.models import (
     TransitRoute,
     RidershipRoute,
@@ -22,10 +23,6 @@ from route_rangers_api.models import (
 load_dotenv()
 
 DATA_PORTAL_APP_TOKEN = os.getenv("DATA_PORTAL_APP_TOKEN")
-
-REQUEST_DELAY = 1
-RESULTS_PER_PAGE = 50000  # Max number of results for API
-TIMEOUT = 30
 
 CHI_TZ = pytz.timezone("America/Chicago")
 START_DATE = datetime.datetime(2023, 1, 1, tzinfo=CHI_TZ)
@@ -42,25 +39,14 @@ DATASETS = {
     },
 }
 
+# Logging configuration
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
 ###########################
 # Data extraction
 ###########################
-
-
-def make_request(url: str, params: Dict, session: Callable = None) -> Response:
-    """
-    Make a request to `url` and return the raw response.
-
-    This function ensure that the domain matches what is
-    expected and that the rate limit is obeyed.
-    """
-    time.sleep(REQUEST_DELAY)
-    print(f"Fetching {url}")
-    if session:
-        resp = session.get(url, params=params)
-    else:
-        resp = requests.get(url, params, timeout=TIMEOUT)
-    return resp
 
 
 def extract_daily_data(
@@ -72,11 +58,10 @@ def extract_daily_data(
 ) -> List:
     """
     Extract daily data from a Chicago Subway or Bus ridership endpoint
-    storing it in a list with partial responses subject to the limit parameter.
-    One item in the list has up to "limit" items
+    storing it in a list with dictionaries
     """
     # Create datetime objects for date query filter
-    start_date, end_date = build_start_end_date_str(date)
+    start_date, end_date = build_start_end_date_str(date, CHI_TZ)
 
     # Define parameters to pass into the request:
     where_clause = f"date >= '{start_date}' AND date < '{end_date}'"
@@ -120,20 +105,6 @@ def build_parameters(
     return params
 
 
-def build_start_end_date_str(date: datetime.datetime) -> Tuple[str, str]:
-    """
-    Creates two strings to pass as filters on the query for
-    a request to the Chicago data Portal
-    """
-    start_date = date.astimezone(CHI_TZ)
-    time_delta = datetime.timedelta(days=1)
-    end_date = start_date + time_delta
-    start_date = start_date.strftime("%Y-%m-%d")
-    end_date = end_date.strftime("%Y-%m-%d")
-
-    return start_date, end_date
-
-
 #####################
 # Data Ingestion
 #####################
@@ -170,18 +141,26 @@ def ingest_daily_bus_ridership(daily_bus_json, date: datetime.date) -> None:
                 f"Ingesting ridership data for route {str(row['route'])} - {row['date']}"
             )
             obs_route = TransitRoute.objects.filter(
-                city="CHI", route_id=row["route"]
+                city="CHI", route_id=row["route"].strip()
             ).first()
             obs_route_id = obs_route.id
             obs = RidershipRoute(
                 route_id=obs_route_id, date=date, ridership=row["rides"]
             )
             obs.save()
-        except:
-            print(f"Ingestion for row {row['route']} - {row['date']} not succesful")
+        except IntegrityError:
+            print(
+                f"Observation route {str(row['route'])} - {row['date']} already ingested"
+            )
+        except Exception as e:
+            logging.info(
+                f"Ingestion for row {row['route']} - {row['date']} not succesful: {e}"
+            )
 
 
-def ingest_subway_ridership(start_date: datetime.date, end_date: datetime.date) -> None:
+def ingest_subway_ridership(
+    start_date: datetime.date = START_DATE, end_date: datetime.date = END_DATE
+) -> None:
     """
     Ingest the Chicago subway ridership data to the RouteRidership table
     starting from start_date and ending at end_date (inclusive)
@@ -204,35 +183,48 @@ def ingest_daily_subway_ridership(daily_subway_json, date: datetime.date) -> Non
     day of ridership
     """
     for row in daily_subway_json:
-
         try:
             print(
                 f"Ingesting ridership data for station {row['station_id']} - {row['date']}"
             )
-            obs_station = TransitStation.objects.filter(
-                city="CHI", station_id=row["station_id"]
-            ).first()
+            obs_station = TransitStation.objects.get(
+                city="CHI", station_id=row["station_id"].strip()
+            )
             obs_station_id = obs_station.id
             obs = RidershipStation(
                 station_id=obs_station_id, date=date, ridership=row["rides"]
             )
             obs.save()
-        except:
+        except IntegrityError:
             print(
-                f"Ingestion for row {row['station_id']} - {row['date']} not succesful"
+                f"Observation station {row['station_id']} - {row['date']} already ingested"
+            )
+        except Exception as e:
+            logging.info(
+                f"Ingestion for row {row['station_id']} - {row['date']} not succesful: {e}"
             )
 
 
-def run():
-    start = datetime.datetime(2023, 1, 1, tzinfo=CHI_TZ)
-    end = datetime.datetime(2023, 2, 1, tzinfo=CHI_TZ)
-    ingest_bus_ridership(start_date=start, end_date=end)
-    # ingest_subway_ridership(start_date=start, end_date=end)
+def run(
+    start_date_str: str = "2023-01-01",
+    end_date_str: str = "2024-01-02",
+    transit_type: str = "both",
+):
+    """
+    Run script ingesting ridership data for Chicago
+    """
+    # Convert arguments to datetime objects
+    start_date = datetime.datetime.strptime(start_date_str, "%Y-%m-%d").replace(
+        tzinfo=CHI_TZ
+    )
+    end_date = datetime.datetime.strptime(end_date_str, "%Y-%m-%d").replace(
+        tzinfo=CHI_TZ
+    )
 
+    if transit_type in ["subway", "both"]:
+        print("Ingesting subway ridership data into RidershipStation")
+        ingest_subway_ridership(start_date=start_date, end_date=end_date)
 
-# if __name__ == "__main__":
-#     date = datetime.datetime(2023,7,9)
-#     resp = extract_daily_data(DATASETS["BUS_RIDERSHIP"]["URL"],date)
-#     for r in resp[:10]:
-#         print(r)
-#         print(r["route"])
+    if transit_type in ["bus", "both"]:
+        print("Ingesting bus ridership data into RouteRidership")
+        ingest_bus_ridership(start_date=start_date, end_date=end_date)
