@@ -350,4 +350,3 @@ def get_survey_context(city, form):
         "form": form,
     }
     return context
-
