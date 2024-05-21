@@ -1,24 +1,17 @@
 import os
-from typing import List, Dict, Tuple
-from requests.models import Response
-import datetime
+from typing import List
 import pytz
 import pandas as pd
 from dotenv import load_dotenv
-import itertools
-import psycopg2
-
-
 from route_rangers_api.models import (
     BikeRidership,
     BikeStation,
 )
 from django.contrib.gis.geos import Point
-
+from django.db import IntegrityError
 from app.scripts.utils import (
     make_request,
-    process_daily_ridership_data,
-    ingest_monthly_data,
+    process_daily_ridership_data
 )
 
 #########################
@@ -76,10 +69,15 @@ def ingest_bike_stations() -> None:
                     location=Point(station["location"]["coordinates"]),
                 )
                 obs.save()
-            except:
+            except IntegrityError:
                 print(f"Observation{station['station_name']} already ingested")
-        except:
+            except Exception as e:
+                print(f"Observation {station['station_name']} not ingested: {e}")
+        except IntegrityError:
             print(f"Observation{station['station_name']} already ingested")
+        except Exception as e:
+            print(f"Observation {station['station_name']} not ingested: {e}")
+        
 
 
 def create_daily_ridership_month(filepath: str) -> pd.DataFrame:
@@ -112,8 +110,10 @@ def ingest_monthly_data(monthly_ridership_df: pd.DataFrame) -> None:
                 n_ended=row.n_rides_ended,
             )
             obs.save()
-        except:
-            pass
+        except IntegrityError:
+            print(f"Observation Station: {obs_station} - {row.date} already ingested")
+        except Exception as e:
+            print(f"Observation Station {obs_station} - {row.date} not ingested: {e}")
 
 
 def ingest_trip_data():
@@ -128,12 +128,16 @@ def ingest_trip_data():
             ingest_monthly_data(monthly_df)
 
 
-def run():
+def run(data:str = "both"):
     ingest_bike_stations()
     ingest_trip_data()
 
-
-# if __name__ == "__main__":
-
-#    df = create_daily_ridership_month(f"{BIKE_DATA_DIR}/2023-divvy-tripdata/202301-divvy-tripdata.csv")
-#    print(df)
+    if data == "stations":
+        ingest_bike_stations()
+    elif data == "ridership":
+        ingest_trip_data()
+    elif data == "both":
+        ingest_bike_stations()
+        ingest_trip_data()
+    else:
+        print("Select one of the following options 'stations', 'ridership' or 'both'")

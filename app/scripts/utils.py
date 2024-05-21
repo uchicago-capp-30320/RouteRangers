@@ -1,21 +1,20 @@
-import os
-from typing import List, Dict, Tuple
-from requests.models import Response
+from typing import Dict, Tuple, List
 from collections.abc import Callable
 import pandas as pd
 import requests
+from requests.models import Response
 import time
+import requests
 import datetime
-import pytz
-from route_rangers_api.models import BikeStation, BikeRidership
 
 
-REQUEST_DELAY = 0.2
-RESULTS_PER_PAGE = 50000  # Max number of results for API
-TIMEOUT = 30
+REQUEST_DELAY = 0.5
+TIMEOUT = 40
 
 
-def make_request(url: str, params: Dict, session: Callable = None) -> Response:
+def make_request(
+    url: str, params: Dict, session: Callable = None, timeout: int = TIMEOUT
+) -> Response:
     """
     Make a request to `url` and return the raw response.
 
@@ -27,14 +26,15 @@ def make_request(url: str, params: Dict, session: Callable = None) -> Response:
     if session:
         resp = session.get(url, params=params)
     else:
-        resp = requests.get(url, params, timeout=TIMEOUT)
+
+        resp = requests.get(url, params, timeout=timeout)
     return resp
 
 
-def build_start_end_date_str(date: datetime.datetime, timezone: str) -> Tuple[str, str]:
+def build_start_end_date_str(date: datetime.datetime, timezone) -> Tuple[str, str]:
     """
     Creates two strings to pass as filters on the query for
-    a request to the NYC Portal
+    a request to the Chicago data Portal
     """
     start_date = date.astimezone(timezone)
     time_delta = datetime.timedelta(days=1)
@@ -44,11 +44,9 @@ def build_start_end_date_str(date: datetime.datetime, timezone: str) -> Tuple[st
 
     return start_date, end_date
 
-
 #######################
 ## Bike Ridership Utils
 #######################
-
 
 def extract_stations(url: str) -> List:
     """
@@ -87,22 +85,3 @@ def process_daily_ridership_data(monthly_df) -> pd.DataFrame:
     return ridership_df
 
 
-def ingest_monthly_data(monthly_ridership_df: pd.DataFrame) -> None:
-    """
-    Ingest ridership at the daily level into the BikeRidership table
-    """
-    for row in monthly_ridership_df.itertuples():
-        try:
-            obs_station = (
-                BikeStation.objects.filter(short_name=row.station_id).first().id
-            )
-            obs = BikeRidership(
-                station_id=obs_station,
-                date=row.date,
-                n_started=row.n_rides_started,
-                n_ended=row.n_rides_ended,
-            )
-            obs.save()
-            print(f"Station {row.station_id} succesfully ingested")
-        except:
-            print(f"Ingesting station {row.station_id} unsuccesful")

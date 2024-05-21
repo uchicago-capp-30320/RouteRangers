@@ -1,17 +1,12 @@
 import os
-from typing import List, Dict, Tuple
-from requests.models import Response
-import datetime
-import pytz
+from typing import List
 import pandas as pd
 from dotenv import load_dotenv
-import itertools
 from app.scripts.utils import (
     process_daily_ridership_data,
-    # ingest_monthly_data,
     extract_stations,
 )
-
+from django.db import IntegrityError
 from route_rangers_api.models import (
     BikeRidership,
     BikeStation,
@@ -68,8 +63,10 @@ def ingest_bike_stations_data() -> None:
                 location=Point(station["lon"], station["lat"]),
             )
             obs.save()
-        except:
+        except IntegrityError:
             print(f"station {station['name']} has already been ingested")
+        except Exception as e:
+            print(f"station {station['name']} not ingested: {e}")
 
 
 def create_daily_ridership_month(filepath: str) -> pd.DataFrame:
@@ -114,8 +111,10 @@ def ingest_monthly_data(monthly_ridership_df: pd.DataFrame) -> None:
             print(
                 f"Observation Station: {obs_station} - {row.date} succesfully ingested"
             )
-        except:
-            print(f"Observation Station: {obs_station} - {row.date} not ingested")
+        except IntegrityError:
+            print(f"Observation Station: {obs_station} - {row.date} already ingested")
+        except Exception as e:
+            print(f"Observation Station {obs_station} - {row.date} not ingested: {e}")
 
 
 def ingest_citibike_ridership_data():
@@ -134,6 +133,14 @@ def ingest_citibike_ridership_data():
             ingest_monthly_data(monthly_df)
 
 
-def run():
-    ingest_bike_stations_data()
-    ingest_citibike_ridership_data()
+def run(data:str="both"):
+    if data == "stations":
+        ingest_bike_stations_data()
+    elif data == "ridership":
+        ingest_citibike_ridership_data()
+    elif data == "both":
+        ingest_bike_stations_data()
+        ingest_citibike_ridership_data()
+    else:
+        print("Select one of the following options 'stations', 'ridership' or 'both'")
+

@@ -1,15 +1,127 @@
-    // Initialize the map with Chicago as the center
-    var map = L.map('map').setView({Coordinates}, 13); // [latitude, longitude], zoom level
-    
-    // Add a tile layer
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attribution">CARTO</a>',
-        subdomains: 'abcd',
-        maxZoom: 19
-    }).addTo(map);
+export function initializeMap(coordinates, stations, iconUrl, routes) {
 
-    // Loop through the stations and add a smaller marker for each
-    var stations_data = {stations};
-    stations_data.forEach(function(station) {
-        var marker = L.marker([station[0], station[1]]).addTo(map);
-        });
+  // Add a tile layer
+  var tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    // attribution:
+    //   'Map data (c) <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, (c) <a href="https://carto.com/attribution">CARTO</a>',
+    subdomains: 'abcd',
+    minZoom: 8,
+    maxZoom: 17,
+  });
+
+  // Initialize the map at center of city
+  var map = L.map('map', { layers: [tileLayer] }).setView(coordinates, 13);
+
+  // Custom icon for smaller markers
+  var smallIcon = L.icon({
+    iconUrl: iconUrl, // URL to a smaller icon image
+    iconSize: [15, 15],
+    iconAnchor: [6, 6],
+  });
+
+  // Set level of zoom at which each kind of transit stop declusters,
+  // based on how spaced apart they usually are
+  var zoomEnd = {
+    0: 12,
+    1: 12,
+    2: 10,
+    3: 15,
+    6: 12
+  };
+
+  var routeNames = {
+    0: "Streetcar",
+    1: "Subway",
+    2: "Commuter rail",
+    3: "Bus",
+    6: "Aerial tram"
+  };
+
+  var markerClusterGroups = {};
+
+  for (var i = 0; i < stations.length; i++) {
+    var station = stations[i];
+    var x = station[0];
+    var y = station[1];
+    var stationName = station[2];
+    var routeType = routeNames[station[3]];
+    var marker = L.marker([x, y], { icon: smallIcon });
+    marker.bindTooltip(stationName + '<br>(' + routeType + ')');
+
+    // create new cluster group for each type of route as needed
+    if (!markerClusterGroups[routeType]) {
+      // This isn't retrieving a valid value from the dictionary
+      // to correctly give different transit types different values
+      // for disableClusteringonZoom. TODO: fix (low priority)
+      var maxZoom = parseInt(zoomEnd[parseInt(routeType, 10)], 10);
+      if (isNaN(maxZoom)) {
+        maxZoom = 14;
+      }
+      markerClusterGroups[routeType] = L.markerClusterGroup({
+        disableClusteringAtZoom: maxZoom
+      });
+    }
+
+    markerClusterGroups[routeType].addLayer(marker);
+  };
+
+  var markerClustersLayer = L.layerGroup();
+  for (var routeType in markerClusterGroups) {
+    markerClustersLayer.addLayer(markerClusterGroups[routeType]);
+  }
+  map.addLayer(markerClustersLayer);
+
+
+  // Add routes layer
+
+  var routeLayers = {};
+
+  L.geoJSON(routes, {
+    style: function (feature) {
+      return {
+        color: '#' + feature.properties.color,
+        weight: 3,
+        "opacity": .7
+      };
+    },
+    onEachFeature: function (feature, layer) {
+      var routeType = feature.properties.mode;
+      var mode = routeNames[routeType];
+      if (!routeLayers[mode]) {
+        routeLayers[mode] = L.layerGroup();
+      }
+      routeLayers[mode].addLayer(layer);
+      layer.bindPopup(feature.properties.route_name + '<br> (' + mode + ')');
+    }
+  });
+
+  // map.addLayer(routesJSON);
+
+  // Adjust width of routes with zoom level
+  function updateRouteWidth() {
+    var zoom = map.getZoom();
+    for (var rType in routeLayers) {
+      routeLayers[rType].eachLayer(function (layer) {
+        layer.setStyle({ weight: (zoom / 4) - 1 });
+      });
+    }
+  }
+
+  var baseMaps = {
+    "base": tileLayer
+  }
+
+  var overlays = {};
+
+  for (var key in markerClusterGroups) {
+    overlays[key + " stops"] = markerClusterGroups[key];
+  }
+  for (var key in routeLayers) {
+    overlays[key + " routes"] = routeLayers[key];
+  }
+
+  var layerControl = L.control.layers(baseMaps, overlays).addTo(map);
+
+  map.on("zoom", updateRouteWidth);
+
+};
