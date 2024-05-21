@@ -13,7 +13,6 @@ urlpatterns = [
     path("dashboard/<str:city>", views.dashboard, name="dashboard"),
     path("responses/<str:city>", views.responses, name="responses"),
     path("survey/<str:city>/", views.survey_p1, name="survey"),
-    path("survey/<str:city>/map", views.survey_p1, name="map"),
     path("survey/<str:city>/2", views.survey_p2, name="survey_p2"),
     path("survey/<str:city>/3", views.survey_p3, name="survey_p3"),
     path("survey/<str:city>/4", views.survey_p4, name="survey_p4"),

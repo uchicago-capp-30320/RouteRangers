@@ -24,7 +24,6 @@ from route_rangers_api.models import (
     SurveyResponse,
     SurveyUser,
 )
-
 from route_rangers_api.forms import (
     RiderSurvey1,
     RiderSurvey2,
