@@ -9,13 +9,8 @@ from django.utils import timezone
 from django.core.serializers import serialize
 from django.templatetags.static import static
 from django.contrib.gis.geos import GEOSGeometry, MultiLineString, LineString
-from app.route_rangers_api.utils.metric_processing import dashboard_metrics
 
 import uuid
-
-
-from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT, CITIES_CHOICES_SURVEY
-from route_rangers_api.models import TransitRoute, TransitStation, SurveyResponse
 
 from app.route_rangers_api.utils.metric_processing import dashboard_metrics
 from app.route_rangers_api.utils.city_mapping import (
@@ -29,7 +24,6 @@ from route_rangers_api.models import (
     SurveyResponse,
     SurveyUser,
 )
-
 from route_rangers_api.forms import (
     RiderSurvey1,
     RiderSurvey2,
@@ -39,11 +33,6 @@ from route_rangers_api.forms import (
 )
 
 from django.contrib.gis.geos import GEOSGeometry, MultiLineString, LineString
-
-from app.route_rangers_api.utils.city_mapping import CITY_CONTEXT
-from route_rangers_api.models import TransitRoute, TransitStation
-
-import json
 
 
 def test(request):
@@ -57,7 +46,7 @@ def home(request):
 
 def about(request):
     context = {"cities_class": "cs-li-link", "about_class": "cs-li-link cs-active"}
-    return render(request, "test.html", context)
+    return render(request, "about.html", context)
 
 
 def dashboard(request, city: str):
