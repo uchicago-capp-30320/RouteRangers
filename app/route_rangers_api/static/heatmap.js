@@ -5,6 +5,7 @@ function heatmaps(
   variables,
   variableunits,
   titles,
+  titles_reversed,
   colorscale = [
     "#FFF7EC",
     "#FEE0C4",
@@ -130,6 +131,9 @@ function heatmaps(
     .then((response) => response.json())
     .then((data) => {
       var baseLayers = {}; // Initialize an object to hold base layers
+      const layerNames = {
+        "median_income": "Median Income",
+      }
 
       // Loop through variables to create base layers
       for (var i = 0; i < variables.length; i++) {
@@ -141,7 +145,7 @@ function heatmaps(
             onEachFeature(feature, layer, variable);
           },
         });
-        baseLayers[variable] = geojson; // Add each base layer to the baseLayers object        
+        baseLayers[titles[variable]] = geojson; // Add each base layer to the baseLayers object        
         // Set the default layer to the first variable (or any condition you prefer)
         if (i === 0) {
           defaultLayer = geojson;
@@ -164,7 +168,7 @@ function heatmaps(
         // Hide all info boxes
         Object.values(infoControls).forEach(info => info._div.style.display = 'none');
         // Show the selected info box
-        currentVariable = event.name;
+        currentVariable =   titles_reversed[event.name];
         infoControls[currentVariable]._div.style.display = 'block';
         // Update the info box with the new layer name
         infoControls[currentVariable].update(null);

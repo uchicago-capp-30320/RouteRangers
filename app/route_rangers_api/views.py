@@ -9,13 +9,13 @@ from django.utils import timezone
 from django.core.serializers import serialize
 from django.templatetags.static import static
 from django.contrib.gis.geos import GEOSGeometry, MultiLineString, LineString
+from app.route_rangers_api.utils.metric_processing import dashboard_metrics
 
 import uuid
 
 from app.route_rangers_api.utils.city_mapping import (
     CITY_CONTEXT,
-    CITIES_CHOICES_SURVEY,
-    CARD_DATA,
+    CITIES_CHOICES_SURVEY
 )
 from route_rangers_api.models import TransitRoute, TransitStation, SurveyResponse
 from route_rangers_api.forms import (
@@ -87,15 +87,13 @@ def dashboard(request, city: str):
     ]
 
     city_name = CITY_CONTEXT[city]["CityName"]
-
+    dashboard_dict = dashboard_metrics(city)
     context = {
         "City": CITY_CONTEXT[city]["CityName"],
         "City_NoSpace": city,
-        "citydata": CARD_DATA,
+        "citydata": dashboard_dict,
         "heatmaplabel": f"{city_name} By Census Tract",
-        "TotalRiders": "104,749",
         "TotalRoutes": num_routes,
-        "Commute": "40 Min",
         "cities_class": "cs-li-link",
         "policy_class": "cs-li-link cs-active",
         "survey_class": "cs-li-link",
@@ -106,11 +104,19 @@ def dashboard(request, city: str):
         "lineplot": CITY_CONTEXT[city]["lineplot"],
         "geojsonfilepath": static(CITY_CONTEXT[city]["geojsonfilepath"]),
         "heatmapscale": [0, 10, 20, 50, 100, 200, 500, 1000],
-        "heat_map_variable": "density",
         "routes": routes_json,
         "heatmap_categories": ["median_income","total_weighted_commute_time","percentage_subway_to_work","percentage_bus_to_work","percentage_public_to_work","population"],
         "heatmap_units": {"median_income": "dollars","total_weighted_commute_time":"minutes","percentage_subway_to_work":"%","percentage_bus_to_work":"%","percentage_public_to_work":"%" ,"population": "people"}, 
-        "heatmap_titles": {"median_income": "Median Income","total_weighted_commute_time":"Total Average Commute Time","percentage_subway_to_work":"Percent of People who Subway to Work","percentage_bus_to_work":"Percent of People who Bus to Work","percentage_public_to_work":"'%' of People who Commute Via Public Transit" ,"population": "Population"},}
+        "heatmap_titles": {"median_income": "Median Income","total_weighted_commute_time":"Total Average Commute Time","percentage_subway_to_work":"Percent of People who Subway to Work","percentage_bus_to_work":"Percent of People who Bus to Work","percentage_public_to_work":"'%' of People who Commute Via Public Transit" ,"population": "Population"},
+        "heatmap_titles_reversed": {
+                "Median Income": "median_income",
+                "Total Average Commute Time": "total_weighted_commute_time",
+                "Percent of People who Subway to Work": "percentage_subway_to_work",
+                "Percent of People who Bus to Work": "percentage_bus_to_work",
+                "'%' of People who Commute Via Public Transit": "percentage_public_to_work",
+                "Population": "population"
+            }}
+
     return render(request, "dashboard.html", context)
 
 
