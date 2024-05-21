@@ -5,7 +5,8 @@ export function initializeMap(coordinates, stations, iconUrl, routes) {
     // attribution:
     //   'Map data (c) <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, (c) <a href="https://carto.com/attribution">CARTO</a>',
     subdomains: 'abcd',
-    maxZoom: 19,
+    minZoom: 8,
+    maxZoom: 17,
   });
 
   // Initialize the map at center of city
@@ -18,24 +19,64 @@ export function initializeMap(coordinates, stations, iconUrl, routes) {
     iconAnchor: [6, 6],
   });
 
-  var markers = L.markerClusterGroup({
-    disableClusteringAtZoom: 16
-  });
+  // Set level of zoom at which each kind of transit stop declusters,
+  // based on how spaced apart they usually are
+  var zoomEnd = {
+    0: 12,
+    1: 12,
+    2: 10,
+    3: 15,
+    6: 12
+  };
+
+  var routeNames = {
+    0: "Streetcar",
+    1: "Subway",
+    2: "Commuter rail",
+    3: "Bus",
+    6: "Aerial tram"
+  };
+
+  var markerClusterGroups = {};
 
   for (var i = 0; i < stations.length; i++) {
     var station = stations[i];
-    var marker = L.marker([station[0], station[1]], { icon: smallIcon });
-    marker.bindTooltip(station[2]);
-    console.log(station[2]);
-    markers.addLayer(marker);
+    var x = station[0];
+    var y = station[1];
+    var stationName = station[2];
+    var routeType = routeNames[station[3]];
+    var marker = L.marker([x, y], { icon: smallIcon });
+    marker.bindTooltip(stationName + '<br>(' + routeType + ')');
+
+    // create new cluster group for each type of route as needed
+    if (!markerClusterGroups[routeType]) {
+      // This isn't retrieving a valid value from the dictionary
+      // to correctly give different transit types different values
+      // for disableClusteringonZoom. TODO: fix (low priority)
+      var maxZoom = parseInt(zoomEnd[parseInt(routeType, 10)], 10);
+      if (isNaN(maxZoom)) {
+        maxZoom = 14;
+      }
+      markerClusterGroups[routeType] = L.markerClusterGroup({
+        disableClusteringAtZoom: maxZoom
+      });
+    }
+
+    markerClusterGroups[routeType].addLayer(marker);
   };
 
-  map.addLayer(markers);
+  var markerClustersLayer = L.layerGroup();
+  for (var routeType in markerClusterGroups) {
+    markerClustersLayer.addLayer(markerClusterGroups[routeType]);
+  }
+  map.addLayer(markerClustersLayer);
 
 
   // Add routes layer
 
-  var routesJSON = L.geoJSON(routes, {
+  var routeLayers = {};
+
+  L.geoJSON(routes, {
     style: function (feature) {
       return {
         color: '#' + feature.properties.color,
@@ -44,21 +85,43 @@ export function initializeMap(coordinates, stations, iconUrl, routes) {
       };
     },
     onEachFeature: function (feature, layer) {
-      layer.bindPopup(feature.properties.route_name);
+      var routeType = feature.properties.mode;
+      var mode = routeNames[routeType];
+      if (!routeLayers[mode]) {
+        routeLayers[mode] = L.layerGroup();
+      }
+      routeLayers[mode].addLayer(layer);
+      layer.bindPopup(feature.properties.route_name + '<br> (' + mode + ')');
     }
   });
 
-  map.addLayer(routesJSON);
+  // map.addLayer(routesJSON);
+
+  // Adjust width of routes with zoom level
+  function updateRouteWidth() {
+    var zoom = map.getZoom();
+    for (var rType in routeLayers) {
+      routeLayers[rType].eachLayer(function (layer) {
+        layer.setStyle({ weight: (zoom / 4) - 1 });
+      });
+    }
+  }
 
   var baseMaps = {
     "base": tileLayer
   }
 
-  var overlayMaps = {
-    "Stations": markers,
-    "Routes": routesJSON
-  };
+  var overlays = {};
 
-  var layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
+  for (var key in markerClusterGroups) {
+    overlays[key + " stops"] = markerClusterGroups[key];
+  }
+  for (var key in routeLayers) {
+    overlays[key + " routes"] = routeLayers[key];
+  }
+
+  var layerControl = L.control.layers(baseMaps, overlays).addTo(map);
+
+  map.on("zoom", updateRouteWidth);
 
 };
