@@ -70,7 +70,9 @@ QUESTIONS = {
                 public transit?",
         "another_trip": "Do you have another trip you would like to report?",
     },
-    "p5": {"feedback", "Any other feedback or comments:"},
+    "p5": {
+        "another_trip": "Do you have another trip you would like to report?",
+    },
 }
 
 BOOL_CHOICES = ((True, "Yes"), (False, "No"))
@@ -151,3 +153,16 @@ class RiderSurvey4(ModelForm):
         }
 
         widgets = {"switch_to_transit": RadioSelect(attrs={"class": "form-radio"})}
+
+
+# use forms.Forms not ModelForm because not writing to database
+class RiderSurvey5(forms.Form):
+    """
+    Check if bikers and walkers have another trip to report.
+    """
+
+    another_trip = forms.ChoiceField(
+        label=QUESTIONS["p5"]["another_trip"],
+        choices=BOOL_CHOICES,
+        widget=RadioSelect(attrs={"class": "form-radio"}),
+    )
