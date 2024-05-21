@@ -12,10 +12,10 @@ from django.contrib.gis.geos import GEOSGeometry, MultiLineString, LineString
 
 import uuid
 
+from app.route_rangers_api.utils.metric_processing import dashboard_metrics
 from app.route_rangers_api.utils.city_mapping import (
     CITY_CONTEXT,
     CITIES_CHOICES_SURVEY,
-    CARD_DATA,
     MODES_OF_TRANSIT,
 )
 from route_rangers_api.models import (
