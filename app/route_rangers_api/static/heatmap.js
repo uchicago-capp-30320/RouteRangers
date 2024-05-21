@@ -18,7 +18,7 @@ function heatmaps(
   ],
 ) {
   // Initialize the map
-  var heatmap = L.map("heatmap").setView(coordinates, 9);
+  var heatmap = L.map("heatmap").setView(coordinates, 10);
 
   // Add base layer
   var tiles = L.tileLayer(
