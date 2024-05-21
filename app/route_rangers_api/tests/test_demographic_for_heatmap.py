@@ -2,11 +2,7 @@ import unittest
 import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Point
-import os
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.abspath(os.path.join(current_dir, "../../"))
-from ..utils.heatmap_data_prep import calculate_demographic_metrics
+from route_rangers_api.utils.heatmap_data_prep import calculate_demographic_metrics
 
 
 class TestCalculateDemographicMetrics(unittest.TestCase):
@@ -83,7 +79,3 @@ class TestCalculateDemographicMetrics(unittest.TestCase):
         expected_df = expected_df[result_columns]
 
         pd.testing.assert_frame_equal(result_df, expected_df)
-
-
-if __name__ == "__main__":
-    unittest.main()

@@ -61,7 +61,7 @@ def dashboard(request, city: str):
         "geojson",
         routes,
         geometry_field="geo_representation",
-        fields=("route_name", "color"),
+        fields=("route_name", "color", "mode"),
     )
 
     # stations
@@ -72,7 +72,7 @@ def dashboard(request, city: str):
     )
 
     lst_coords = [
-        [point["location"].x, point["location"].y, point["station_name"]]
+        [point["location"].x, point["location"].y, point["station_name"], point["mode"]]
         for point in stations
     ]
 
