@@ -22,7 +22,15 @@ from app.route_rangers_api.utils.city_mapping import (
     MODES_OF_TRANSIT,
     CITY_RIDERSHIP_LEVEL,
 )
-from app.route_rangers_api.utils.survey_results_processing import get_number_of_responses, get_transit_use_pct, get_rider_satisfaction,get_transit_mode, get_trip_top, get_transit_improv_drivers_dict, get_transit_improv_riders_dict
+from app.route_rangers_api.utils.survey_results_processing import (
+    get_number_of_responses,
+    get_transit_use_pct,
+    get_rider_satisfaction,
+    get_transit_mode,
+    get_trip_top,
+    get_transit_improv_drivers_dict,
+    get_transit_improv_riders_dict,
+)
 from route_rangers_api.models import (
     TransitRoute,
     TransitStation,
@@ -55,7 +63,7 @@ def about(request):
 
 
 # caching for 6 hours since the data doesn't change often
-@cache_page(60 * 60 * 6)
+# @cache_page(60 * 60 * 6)
 def dashboard(request, city: str):
     # Get existing routes and stations
     routes = TransitRoute.objects.filter(city=CITY_CONTEXT[city]["DB_Name"])
@@ -257,7 +265,6 @@ def survey_p2(request, city: str, user_id: str = None):
     route_id = request.session.get("route_id")
 
     if request.method == "POST":
-
         # post form data to database
         city_survey = CITIES_CHOICES_SURVEY[city]
         survey_answer = SurveyResponse(
@@ -433,9 +440,7 @@ def responses(request, city: str):
         "transit_mode_graph": get_transit_mode(city),
         "toptengraph": get_trip_top(city),
         "tranrideimprov_rider": get_transit_improv_riders_dict(city),
-        "tranrideimprov_drivers": get_transit_improv_drivers_dict(city)
-
-
+        "tranrideimprov_drivers": get_transit_improv_drivers_dict(city),
     }
     return render(request, "responses.html", context)
 
