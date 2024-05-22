@@ -2,7 +2,7 @@
 Processing data from db to simplify for views
 """
 
-from django.db.models import Avg, Count, Sum
+from django.db.models import Avg, Count, Sum, Q
 import pandas as pd
 from route_rangers_api.models import (
     TransitModes,
@@ -12,6 +12,8 @@ from route_rangers_api.models import (
     Demographics,
 )
 from route_rangers_api.utils.city_mapping import CITY_CONTEXT
+import json
+from django.core.serializers.json import DjangoJSONEncoder
 
 
 def dashboard_metrics(city: str):
@@ -114,3 +116,126 @@ def get_pct_riders(city: str):
     train = round(((ridership["train_commute"] / ridership["total_commute"]) * 100), 1)
 
     return all, bus, train
+
+
+def extract_top_ten(
+    city: str, mode: int, transit_unit: str = "stations", weekday: bool = True
+):
+    """
+    Extract ridership for top 10 stations or top 10 routes
+    """
+    top_ten_units = []
+    if transit_unit == "stations":
+        stations = RidershipStation.objects.filter(
+            station_id__city=CITY_CONTEXT[city]["DB_Name"],
+            date__year=2023,
+            station_id__mode=mode,
+        )
+        if weekday:
+            stations = stations.exclude(Q(date__week_day=1) | Q(date__week_day=7))
+        else:
+            stations = stations.exclude(Q(date__week_day=1) | Q(date__week_day=7))
+        top_ten_stations = (
+            stations.values("station_id__station_name")
+            .annotate(avg_ridership=Sum("ridership") / Count("ridership"))
+            .order_by("-avg_ridership")[:10]
+        )
+        for station in top_ten_stations:
+            station_value = {
+                "name": station["station_id__station_name"],
+                "avg_ridership": station["avg_ridership"],
+            }
+            top_ten_units.append(station_value)
+    else:
+        routes = RidershipRoute.objects.filter(
+            route_id__city=CITY_CONTEXT[city]["DB_Name"],
+            date__year=2023,
+            route_id__mode=mode,
+        )
+        print(f"routes: {routes}")
+        if weekday:
+            routes = routes.exclude(Q(date__week_day=1) | Q(date__week_day=7))
+        else:
+            routes = routes.filter(Q(date__week_day=1) | Q(date__week_day=7))
+        top_ten_routes = (
+            routes.values("route_id__route_name")
+            .annotate(avg_ridership=Sum("ridership") / Count("ridership"))
+            .order_by("-avg_ridership")[:10]
+        )
+        for route in top_ten_routes:
+            route_value = {
+                "name": route["route_id__route_name"],
+                "avg_ridership": route["avg_ridership"],
+            }
+            top_ten_units.append(route_value)
+
+    return json.dumps(list(top_ten_units), cls=DjangoJSONEncoder)
+
+
+def get_daily_ridership(city: str):
+    """
+    Extract daily ridership to be graphed
+    """
+    # 1. Create queries
+    # Bus ridership
+    bus_route_daily_ridership = (
+        RidershipRoute.objects.filter(
+            route_id__mode=3, route_id__city=CITY_CONTEXT[city]["DB_Name"]
+        )
+        .values("date")
+        .annotate(total_ridership=Sum("ridership"))
+        .order_by("date")
+    )
+    bus_station_daily_ridership = (
+        RidershipStation.objects.filter(
+            station_id__mode=3, station_id__city=CITY_CONTEXT[city]["DB_Name"]
+        )
+        .values("date")
+        .annotate(total_ridership=Sum("ridership"))
+        .order_by("date")
+    )
+
+    # Subway ridership
+    subway_station_daily_ridership = (
+        RidershipStation.objects.filter(
+            station_id__mode=1, station_id__city=CITY_CONTEXT[city]["DB_Name"]
+        )
+        .values("date")
+        .annotate(total_ridership=Sum("ridership"))
+        .order_by("date")
+    )
+
+    # 2. Populate day dictionaries
+    daily_ridership = {}
+    for bus_route in bus_route_daily_ridership:
+        daily_ridership[bus_route["date"]] = {}
+        daily_ridership[bus_route["date"]]["bus_route"] = bus_route["total_ridership"]
+    for bus_station in bus_station_daily_ridership:
+        if bus_station["date"] not in daily_ridership.keys():
+            daily_ridership[bus_station["date"]] = {}
+        daily_ridership[bus_station["date"]]["bus_station"] = bus_station[
+            "total_ridership"
+        ]
+    for subway_station in subway_station_daily_ridership:
+        if subway_station["date"] not in daily_ridership.keys():
+            daily_ridership[subway_station["date"]] = {}
+        daily_ridership[subway_station["date"]]["subway"] = subway_station[
+            "total_ridership"
+        ]
+
+    # 3. Reformat to pass as the way specified by D3
+    ridership_list = []
+    for date, daily_dict in daily_ridership.items():
+        bus_ridership = daily_dict.get("bus_route", 0) + daily_dict.get(
+            "bus_station", 0
+        )
+        subway_ridership = daily_dict.get("subway", 0)
+        date_ridership = {
+            "date": date,
+            "bus": bus_ridership,
+            "subway": subway_ridership,
+            "total": bus_ridership + subway_ridership,
+        }
+        ridership_list.append(date_ridership)
+
+    return json.dumps(list(ridership_list), cls=DjangoJSONEncoder)
