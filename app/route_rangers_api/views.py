@@ -4,13 +4,13 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.http import Http404, JsonResponse
 from django.urls import reverse
-from django.views import generic
-from django.utils import timezone
 from django.core.serializers import serialize
 from django.templatetags.static import static
-from django.contrib.gis.geos import GEOSGeometry, MultiLineString, LineString
+from django.contrib.gis.geos import GEOSGeometry, MultiLineString, LineString, Point
+from django.views.decorators.cache import cache_page
 
 import uuid
+import json
 
 from app.route_rangers_api.utils.metric_processing import (
     dashboard_metrics,
@@ -54,6 +54,8 @@ def about(request):
     return render(request, "about.html", context)
 
 
+# caching for 6 hours since the data doesn't change often
+@cache_page(60 * 60 * 6)
 def dashboard(request, city: str):
     # Get Routes:
     routes = TransitRoute.objects.filter(city=CITY_CONTEXT[city]["DB_Name"])
@@ -177,6 +179,7 @@ def survey_p1(request, city: str):
         # create new SurveyUser object
         city_survey = CITIES_CHOICES_SURVEY[city]
         survey_answer = SurveyUser(user_id=request.session["uuid"], city=city_survey)
+
         update_survey = RiderSurvey1(request.POST, instance=survey_answer)
         # update and save
         update_survey.save()
@@ -200,19 +203,39 @@ def survey_p2(request, city: str, user_id: str = None):
     route_id = request.session.get("route_id")
 
     if request.method == "POST":
-        # check if route already exists
+
+        # post form data to database
         city_survey = CITIES_CHOICES_SURVEY[city]
         survey_answer = SurveyResponse(
             user_id_id=user_id, city=city_survey, route_id=route_id
         )
+        print(f"survey answer pg 2: {survey_answer}")
         update_survey = RiderSurvey2(request.POST, instance=survey_answer)
         # update and save
         update_survey.save()
 
+        # Get the line string data and update database
+        post_line_string = request.POST.get("lineString")
+        # Convert the string to a list of tuples
+        line_string_coords = json.loads(post_line_string)
+        # Create a LineString object
+        route = LineString(line_string_coords)
+        # Access the first and last points
+        starting_point = route.coords[0]
+        end_point = route.coords[-1]
+
+        # Update row in database
+        obj = SurveyResponse.objects.get(user_id_id=user_id, route_id=route_id)
+
+        obj.route = route
+        obj.starting_point = Point(starting_point)
+        obj.end_point = Point(end_point)
+        obj.save()
+
         # return selected mode of transit from form
         selected_mode_index = update_survey.cleaned_data["modes_of_transit"]
         selected_mode = MODES_OF_TRANSIT[selected_mode_index]
-        print("selected mode: ", selected_mode)
+
         if selected_mode == "Train" or selected_mode == "Bus":
             return redirect(reverse("app:survey_p3", kwargs={"city": city}))
         elif selected_mode == "Car" or selected_mode == "Rideshare":
@@ -225,7 +248,7 @@ def survey_p2(request, city: str, user_id: str = None):
 
     context = get_survey_context(city, form)
 
-    return render(request, "survey_p2.html", context)
+    return render(request, "survey_map.html", context)
 
 
 def survey_p3(request, city: str):
@@ -249,6 +272,7 @@ def survey_p3(request, city: str):
         # Not recognizing T/F as booleans so using string
         if another_trip == "True" and int(route_id) < 3:
             route_id += 1
+            print(route_id)
             request.session["route_id"] = route_id
             return redirect(reverse("app:survey_p2", kwargs={"city": city}))
         else:
@@ -259,7 +283,7 @@ def survey_p3(request, city: str):
 
     context = get_survey_context(city, form)
 
-    return render(request, "survey_p3.html", context)
+    return render(request, "survey_internal.html", context)
 
 
 def survey_p4(request, city: str):
@@ -269,7 +293,6 @@ def survey_p4(request, city: str):
     user_id = request.session.get("uuid")
     route_id = request.session.get("route_id")
     print(request.method)
-
     if request.method == "POST":
         survey_answer = SurveyResponse.objects.get(
             user_id_id=user_id, route_id=route_id
@@ -282,6 +305,7 @@ def survey_p4(request, city: str):
 
         if another_trip == "True" and int(route_id) < 3:
             route_id += 1
+            print(route_id)
             request.session["route_id"] = route_id
             return redirect(reverse("app:survey_p2", kwargs={"city": city}))
         else:
@@ -292,7 +316,7 @@ def survey_p4(request, city: str):
 
     context = get_survey_context(city, form)
 
-    return render(request, "survey_p4.html", context)
+    return render(request, "survey_internal.html", context)
 
 
 def survey_p5(request, city: str):
@@ -310,6 +334,7 @@ def survey_p5(request, city: str):
 
         if another_trip == "True" and int(route_id) < 3:
             route_id += 1
+            print(route_id)
             request.session["route_id"] = route_id
             return redirect(reverse("app:survey_p2", kwargs={"city": city}))
         else:
@@ -320,7 +345,7 @@ def survey_p5(request, city: str):
 
     context = get_survey_context(city, form)
 
-    return render(request, "survey_p4.html", context)
+    return render(request, "survey_internal.html", context)
 
 
 def thanks(request, city: str):
@@ -363,7 +388,7 @@ def get_survey_context(city, form):
         "policy_class": "cs-li-link ",
         "survey_class": "cs-li-link cs-active",
         "feedback_class": "cs-li-link",
-        "Coordinates": CITY_CONTEXT[city]["Coordinates"],
+        "coordinates": CITY_CONTEXT[city]["Coordinates"],
         "form": form,
     }
     return context
