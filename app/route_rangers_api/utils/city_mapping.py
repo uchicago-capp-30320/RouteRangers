@@ -19,6 +19,9 @@ CITY_CONTEXT = {
         "lineplot": "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_connectedscatter.csv",
         "geojsonfilepath": "ChicagoCensus_2020.geojson",
         "fips_county": CITY_FIPS["chicago"]["county"],
+        "subway_mode": 1,
+        "bus_level": "route",
+        "subway_level": "stations",
     },
     "NewYork": {
         "CityName": "New York",
@@ -29,6 +32,9 @@ CITY_CONTEXT = {
         "lineplot": "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_connectedscatter.csv",
         "geojsonfilepath": "NewYorkCensus_2020.geojson",
         "fips_county": CITY_FIPS["nyc"]["county"],
+        "subway_mode": 1,
+        "bus_level": "route",
+        "subway_level": "stations",
     },
     "Portland": {
         "CityName": "Portland",
@@ -39,6 +45,9 @@ CITY_CONTEXT = {
         "lineplot": "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_connectedscatter.csv",
         "geojsonfilepath": "PortlandCensus_2020.geojson",
         "fips_county": CITY_FIPS["portland"]["county"],
+        "subway_mode": 0,
+        "bus_level": "stations",
+        "subway_level": "stations",
     },
 }
 
