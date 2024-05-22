@@ -57,7 +57,7 @@ def about(request):
 # caching for 6 hours since the data doesn't change often
 @cache_page(60 * 60 * 6)
 def dashboard(request, city: str):
-    # Get Routes:
+    # Get existing routes and stations
     routes = TransitRoute.objects.filter(city=CITY_CONTEXT[city]["DB_Name"])
     # reduce load time and data transfer size by overwriting model attribute
     TOLERANCE = 0.00005
@@ -82,6 +82,58 @@ def dashboard(request, city: str):
     stations_json = serialize(
         "geojson", stations, geometry_field="location", fields=("station_name", "mode")
     )
+
+    # Get user-drawn routes and endpoints
+    user_routes = SurveyResponse.objects.filter(
+        city=CITY_CONTEXT[city]["DB_Name"],
+        route__isnull=False,
+        starting_point__isnull=False,
+        end_point__isnull=False,
+    )
+    # reduce load time and data transfer size by overwriting model attribute
+    user_features = []
+    for user_drawn in user_routes:
+        simple_route = user_drawn.route.simplify(
+            tolerance=TOLERANCE, preserve_topology=True
+        )
+        user_drawn.route = simple_route
+        user_features.append(
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "GeometryCollection",
+                    "geometries": [
+                        {
+                            "type": "LineString",
+                            "coordinates": [
+                                # TODO: figure out why these are reversed y,x
+                                # instead of x,y
+                                [coord[1], coord[0]]
+                                for coord in user_drawn.route.coords
+                            ],
+                        },
+                        {
+                            "type": "Point",
+                            "coordinates": [
+                                user_drawn.starting_point.x,
+                                user_drawn.starting_point.y,
+                            ],
+                        },
+                        {
+                            "type": "Point",
+                            "coordinates": [
+                                user_drawn.end_point.x,
+                                user_drawn.end_point.y,
+                            ],
+                        },
+                    ],
+                },
+                "properties": {"id": user_drawn.id},
+            }
+        )
+
+    # When you make a geoJSON yourself, you don't need to serialize it
+    user_drawn_json = {"type": "FeatureCollection", "features": user_features}
 
     city_name = CITY_CONTEXT[city]["CityName"]
 
@@ -162,6 +214,7 @@ def dashboard(request, city: str):
             "Percent of people who commute via subway": "percentage_public_to_work",
             "Population": "population",
         },
+        "user_drawn": user_drawn_json,
     }
 
     return render(request, "dashboard.html", context)
