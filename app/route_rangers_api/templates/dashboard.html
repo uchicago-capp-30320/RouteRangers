@@ -127,9 +127,10 @@
   <div class="row">
     <div class="col-12 col-md-6 col-lg-6">
       <!-- Bar Graph -->
-      <button onclick="drawgraph(jsonData,'group','var1')">Bus</button>
-      <button onclick="drawgraph(jsonData,'group','var2')">Train</button>
-      <div id="my_dataviz"></div>
+      <button onclick="drawgraph(jsonData,'group','var1','#my_dataviz' )">Bus</button>
+      <button onclick="drawgraph(jsonData,'group','var2', '#my_dataviz')">Train</button>
+      <div id="my_dataviz", class="mx-auto",
+      style="width: 90%; height: 30rem; margin-top: 5%"></div>
     </div>
     <div class="col-12 col-md-6 col-lg-6">
       <!-- Trends graph -->
@@ -172,7 +173,7 @@
   {"group": "J", "var1": 22, "var2": 9}
 ];
 
-  drawgraph(jsonData,"group","var1");
+  drawgraph(jsonData,"group","var1", "#my_dataviz");
   const j =[
   {
     "time": "1",

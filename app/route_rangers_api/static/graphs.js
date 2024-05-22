@@ -1,9 +1,15 @@
-function drawgraph(jsonData, xaxis, yaxis) {
-  var margin = { top: 30, right: 30, bottom: 70, left: 60 },
-    width = 460 - margin.left - margin.right,
-    height = 400 - margin.top - margin.bottom;
-
-  var bargraph_bus = d3.select("#my_dataviz");
+function drawgraph(jsonData, xaxis, yaxis, id, color="#69b3a2") {
+  var parentContainer = d3.select(id).node().getBoundingClientRect();
+  const margin = {
+      top: 0.05 * parentContainer.height,
+      right: 0.05 * parentContainer.width,
+      bottom: 0.2 * parentContainer.height,
+      left: 0.15 * parentContainer.width
+  };
+  var width = parentContainer.width - margin.left - margin.right;
+  var height = parentContainer.height - margin.top - margin.bottom;
+  
+  var bargraph_bus = d3.select(id);
 
   // Remove existing SVG elements
   bargraph_bus.selectAll("*").remove();
@@ -27,51 +33,64 @@ function drawgraph(jsonData, xaxis, yaxis) {
   var yAxis = bargraph_bus.append("g").attr("class", "myYaxis");
 
   // A function that create / update the plot for a given variable:
-  function update(selectedVar) {
+  function update(xaxis, yaxis) {
     // X axis
     x.domain(jsonData.map(function (d) {
-      return d.group;
+      return d[xaxis];
     }));
-    xAxis.transition().duration(1000).call(d3.axisTop(x));
+    xAxis.transition().duration(1000).call(d3.axisBottom(x))
+      .selectAll("text")
+      .style("text-anchor", "middle")
+      .attr("dx", "0em")
+      .attr("dy", "1em")
+      .attr("transform", "rotate(0)")
+      .style("font-size", function() {
+        // Scale font size based on available space
+        var availableWidth = x.bandwidth();
+        var textWidth = this.getBBox().width*7;
+        var scaleFactor = Math.min(1, availableWidth*.7 / textWidth);
+        return scaleFactor + "em";
+      });
 
     // Add Y axis
     y.domain([0, d3.max(jsonData, function (d) {
-      return +d[selectedVar];
+      return +d[yaxis];
     })]);
     yAxis.transition().duration(1000).call(d3.axisLeft(y));
-
+  
     // variable u: map data to existing bars
     var u = bargraph_bus.selectAll("rect").data(jsonData);
-
+  
     // update bars
     u.enter()
       .append("rect")
       .merge(u)
       .transition()
-      .duration(5)
+      .duration(1000)
       .attr("x", function (d) {
         return x(d[xaxis]);
       })
       .attr("y", function (d) {
-        return y(d[selectedVar]);
+        return y(d[yaxis]);
       })
       .attr("width", x.bandwidth())
       .attr("height", function (d) {
-        return height - y(d[selectedVar]);
+        return height - y(d[yaxis]);
       })
-      .attr("fill", "#69b3a2");
+      .attr("fill", color);
   }
 
   // Initialize plot
-  update(yaxis);}
-
+  update(xaxis, yaxis);
+}
   function drawTrends(jsonData, datasetLabels) {
-    var margin = { top: 10, right: 100, bottom: 30, left: 30 },
-      width = 460 - margin.left - margin.right,
-      height = 400 - margin.top - margin.bottom;
+    var parentContainer = d3.select("#my_dataviz").node().getBoundingClientRect();
+    var margin = { top: 30, right: 30, bottom: 150, left: 60 },
+        width = parentContainer.width - margin.left - margin.right,
+        height = parentContainer.height - margin.top - margin.bottom;
   
     var trend = d3
-      .select("#trend_dataviz")
+      .select("#my_dataviz")
       .append("svg")
       .attr("width", "100%")
       .attr("height", height + margin.top + margin.bottom)
@@ -218,77 +237,108 @@ function drawgraph(jsonData, xaxis, yaxis) {
       });
   }
 
-function drawhorizontalgraph(jsonData, xaxis, yaxis) {
-  var margin = { top: 30, right: 30, bottom: 70, left: 60 },
-    width = 460 - margin.left - margin.right,
-    height = 400 - margin.top - margin.bottom;
+  function drawhorizontalgraph(jsonData, xaxis, yaxis, id, color="#69b3a2") {
+    var parentContainer = d3.select(id).node().getBoundingClientRect();
+    var margin = { top: 30, right: 30, bottom: 70, left: 150 },
+        width = parentContainer.width - margin.left - margin.right,
+        height = parentContainer.height - margin.top - margin.bottom;
 
-  var bargraph = d3.select("#horizontaldataviz");
+    var bargraph = d3.select(id);
 
-  // Remove existing SVG elements
-  bargraph.selectAll("*").remove();
+    // Remove existing SVG elements
+    bargraph.selectAll("*").remove();
 
-  // Append SVG and set dimensions
-  bargraph = bargraph
-    .append("svg")
-    .attr("width", "100%")
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    // Append SVG and set dimensions
+    bargraph = bargraph
+      .append("svg")
+      .attr("width", "100%")
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  // Initialize the X axis
-  var y = d3
-    .scaleBand() // Changed to scaleBand for horizontal bars
-    .range([0, height])
-    .padding(0.2);
-  var yAxis = bargraph.append("g").attr("transform", "translate(0,0)"); // Adjusted translation for horizontal bars
+    // Initialize the Y axis
+    var y = d3.scaleBand().range([0, height]).padding(0.2);
+    var yAxis = bargraph.append("g").attr("transform", "translate(0,0)");
 
-  // Initialize the Y axis
-  var x = d3
-    .scaleLinear() // Changed to scaleLinear for horizontal bars
-    .range([0, width]);
-  var xAxis = bargraph.append("g").attr("class", "myXaxis"); // Changed class for styling purposes
+    // Initialize the X axis
+    var x = d3.scaleLinear().range([0, width]);
+    var xAxis = bargraph.append("g").attr("class", "myXaxis").attr("transform", `translate(0, ${height})`);
 
-  // A function that create / update the plot for a given variable:
-  function update(selectedVar) {
-    // X axis
-    x.domain([
-      0,
-      d3.max(jsonData, function (d) {
-        return +d[selectedVar];
-      }),
-    ]);
-    xAxis.transition().duration(1000).call(d3.axisBottom(x)); // Changed to axisBottom for horizontal bars
+    // Function to update the plot
+    function update(selectedX, selectedY) {
+      // Update X axis domain
+      x.domain([0, d3.max(jsonData, function (d) {
+        return +d[selectedY];
+      })]);
+      xAxis.transition().duration(1000).call(d3.axisBottom(x));
 
-    // Add Y axis
-    y.domain(
-      jsonData.map(function (d) {
-        return d.group;
-      }),
-    );
-    yAxis.transition().duration(1000).call(d3.axisLeft(y));
+      // Update Y axis domain
+      y.domain(jsonData.map(function (d) {
+        return d[selectedX];
+      }));
+      yAxis.transition().duration(1000).call(d3.axisLeft(y))
+        .selectAll("text")
+        .call(wrap, margin.left - 20); // Call wrap function for text wrapping with padding
 
-    // variable u: map data to existing bars
-    var map = bargraph.selectAll("rect").data(jsonData);
+      // Bind data to rectangles (bars)
+      var u = bargraph.selectAll("rect").data(jsonData);
 
-    // update bars
-    map
-      .enter()
-      .append("rect")
-      .merge(map)
-      .transition()
-      .duration(500)
-      .attr("y", function (d) {
-        return y(d[xaxis]);
-      })
-      .attr("x", 0)
-      .attr("height", y.bandwidth())
-      .attr("width", function (d) {
-        return x(d[selectedVar]);
-      })
-      .attr("fill", "#566C4B");
+      // Enter new data, update existing data, remove old data
+      u.enter()
+        .append("rect")
+        .merge(u)
+        .transition()
+        .duration(500)
+        .attr("y", function (d) {
+          return y(d[selectedX]);
+        })
+        .attr("x", 0)
+        .attr("height", y.bandwidth())
+        .attr("width", function (d) {
+          return x(d[selectedY]);
+        })
+        .attr("fill", color);
+
+      // Remove old bars
+      u.exit().remove();
+    }
+
+    // Text wrapping function
+    function wrap(text, width) {
+      text.each(function() {
+        var text = d3.select(this),
+            words = text.text().split(/\s+/).reverse(),
+            word,
+            line = [],
+            lineNumber = 0,
+            lineHeight = 1.1, // ems
+            y = text.attr("y"),
+            dy = parseFloat(text.attr("dy")) || 0,
+            tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+        while (word = words.pop()) {
+          line.push(word);
+          tspan.text(line.join(" "));
+          if (tspan.node().getComputedTextLength() > width) {
+            line.pop();
+            tspan.text(line.join(" "));
+            line = [word];
+            tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+          }
+        }
+      });
+    }
+
+    // Initialize plot
+    update(xaxis, yaxis);
   }
 
-  // Initialize plot
-  update(yaxis);
-}
+  // Sample JSON data
+  var jsonData = [
+    { transit_type: "Bus", count: 50 },
+    { transit_type: "Train", count: 70 },
+    { transit_type: "Tram", count: 30 },
+    { transit_type: "Ferry", count: 20 },
+    { transit_type: "Bike", count: 10 }
+  ];
+
+  

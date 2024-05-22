@@ -88,7 +88,7 @@ def get_rider_satisfaction(city: str) -> float:
     return round(average, 1)
 
 
-def get_transit_mode_dict(city: str) -> Dict:
+def get_transit_mode(city: str) -> Dict:
     """
     Given a city, return a dictionary with a count
     of responses by transit mode. Legend for transit modes:
@@ -102,30 +102,30 @@ def get_transit_mode_dict(city: str) -> Dict:
         6: "Rideshare",
     }
 
-    mode_count_dict = {}
+    mode_count=[]
     for mode_id, mode_name in MODES_OF_TRANSIT.items():
         count_by_mode = SurveyResponse.objects.filter(
             city=CITY_CONTEXT[city]["DB_Name"], modes_of_transit=mode_id
         ).count()
-        mode_count_dict[mode_name] = count_by_mode
+        mode_count.append({"transit_type": mode_name,"count": count_by_mode})
 
-    return mode_count_dict
+    return mode_count
 
 
-def get_trip_top_dict(city: str) -> Dict:
+def get_trip_top(city: str) -> Dict:
     """
     Given a city, return a dictionary with a count
     of responses by time of day
     """
     TIME_OF_DAY = {1: "Peak commute hours", 2: "Daytime", 3: "Nighttime"}
-    tod_count_dict = {}
+    tod_count=[]
     for tod_id, tod_name in TIME_OF_DAY.items():
         count_by_tod = SurveyResponse.objects.filter(
             city=CITY_CONTEXT[city]["DB_Name"], trip_tod=tod_id
         ).count()
-        tod_count_dict[tod_name] = count_by_tod
+        tod_count.append({"tod":tod_name, "count":count_by_tod})
 
-    return tod_count_dict
+    return tod_count
 
 
 def get_transit_improv_drivers_dict(city: str) -> Dict:
@@ -140,16 +140,16 @@ def get_transit_improv_drivers_dict(city: str) -> Dict:
         4: "It feels safe at the station and onboard",
         5: "No improvement needed",
     }
-    improv_count_dict = {}
+    improv = []
     for improv_id, improv_name in TRANSIT_IMPROVEMENT.items():
         count_by_improv = SurveyResponse.objects.filter(
             city=CITY_CONTEXT[city]["DB_Name"],
             transit_improvement=improv_id,
             user_id_id__car_owner=1,  # Filter by car_owner
         ).count()
-        improv_count_dict[improv_name] = count_by_improv
+        improv.append({"transit_type": improv_name,"count": count_by_improv})
 
-    return improv_count_dict
+    return improv
 
 
 def get_transit_improv_riders_dict(city: str) -> Dict:
@@ -164,13 +164,14 @@ def get_transit_improv_riders_dict(city: str) -> Dict:
         4: "It feels safe at the station and onboard",
         5: "No improvement needed",
     }
-    improv_count_dict = {}
+    improv = []
     for improv_id, improv_name in TRANSIT_IMPROVEMENT.items():
         count_by_improv = SurveyResponse.objects.filter(
             city=CITY_CONTEXT[city]["DB_Name"],
             transit_improvement=improv_id,
-            user_id_id__car_owner=2,  # Filter by Non car_owner
+            user_id_id__car_owner=2,  # Filter by car_owner
         ).count()
-        improv_count_dict[improv_name] = count_by_improv
+        improv.append({"transit_type": improv_name,"count": count_by_improv})
 
-    return improv_count_dict
+
+    return improv

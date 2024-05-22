@@ -22,6 +22,7 @@ from app.route_rangers_api.utils.city_mapping import (
     MODES_OF_TRANSIT,
     CITY_RIDERSHIP_LEVEL,
 )
+from app.route_rangers_api.utils.survey_results_processing import get_number_of_responses, get_transit_use_pct, get_rider_satisfaction,get_transit_mode, get_trip_top, get_transit_improv_drivers_dict, get_transit_improv_riders_dict
 from route_rangers_api.models import (
     TransitRoute,
     TransitStation,
@@ -115,6 +116,7 @@ def dashboard(request, city: str):
         "City_NoSpace": city,
         "citydata": dashboard_dict,
         "heatmaplabel": f"{city_name} By Census Tract",
+        "TotalRoutes": num_routes,
         "cities_class": "cs-li-link",
         "policy_class": "cs-li-link cs-active",
         "survey_class": "cs-li-link",
@@ -128,6 +130,7 @@ def dashboard(request, city: str):
         "top_subway_weekday": top_subway_weekday,
         "lineplot": CITY_CONTEXT[city]["lineplot"],
         "geojsonfilepath": static(CITY_CONTEXT[city]["geojsonfilepath"]),
+        "heatmapscale": [0, 10, 20, 50, 100, 200, 500, 1000],
         "routes": routes_json,
         "heatmap_categories": [
             "median_income",
@@ -366,15 +369,21 @@ def thanks(request, city: str):
 def responses(request, city: str):
     context = {
         "City": CITY_CONTEXT[city]["CityName"],
-        "Response": "567",
+        "Response": get_number_of_responses(city),
         "City_NoSpace": city,
-        "Riders": "30%",
-        "Cars": "270%",
+        "Riders": get_transit_use_pct(city),
         "cities_class": "cs-li-link",
         "policy_class": "cs-li-link ",
         "survey_class": "cs-li-link",
         "feedback_class": "cs-li-link cs-active",
         "coordinates": CITY_CONTEXT[city]["Coordinates"],
+        "ridersatisfaction": get_rider_satisfaction(city),
+        "transit_mode_graph": get_transit_mode(city),
+        "toptengraph": get_trip_top(city),
+        "tranrideimprov_rider": get_transit_improv_riders_dict(city),
+        "tranrideimprov_drivers": get_transit_improv_drivers_dict(city)
+
+
     }
     return render(request, "responses.html", context)
 
