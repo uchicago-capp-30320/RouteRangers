@@ -559,7 +559,14 @@ h1 {
   display: flex;
   color: #555;
 }
-
+.legend {
+  background-color: white; /* White background */
+  padding: 10px;           /* Padding for inner content */
+  border: 1px solid #ccc;  /* Light gray border */
+  border-radius: 5px;      /* Rounded corners */
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Slight shadow for depth */
+}
+  
 .inline {
   margin-left: 0.5vw;
   font-size: 15px;
