@@ -134,7 +134,7 @@ def extract_top_ten(
         if weekday:
             stations = stations.exclude(Q(date__week_day=1) | Q(date__week_day=7))
         else:
-            stations = stations.exclude(Q(date__week_day=1) | Q(date__week_day=7))
+            stations = stations.filter(Q(date__week_day=1) | Q(date__week_day=7))
         top_ten_stations = (
             stations.values("station_id__station_name")
             .annotate(avg_ridership=Sum("ridership") / Count("ridership"))
@@ -152,7 +152,6 @@ def extract_top_ten(
             date__year=2023,
             route_id__mode=mode,
         )
-        print(f"routes: {routes}")
         if weekday:
             routes = routes.exclude(Q(date__week_day=1) | Q(date__week_day=7))
         else:
