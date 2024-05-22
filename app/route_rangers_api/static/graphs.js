@@ -32,7 +32,7 @@ function drawgraph(jsonData, xaxis, yaxis, id, color="#69b3a2") {
   var y = d3.scaleLinear().range([height, 0]);
   var yAxis = bargraph_bus.append("g").attr("class", "myYaxis");
 
-  // swap jsonn files and/ or y axis 
+  // swap json files and/ or y axis 
   function update(xaxis, yaxis) {
 
     x.domain(jsonData.map(function (d) {
@@ -42,12 +42,12 @@ function drawgraph(jsonData, xaxis, yaxis, id, color="#69b3a2") {
       .selectAll("text")
       .style("text-anchor", "middle")
       .attr("dx", "0em")
-      .attr("dy", "1em")
+      .attr("dy", "-2em")
       .attr("transform", "rotate(0)")
       .style("font-size", function() {
         // Scale font size based on available space
         var availableWidth = x.bandwidth();
-        var textWidth = this.getBBox().width*15;
+        var textWidth = this.getBBox().width*.8;
         var scaleFactor = Math.min(1, availableWidth*.7 / textWidth);
         return scaleFactor + "em";
       });
