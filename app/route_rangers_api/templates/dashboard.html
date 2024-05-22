@@ -121,10 +121,11 @@
   var coordinates = {{ coordinates }};
   var stations = {{ stations | safe }};
   var iconUrl = "{% static 'images/map_pin.png' %}";
+  var userIconUrl = "{% static 'images/map_pin_W.png' %}";
   var routes = {{ routes | safe}};
   var userDrawn = {{ user_drawn | safe }};
   // "safe" parameter needed to deal with escaped quotation marks in GeoJSON
-  initializeMap(coordinates, stations, iconUrl, routes, userDrawn);
+  initializeMap(coordinates, stations, iconUrl, userIconUrl, routes, userDrawn);
 </script>
 
 <!-- Map and graph Imports-->

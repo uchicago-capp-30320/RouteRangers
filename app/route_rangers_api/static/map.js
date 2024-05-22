@@ -1,4 +1,4 @@
-export function initializeMap(coordinates, stations, iconUrl, routes, userDrawn) {
+export function initializeMap(coordinates, stations, iconUrl, userIconUrl, routes, userDrawn) {
 
   // Add a tile layer
   var tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -12,11 +12,17 @@ export function initializeMap(coordinates, stations, iconUrl, routes, userDrawn)
   // Initialize the map at center of city
   var map = L.map('map', { layers: [tileLayer] }).setView(coordinates, 13);
 
-  // Custom icon for smaller markers
+  // Custom icons for smaller markers
   var smallIcon = L.icon({
     iconUrl: iconUrl, // URL to a smaller icon image
     iconSize: [15, 15],
     iconAnchor: [6, 6],
+  });
+
+  var userIcon = L.icon({
+    iconUrl: userIconUrl, // URL to a smaller icon image
+    iconSize: [20, 20],
+    iconAnchor: [9, 9],
   });
 
   // Set level of zoom at which each kind of transit stop declusters,
@@ -109,7 +115,7 @@ export function initializeMap(coordinates, stations, iconUrl, routes, userDrawn)
       var geometries = feature.geometry.geometries;
       geometries.forEach(function (geometry) {
         if (geometry.type === "LineString") {
-          var user_route = L.polyline(geometry.coordinates, { color: "#ddddff", opacity: 0.5, });
+          var user_route = L.polyline(geometry.coordinates, { color: "#aaaacc", opacity: 0.6, });
           routeLayers["User-drawn"].addLayer(user_route);
         } else if (geometry.type === "Point") {
           var coords = geometry.coordinates;
@@ -118,7 +124,7 @@ export function initializeMap(coordinates, stations, iconUrl, routes, userDrawn)
             var x = coords[1];
             var y = coords[0];
             if (x != undefined && y != undefined) {
-              var marker = L.marker([x, y], { icon: smallIcon });
+              var marker = L.marker([x, y], { icon: userIcon });
               marker.bindTooltip("User-submitted endpoint");
               markerClusterGroups["User-drawn"].addLayer(marker);
             } else {
