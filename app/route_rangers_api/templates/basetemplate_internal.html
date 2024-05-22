@@ -39,6 +39,7 @@
   </head>
 
   <body>
+    <div class="header-footer-container">
     <header id="cs-navigation">
       <div class="cs-container">
         <!--Nav Logo-->
@@ -101,47 +102,32 @@
 
     <main>{% block content %} {% endblock %}</main>
     <footer id="cs-footer">
-      <div class="container">
-        <div class="row">
-          <div class="col-md-2 text-nowrap">
-            <p class="mb-0 pt-5 pb-3 text-center">
-              <strong>Plan Our Transit</strong>
-            </p>
-          </div>
-          <div class="col-md-5"></div>
-          <div class="col-md-5">
-            <div class="row">
-              <!-- Centering the heading above the columns -->
-              <div class="col-md-12 text-center mt-1">
-                <p class="mb-0 text-left text-nowrap">
-                  <strong>Quick Links</strong>
-                </p>
+          <div class="footer-multi-container">
+            <div class="footer-multi-logo">
+              <a href="" class="cs-logo" aria-label="back to home">
+                <img
+                  src="{% static 'footer_title.svg' %}"
+                  alt="logo"
+                  width="210"
+                  height="20"
+                  aria-hidden="true"
+                  decoding="async"
+                />
+              </a>
+            </div>
+            <div class="footer-multi-logo">
+              <div>
+                <p class="unstyled-link"><strong>Quick Links</strong></p>
               </div>
-              <!-- Distributing links evenly in two columns -->
-              <div class="col-md-6 text-center">
-                <ul class="list-unstyled">
-                  <li class="cs-li mb-2">
-                    <a href="#" class="cs-li-link">City</a>
-                  </li>
-                  <li class="cs-li">
-                    <a href="#" class="cs-li-link">Policy Maker Dashboard</a>
-                  </li>
-                </ul>
+              <div class="grid-links">
+                <a href="/about" class="unstyled-link">About</a>
+                <a href="/survey/{{ City_NoSpace}}" class="unstyled-link">Survey</a>
+                <a href="/dashboard/{{ City_NoSpace}}" class="unstyled-link">Policy Maker Dashboard</a>
+                <a href="/responses/{{ City_NoSpace}}" class="unstyled-link">Survey Responses</a>
               </div>
-              <div class="col-md-6 text-center text-nowrap">
-                <ul class="list-unstyled">
-                  <li class="cs-li mb-2">
-                    <a href="#" class="cs-li-link"> Survey</a>
-                  </li>
-                  <li class="cs-li">
-                    <a href="#" class="cs-li-link"> Survey Results</a>
-                  </li>
-                </ul>
-              </div>
+            
             </div>
           </div>
-        </div>
-      </div>
     </footer>
 
     <script>
