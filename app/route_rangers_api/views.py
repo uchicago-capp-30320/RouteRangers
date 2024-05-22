@@ -12,11 +12,16 @@ from django.views.decorators.cache import cache_page
 import uuid
 import json
 
-from app.route_rangers_api.utils.metric_processing import dashboard_metrics
+from app.route_rangers_api.utils.metric_processing import (
+    dashboard_metrics,
+    get_daily_ridership,
+    extract_top_ten,
+)
 from app.route_rangers_api.utils.city_mapping import (
     CITY_CONTEXT,
     CITIES_CHOICES_SURVEY,
     MODES_OF_TRANSIT,
+    CITY_RIDERSHIP_LEVEL,
 )
 from route_rangers_api.models import (
     TransitRoute,
@@ -72,6 +77,7 @@ def dashboard(request, city: str):
         fields=("route_name", "color", "mode"),
     )
 
+    # Get Stations:
     stations = TransitStation.objects.filter(city=CITY_CONTEXT[city]["DB_Name"])
     stations_json = serialize(
         "geojson", stations, geometry_field="location", fields=("station_name", "mode")
@@ -130,7 +136,33 @@ def dashboard(request, city: str):
     user_drawn_json = {"type": "FeatureCollection", "features": user_features}
 
     city_name = CITY_CONTEXT[city]["CityName"]
+
+    # Get dashboard metrics:
     dashboard_dict = dashboard_metrics(city)
+
+    # Get daily ridership:
+    daily_ridership_json = get_daily_ridership(city)
+
+    # Get top transit stations:
+    top_bus_weekend = extract_top_ten(
+        city=city, mode=3, transit_unit=CITY_RIDERSHIP_LEVEL[city]["bus"], weekday=True
+    )
+    top_subway_weekend = extract_top_ten(
+        city=city,
+        mode=1,
+        transit_unit=CITY_RIDERSHIP_LEVEL[city]["subway"],
+        weekday=True,
+    )
+    top_bus_weekday = extract_top_ten(
+        city=city, mode=3, transit_unit=CITY_RIDERSHIP_LEVEL[city]["bus"], weekday=True
+    )
+    top_subway_weekday = extract_top_ten(
+        city=city,
+        mode=1,
+        transit_unit=CITY_RIDERSHIP_LEVEL[city]["subway"],
+        weekday=True,
+    )
+
     context = {
         "City": CITY_CONTEXT[city]["CityName"],
         "City_NoSpace": city,
@@ -142,7 +174,11 @@ def dashboard(request, city: str):
         "feedback_class": "cs-li-link",
         "coordinates": CITY_CONTEXT[city]["Coordinates"],
         "stations": stations_json,
-        "csv": CITY_CONTEXT[city]["csv"],
+        "daily_ridership": daily_ridership_json,
+        "top_bus_weekend": top_bus_weekend,
+        "top_bus_weekday": top_bus_weekday,
+        "top_subway_weekend": top_subway_weekend,
+        "top_subway_weekday": top_subway_weekday,
         "lineplot": CITY_CONTEXT[city]["lineplot"],
         "geojsonfilepath": static(CITY_CONTEXT[city]["geojsonfilepath"]),
         "routes": routes_json,

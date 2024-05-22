@@ -83,3 +83,9 @@ TIME_OF_DAY = {1: "Peak commute hours", 2: "Daytime", 3: "Nighttime"}
 BOOL_CHOICES = {1: "Yes", 2: "No"}
 
 SATISFIED = {1: "1", 2: "2", 3: "3", 4: "4", 5: "5"}
+
+CITY_RIDERSHIP_LEVEL = {
+    "Portland": {"bus": "stations", "subway": "stations"},
+    "Chicago": {"bus": "route", "subway": "stations"},
+    "NewYork": {"bus": "route", "subway": "stations"},
+}
