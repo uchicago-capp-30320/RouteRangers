@@ -69,14 +69,31 @@
 <div class="card container">
   <h2 class="card-content">Top 10 Stations/Stops</h2>
   <div class="card-content row">
-    <div class="col-12 col-md-4 col-lg-4">
-      <button onclick="drawhorizontalgraph('{{csv}}','group','var1')">
-        Bus
+    <div class="col-12 col-md-6 col-lg-6">
+        <h3>Subway</h3>
+    </div>
+    <div class="col-12 col-md-6 col-lg-6">
+        <h3>Bus</h3>
+    </div>
+    <div class="col-12 col-md-6 col-lg-6">
+      <button class="btn btn-secondary-subtle", onclick='drawhorizontalgraph(top_subway_week, "name","avg_ridership", "#toptensubway", "#BF5002")'>
+        Weekday
       </button>
-      <button onclick="drawhorizontalgraph('{{csv}}','group','var2')">
-        Train
+      <button class ="btn btn-secondary-subtle", onclick='drawhorizontalgraph(top_subway_wked, "name","avg_ridership", "#toptensubway","#BF5002")'>
+        Weekend
       </button>
-      <div id="horizontaldataviz"></div>
+      <div class="mx-auto", id="toptensubway", 
+      style="width: 100%; height: 500; margin-top: 5%"></div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-6">
+      <button class="btn btn-secondary-subtle" onclick='drawhorizontalgraph(top_bus_week, "name","avg_ridership", "#toptenbus", "#6F8695")'>
+        Weekday
+      </button>
+      <button class= "btn btn-secondary-subtle", onclick='drawhorizontalgraph(top_bus_wked, "name","avg_ridership", "#toptenbus", "#6F8695")'>
+        Weekend
+      </button>
+      <div class="mx-auto", id="toptenbus", 
+      style="width: 100%; height: 500; margin-top: 5%"></div>
     </div>
   </div>
 </div>
@@ -102,14 +119,15 @@
 <div class="graphs container">
   <div class="row">
     <div class="col-12 col-md-6 col-lg-6">
+      <h3>Ridership Over Time</h3>
+  </div>
+    <div class="col-12 col-md-12 col-lg-12">
       <!-- Bar Graph -->
-      <button onclick="drawgraph('{{csv}}','group','var1')">Bus</button>
-      <button onclick="drawgraph('{{csv}}','group','var2')">Train</button>
-      <div id="my_dataviz"></div>
+      <div id="my_dataviz", class="mx-auto",
+      style="width: 90%; height: 40rem;"></div>
     </div>
-    <div class="col-12 col-md-6 col-lg-6">
       <!-- Trends graph -->
-      <div id="trend_dataviz"></div>
+    </div>
     </div>
   </div>
 </div>
@@ -137,14 +155,21 @@
 <script src="{% static 'heatmap.js' %}"></script>
 <script src="{% static 'cards.js' %}"></script>
 <script>
-  drawgraph("{{csv}}", "group", "var1");
-  drawTrends("{{lineplot}}");
-  drawhorizontalgraph("{{csv}}", "group", "var1");
+
+  const top_subway_week= {{top_subway_weekday | safe}};
+  const top_subway_wked= {{top_subway_weekend | safe}};
+  const top_bus_week= {{top_bus_weekday | safe}};
+  const top_bus_wked= {{top_bus_weekend | safe}};
+  const daily_riderships = {{daily_ridership | safe}};
+  const ridership_labels=['bus','subway','total']
+  drawhorizontalgraph(top_subway_week, "name","avg_ridership", "#toptensubway", "#BF5002");
+  drawhorizontalgraph(top_bus_week, "name","avg_ridership", "#toptenbus", "#6F8695");
+  drawTrends(daily_riderships, ridership_labels)
+
   var heatmap_categories = {{ heatmap_categories | safe }};
   var heatmap_units = {{ heatmap_units | safe }};
   var heatmap_titles = {{ heatmap_titles | safe }};
   var heatmap_titles_reversed = {{ heatmap_titles_reversed | safe }};
-
-  heatmaps("{{geojsonfilepath}}", {{ coordinates }}, '{{heatmaplabel}}', heatmap_categories, heatmap_units, heatmap_titles, heatmap_titles_reversed);
+  heatmaps("{{geojsonfilepath}}", {{coordinates}}, '{{heatmaplabel}}', heatmap_categories, heatmap_units, heatmap_titles, heatmap_titles_reversed);
 </script>
 {% endblock %}
