@@ -104,7 +104,12 @@ class RiderSurvey2(ModelForm):
 
     class Meta:
         model = SurveyResponse
-        fields = ["trip_frequency", "trip_tod", "trip_time", "modes_of_transit"]
+        fields = [
+            "trip_frequency",
+            "trip_tod",
+            "trip_time",
+            "modes_of_transit",
+        ]
         labels = {
             "trip_frequency": _(QUESTIONS["p2"]["trip_freq"]),
             "trip_tod": _(QUESTIONS["p2"]["trip_tod"]),
