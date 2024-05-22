@@ -2,7 +2,7 @@
 # from django import forms
 from django.contrib.gis import forms
 from route_rangers_api.models import SurveyResponse, SurveyUser
-from django.forms import ModelForm, RadioSelect
+from django.forms import ModelForm, RadioSelect, Textarea, NumberInput
 from django.utils.translation import gettext_lazy as _
 
 MODES_OF_TRANIST = {
@@ -98,8 +98,15 @@ class RiderSurvey1(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["frequent_transit"].empty_label = None
-        self.fields["car_owner"].empty_label = None
+        # Remove the placeholder choice
+        self.fields["frequent_transit"].widget.choices = [
+            choice
+            for choice in self.fields["frequent_transit"].choices
+            if choice[0] != ""
+        ]
+        self.fields["car_owner"].widget.choices = [
+            choice for choice in self.fields["car_owner"].choices if choice[0] != ""
+        ]
 
 
 class RiderSurvey2(ModelForm):
@@ -121,6 +128,29 @@ class RiderSurvey2(ModelForm):
             "trip_time": _(QUESTIONS["p2"]["trip_time"]),
             "modes_of_transit": _(QUESTIONS["p2"]["modes_of_transit"]),
         }
+        widgets = {
+            "trip_frequency": RadioSelect(attrs={"class": "form-radio"}),
+            "trip_tod": RadioSelect(attrs={"class": "form-radio"}),
+            "trip_time": NumberInput(attrs={"class": "NumberInput", "min": 0}),
+            "modes_of_transit": RadioSelect(attrs={"class": "form-radio"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Remove the placeholder choice
+        self.fields["trip_frequency"].widget.choices = [
+            choice
+            for choice in self.fields["trip_frequency"].choices
+            if choice[0] != ""
+        ]
+        self.fields["trip_tod"].widget.choices = [
+            choice for choice in self.fields["trip_tod"].choices if choice[0] != ""
+        ]
+        self.fields["modes_of_transit"].widget.choices = [
+            choice
+            for choice in self.fields["modes_of_transit"].choices
+            if choice[0] != ""
+        ]
 
 
 class RiderSurvey3(ModelForm):
@@ -136,13 +166,28 @@ class RiderSurvey3(ModelForm):
 
     class Meta:
         model = SurveyResponse
-        fields = ["satisfied", "transit_improvement", "transit_improvement_open"]
+        fields = ["satisfied", "transit_improvement"]
         labels = {
             "satisfied": _(QUESTIONS["p3"]["satisfied"]),
             "transit_improvement": _(QUESTIONS["p3"]["transit_improvement"]),
         }
 
-        widgets = {"satisfied": RadioSelect(attrs={"class": "form-radio"})}
+        widgets = {
+            "satisfied": RadioSelect(attrs={"class": "form-radio"}),
+            "transit_improvement": RadioSelect(attrs={"class": "form-radio"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Remove the placeholder choice
+        self.fields["satisfied"].widget.choices = [
+            choice for choice in self.fields["satisfied"].choices if choice[0] != ""
+        ]
+        self.fields["transit_improvement"].widget.choices = [
+            choice
+            for choice in self.fields["transit_improvement"].choices
+            if choice[0] != ""
+        ]
 
 
 class RiderSurvey4(ModelForm):
@@ -164,6 +209,15 @@ class RiderSurvey4(ModelForm):
         }
 
         widgets = {"switch_to_transit": RadioSelect(attrs={"class": "form-radio"})}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Remove the placeholder choice
+        self.fields["switch_to_transit"].widget.choices = [
+            choice
+            for choice in self.fields["switch_to_transit"].choices
+            if choice[0] != ""
+        ]
 
 
 # use forms.Forms not ModelForm because not writing to database
