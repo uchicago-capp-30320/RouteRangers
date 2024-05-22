@@ -36,7 +36,8 @@
 
 <div class="headers">
   <h2>Rider Trips</h2>
-  <p class="inline">Map showing all transit routes in your city</p>
+  <p class="inline">For map showing all transit routes in your city (including user-drawn routes), see:</p>
+  <p class="inline"><strong><a href="{{url}} /dashboard/{{City}}">Policymaker Dashboard</a></strong></p>
 </div>
 {% block rider_graphs%} {% endblock %}
 <div class="headers">
@@ -52,8 +53,8 @@
 <div class="headers">
   <h2>Spatial Analysis</h2>
   <p class="inline">
-    Analysis of spatial data reported through rider survey. /p> {% block map%}
-    {% endblock %} {% block heat_map%} {% endblock %}
+    Analysis of spatial data reported through rider survey. </p> {% block map%}
+  {% endblock %} {% block heat_map%} {% endblock %}
   </p>
 </div>
 
