@@ -55,7 +55,7 @@ def about(request):
 
 
 # caching for 6 hours since the data doesn't change often
-@cache_page(60 * 60 * 6)
+# @cache_page(60 * 60 * 6)
 def dashboard(request, city: str):
     # Get Routes:
     routes = TransitRoute.objects.filter(city=CITY_CONTEXT[city]["DB_Name"])
@@ -99,7 +99,7 @@ def dashboard(request, city: str):
         city=city,
         mode=1,
         transit_unit=CITY_RIDERSHIP_LEVEL[city]["subway"],
-        weekday=True,
+        weekday=False,
     )
     top_bus_weekday = extract_top_ten(
         city=city, mode=3, transit_unit=CITY_RIDERSHIP_LEVEL[city]["bus"], weekday=True
@@ -116,7 +116,6 @@ def dashboard(request, city: str):
         "City_NoSpace": city,
         "citydata": dashboard_dict,
         "heatmaplabel": f"{city_name} By Census Tract",
-        "TotalRoutes": num_routes,
         "cities_class": "cs-li-link",
         "policy_class": "cs-li-link cs-active",
         "survey_class": "cs-li-link",
@@ -130,7 +129,6 @@ def dashboard(request, city: str):
         "top_subway_weekday": top_subway_weekday,
         "lineplot": CITY_CONTEXT[city]["lineplot"],
         "geojsonfilepath": static(CITY_CONTEXT[city]["geojsonfilepath"]),
-        "heatmapscale": [0, 10, 20, 50, 100, 200, 500, 1000],
         "routes": routes_json,
         "heatmap_categories": [
             "median_income",

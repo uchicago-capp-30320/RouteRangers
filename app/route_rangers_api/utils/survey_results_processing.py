@@ -117,7 +117,7 @@ def get_trip_top(city: str) -> Dict:
     Given a city, return a dictionary with a count
     of responses by time of day
     """
-    TIME_OF_DAY = {1: "Peak commute hours", 2: "Daytime", 3: "Nighttime"}
+    TIME_OF_DAY = {1: "Peak Commute Hours", 2: "Daytime", 3: "Night"}
     tod_count=[]
     for tod_id, tod_name in TIME_OF_DAY.items():
         count_by_tod = SurveyResponse.objects.filter(

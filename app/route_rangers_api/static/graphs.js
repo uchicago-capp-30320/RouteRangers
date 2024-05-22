@@ -83,166 +83,177 @@ function drawgraph(jsonData, xaxis, yaxis, id, color="#69b3a2") {
   // Initialize plot
   update(xaxis, yaxis);
 }
-  function drawTrends(jsonData, datasetLabels) {
-    var parentContainer = d3.select("#my_dataviz").node().getBoundingClientRect();
-    var margin = { top: 30, right: 30, bottom: 150, left: 60 },
-        width = parentContainer.width - margin.left - margin.right,
-        height = parentContainer.height - margin.top - margin.bottom;
-  
-    var trend = d3
+function drawTrends(jsonData, datasetLabels) {
+  var parentContainer = d3.select("#my_dataviz").node().getBoundingClientRect();
+  var margin = { top: 30, right: 30, bottom: 150, left: 60 },
+      width = parentContainer.width - margin.left - margin.right,
+      height = parentContainer.height - margin.top - margin.bottom;
+
+  var trend = d3
       .select("#my_dataviz")
       .append("svg")
       .attr("width", "100%")
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-  
-    // Reformat the data: we need an array of arrays of {x, y} tuples
-    var dataReady = datasetLabels.map(function (grpName) {
-      return {
-        name: grpName,
-        values: jsonData.map(function (d) {
-          return { time: d.time, value: +d[grpName] };
-        }),
-      };
-    });
-  
-    // A color scale: one color for each group
-    var myColor = d3.scaleOrdinal().domain(datasetLabels).range(d3.schemeSet2);
-  
-    // Add X axis --> it is a date format
-    var xDomain = d3.extent(jsonData, function(d) { return +d.time; });
-    var yMax = d3.max(dataReady, function (d) {
+
+  // Function to filter data points based on graph width
+  function filterData(values, minDistance) {
+    if (values.length < 2) return values;
+
+    let filtered = [values[0]]; // Always include the first point
+    let lastIncludedIndex = 0;
+
+    for (let i = 1; i < values.length; i++) {
+      let currentX = x(values[i].time);
+      let lastIncludedX = x(filtered[filtered.length - 1].time);
+      if (currentX - lastIncludedX >= minDistance) {
+        filtered.push(values[i]);
+      }
+    }
+
+    return filtered;
+  }
+
+  // Reformat the data: we need an array of arrays of {x, y} tuples
+  var dataReady = datasetLabels.map(function (grpName) {
+    return {
+      name: grpName,
+      values: jsonData.map(function (d) {
+        return { time: new Date(d.date), value: +d[grpName] };
+      }),
+    };
+  });
+
+
+  // Define your custom color array
+  var customColors = ["#BF5002","#566C4B","#425469"];
+
+  // Create a scaleOrdinal scale with your custom color range
+  var myColor = d3.scaleOrdinal()
+    .domain(datasetLabels)
+    .range(customColors);
+
+  // Add X axis --> it is a date format
+  var xDomain = d3.extent(jsonData, function(d) { return new Date(d.date); });
+  var yMax = d3.max(dataReady, function (d) {
       return d3.max(d.values, function (v) {
-        return v.value;
+          return v.value;
       });
-    });
-  
-    // Define scales with dynamic domains
-    var x = d3.scaleLinear().domain(xDomain).range([0, width]);
-    var y = d3.scaleLinear().domain([0, yMax]).range([height, 0]);
-  
-    // Add X axis
-    trend.append("g")
+  });
+
+  // Define scales with dynamic domains
+  var x = d3.scaleTime().domain(xDomain).range([0, width]);
+  var y = d3.scaleLinear().domain([0, yMax*1.1]).range([height, 0]);
+
+  // Add X axis
+  trend.append("g")
       .attr("transform", "translate(0," + height + ")")
       .call(d3.axisBottom(x));
-  
-    // Add Y axis
-    trend.append("g")
+
+  // Add Y axis
+  trend.append("g")
       .call(d3.axisLeft(y));
-  
-    // Add the lines
-    var line = d3
+
+  // Filter points based on minimum distance
+  var minDistance = 20; // Minimum distance between points in pixels
+  dataReady.forEach(function(d) {
+    d.values = filterData(d.values, minDistance);
+  });
+
+
+  // Add the lines
+  var line = d3
       .line()
       .x(function (d) {
-        return x(+d.time);
+          return x(d.time);
       })
       .y(function (d) {
-        return y(+d.value);
+          return y(+d.value);
       });
-    trend
+
+  trend
       .selectAll("myLines")
       .data(dataReady)
       .enter()
       .append("path")
       .attr("class", function (d) {
-        return d.name;
+          return d.name;
       })
       .attr("d", function (d) {
-        return line(d.values);
+          return line(d.values);
       })
       .attr("stroke", function (d) {
-        return myColor(d.name);
+          return myColor(d.name);
       })
       .style("stroke-width", 4)
       .style("fill", "none");
-  
-    // Add the points
-    trend
+
+  // Add the points
+  var points = trend
       .selectAll("myDots")
       .data(dataReady)
       .enter()
       .append("g")
       .style("fill", function (d) {
-        return myColor(d.name);
+          return myColor(d.name);
       })
       .attr("class", function (d) {
-        return d.name;
-      })
-      .selectAll("myPoints")
+          return d.name;
+      });
+
+  points.selectAll("myPoints")
       .data(function (d) {
-        return d.values;
+          return d.values;
       })
       .enter()
       .append("circle")
       .attr("cx", function (d) {
-        return x(d.time);
+          return x(d.time);
       })
       .attr("cy", function (d) {
-        return y(d.value);
+          return y(d.value);
       })
       .attr("r", 5)
       .attr("stroke", "white");
-  
-    // Add a label at the end of each line
-    trend
-      .selectAll("myLabels")
-      .data(dataReady)
-      .enter()
-      .append("g")
-      .append("text")
-      .attr("class", function (d) {
-        return d.name;
-      })
-      .datum(function (d) {
-        return { name: d.name, value: d.values[d.values.length - 1] };
-      })
-      .attr("transform", function (d) {
-        return "translate(" + x(d.value.time) + "," + y(d.value.value) + ")";
-      })
-      .attr("x", 12)
-      .text(function (d) {
-        return d.name;
-      })
-      .style("fill", function (d) {
-        return myColor(d.name);
-      })
-      .style("font-size", 15);
-  
-    // Add a legend (interactive)
-    trend
+
+  // Add a legend (interactive)
+  trend
       .selectAll("myLegend")
       .data(dataReady)
       .enter()
       .append("g")
       .append("text")
       .attr("x", function (d, i) {
-        return 30 + i * 60;
+          return 30 + i * 60;
       })
       .attr("y", 30)
       .text(function (d) {
-        return d.name;
+          return d.name;
       })
       .style("fill", function (d) {
-        return myColor(d.name);
+          return myColor(d.name);
       })
       .style("font-size", 15)
       .on("click", function (d) {
-        // is the element currently visible ?
-        currentOpacity = d3.selectAll("." + d.name).style("opacity");
-        // Change the opacity: from 0 to 1 or from 1 to 0
-        d3.selectAll("." + d.name)
-          .transition()
-          .style("opacity", currentOpacity == 1 ? 0 : 1);
+          // is the element currently visible ?
+          var currentOpacity = d3.selectAll("." + d.name).style("opacity");
+          // Change the opacity: from 0 to 1 or from 1 to 0
+          d3.selectAll("." + d.name)
+              .transition()
+              .style("opacity", currentOpacity == 1 ? 0 : 1);
       });
-  }
-
+}
   function drawhorizontalgraph(jsonData, xaxis, yaxis, id, color="#69b3a2") {
     var parentContainer = d3.select(id).node().getBoundingClientRect();
-    var margin = { top: 30, right: 30, bottom: 70, left: 150 },
-        width = parentContainer.width - margin.left - margin.right,
-        height = parentContainer.height - margin.top - margin.bottom;
-
+    const margin = {
+        top: 0.05 * parentContainer.height,
+        right: 0.05 * parentContainer.width,
+        bottom: 0.2 * parentContainer.height,
+        left: 0.3 * parentContainer.width
+    };
+    var width = parentContainer.width - margin.left - margin.right;
+    var height = parentContainer.height - margin.top - margin.bottom;
     var bargraph = d3.select(id);
 
     // Remove existing SVG elements
@@ -331,14 +342,3 @@ function drawgraph(jsonData, xaxis, yaxis, id, color="#69b3a2") {
     // Initialize plot
     update(xaxis, yaxis);
   }
-
-  // Sample JSON data
-  var jsonData = [
-    { transit_type: "Bus", count: 50 },
-    { transit_type: "Train", count: 70 },
-    { transit_type: "Tram", count: 30 },
-    { transit_type: "Ferry", count: 20 },
-    { transit_type: "Bike", count: 10 }
-  ];
-
-  

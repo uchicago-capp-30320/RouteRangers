@@ -43,7 +43,7 @@
   <div class="mx-auto", id="tranform",
   style="width: 90%; height: 600; margin-top: 5%"></div></div>
   <div class="card col-12 col-md-6 col-lg-6"><div class="mx-auto", id="timeofday",
-style="width: 90%; height: 600; margin-top: 5%"></div></div>
+style="width: 100%; height: 600; margin-top: 5%"></div></div>
 </div>
 
 <div class="headers">
@@ -52,15 +52,14 @@ style="width: 90%; height: 600; margin-top: 5%"></div></div>
 
   <div class="card col-12 col-md-6 col-lg-6">
   <div class="mx-auto", id="dataviz",
-style="width: 90%; height: 600; margin-top: 5%"></div>
+style="width: 90%; height: 50rem; margin-top: 5%"></div>
 </div></div>
 {% block transit_graphs%} {% endblock %}
 <div class="headers">
   <h2>Feedback from driver</h2>
   <p class="inline">Answers from people about trips in cars and rideshares.</p>
   <div class="card col-12 col-md-6 col-lg-6">
-  <div class="mx-auto", id="my_dataviz",
-style="width: 90%; height: 600; margin-top: 5%"></div></div>
+  <div class="mx-auto", id="my_dataviz", style="width: 100%; height : var(--starting-height, 50rem); margin-top: 5%"></div></div>
 </div>
 <div class="headers">
   <h2>Spatial Analysis</h2>
@@ -68,7 +67,8 @@ style="width: 90%; height: 600; margin-top: 5%"></div></div>
     Analysis of spatial data reported through rider survey. /p> 
   </p>
 </div>
-<script>  <style>
+<script>  
+<style>
   .axis text {
     font-size: 12px;
   }
