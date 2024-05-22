@@ -96,6 +96,11 @@ class RiderSurvey1(ModelForm):
             "car_owner": forms.RadioSelect(attrs={"class": "form-radio"}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["frequent_transit"].empty_label = None
+        self.fields["car_owner"].empty_label = None
+
 
 class RiderSurvey2(ModelForm):
     """
