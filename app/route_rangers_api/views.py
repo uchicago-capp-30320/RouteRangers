@@ -160,7 +160,6 @@ def dashboard(request, city: str):
         mode=1,
         transit_unit=CITY_RIDERSHIP_LEVEL[city]["subway"],
         weekday=False,
-
     )
     top_bus_weekday = extract_top_ten(
         city=city, mode=3, transit_unit=CITY_RIDERSHIP_LEVEL[city]["bus"], weekday=True
