@@ -1,11 +1,11 @@
-export function initializeMap(coordinates, stations, iconUrl, routes) {
+export function initializeMap(coordinates, stations, iconUrl, routes, userDrawn) {
 
   // Add a tile layer
   var tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     // attribution:
     //   'Map data (c) <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, (c) <a href="https://carto.com/attribution">CARTO</a>',
     subdomains: 'abcd',
-    minZoom: 8,
+    minZoom: 0,
     maxZoom: 17,
   });
 
@@ -98,12 +98,47 @@ export function initializeMap(coordinates, stations, iconUrl, routes) {
     }
   });
 
+  // Add user-drawn route and endpoint layers
+
+  routeLayers["User-drawn"] = L.layerGroup();
+  markerClusterGroups["User-drawn"] = L.markerClusterGroup();
+
+  L.geoJSON(userDrawn, {
+    onEachFeature: function (feature, layer) {
+
+      var geometries = feature.geometry.geometries;
+      geometries.forEach(function (geometry) {
+        if (geometry.type === "LineString") {
+          var user_route = L.polyline(geometry.coordinates, { color: "#ddddff", opacity: 0.5, });
+          routeLayers["User-drawn"].addLayer(user_route);
+        } else if (geometry.type === "Point") {
+          var coords = geometry.coordinates;
+          if (coords && coords.length === 2) {
+            // TODO: figure out why the coords need to be reversed here and not above
+            var x = coords[1];
+            var y = coords[0];
+            if (x != undefined && y != undefined) {
+              var marker = L.marker([x, y], { icon: smallIcon });
+              marker.bindTooltip("User-submitted endpoint");
+              markerClusterGroups["User-drawn"].addLayer(marker);
+            } else {
+              console.error("Invalid coordinates for Point:", coordinates);
+            }
+          } else {
+            console.error("Invalid coordinates array for Point:", coords);
+          }
+
+        }
+      });
+    }
+  });
+
   // Adjust width of routes with zoom level
   function updateRouteWidth() {
     var zoom = map.getZoom();
     for (var rType in routeLayers) {
       routeLayers[rType].eachLayer(function (layer) {
-        layer.setStyle({ weight: (zoom / 4) - 1 });
+        layer.setStyle({ weight: (zoom / 4) - 0.5 });
       });
     }
   }

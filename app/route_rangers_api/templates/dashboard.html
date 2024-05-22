@@ -5,39 +5,19 @@
 </div>
 <div class="card-container row">
   <div class="col-12 col-md-3 col-lg-3">
-    <button
-      class="btn btn-secondary-subtle dropdown-toggle"
-      type="button"
-      id="typeDropdown"
-      data-bs-toggle="dropdown"
-      aria-expanded="false"
-    >
+    <button class="btn btn-secondary-subtle dropdown-toggle" type="button" id="typeDropdown" data-bs-toggle="dropdown"
+      aria-expanded="false">
       Select Transit Type
     </button>
     <ul class="dropdown-menu" aria-labelledby="typeDropdown">
       <li>
-        <a
-          class="dropdown-item"
-          href="#"
-          onclick="updateCards('typeDropdown', this)"
-          >All</a
-        >
+        <a class="dropdown-item" href="#" onclick="updateCards('typeDropdown', this)">All</a>
       </li>
       <li>
-        <a
-          class="dropdown-item"
-          href="#"
-          onclick="updateCards('typeDropdown', this)"
-          >Bus</a
-        >
+        <a class="dropdown-item" href="#" onclick="updateCards('typeDropdown', this)">Bus</a>
       </li>
       <li>
-        <a
-          class="dropdown-item"
-          href="#"
-          onclick="updateCards('typeDropdown', this)"
-          >Train</a
-        >
+        <a class="dropdown-item" href="#" onclick="updateCards('typeDropdown', this)">Train</a>
       </li>
       <!-- Add more months as needed -->
     </ul>
@@ -71,7 +51,7 @@
 </div>
 <script>
   cityData = {{ citydata | safe }};
-  var type= "All";
+  var type = "All";
   document.getElementById("totalRidersText").textContent =
     cityData[type]["TotalRiders"];
   document.getElementById("totalRoutesText").textContent =
@@ -107,11 +87,7 @@
     Maps of showing variation in transit, environmental, and socio-economic
     variables across census tracts <br />
   </p>
-  <div
-    id="heatmap"
-    class="mx-auto"
-    style="width: 90%; height: 600px; margin-top: 5%"
-  ></div>
+  <div id="heatmap" class="mx-auto" style="width: 90%; height: 600px; margin-top: 5%"></div>
 </div>
 
 <div class="headers">
@@ -146,8 +122,9 @@
   var stations = {{ stations | safe }};
   var iconUrl = "{% static 'images/map_pin.png' %}";
   var routes = {{ routes | safe}};
+  var userDrawn = {{ user_drawn | safe }};
   // "safe" parameter needed to deal with escaped quotation marks in GeoJSON
-  initializeMap(coordinates, stations, iconUrl, routes);
+  initializeMap(coordinates, stations, iconUrl, routes, userDrawn);
 </script>
 
 <!-- Map and graph Imports-->
@@ -159,14 +136,14 @@
 <script src="{% static 'heatmap.js' %}"></script>
 <script src="{% static 'cards.js' %}"></script>
 <script>
-  drawgraph("{{csv}}","group","var1");
+  drawgraph("{{csv}}", "group", "var1");
   drawTrends("{{lineplot}}");
-  drawhorizontalgraph("{{csv}}","group","var1");
+  drawhorizontalgraph("{{csv}}", "group", "var1");
   var heatmap_categories = {{ heatmap_categories | safe }};
   var heatmap_units = {{ heatmap_units | safe }};
   var heatmap_titles = {{ heatmap_titles | safe }};
   var heatmap_titles_reversed = {{ heatmap_titles_reversed | safe }};
 
-  heatmaps("{{geojsonfilepath}}", {{coordinates}}, '{{heatmaplabel}}', heatmap_categories, heatmap_units, heatmap_titles, heatmap_titles_reversed);
+  heatmaps("{{geojsonfilepath}}", {{ coordinates }}, '{{heatmaplabel}}', heatmap_categories, heatmap_units, heatmap_titles, heatmap_titles_reversed);
 </script>
 {% endblock %}
