@@ -1,4 +1,5 @@
 function drawgraph(jsonData, xaxis, yaxis, id, color="#69b3a2") {
+  // Size to parent container for relative screens
   var parentContainer = d3.select(id).node().getBoundingClientRect();
   const margin = {
       top: 0.05 * parentContainer.height,
@@ -11,10 +12,9 @@ function drawgraph(jsonData, xaxis, yaxis, id, color="#69b3a2") {
   
   var bargraph_bus = d3.select(id);
 
-  // Remove existing SVG elements
+  // Remove existing SVG elements to update if previously initialed. 
   bargraph_bus.selectAll("*").remove();
 
-  // Append SVG and set dimensions
   bargraph_bus = bargraph_bus
     .append("svg")
     .attr("width", "100%")
@@ -32,9 +32,9 @@ function drawgraph(jsonData, xaxis, yaxis, id, color="#69b3a2") {
   var y = d3.scaleLinear().range([height, 0]);
   var yAxis = bargraph_bus.append("g").attr("class", "myYaxis");
 
-  // A function that create / update the plot for a given variable:
+  // swap jsonn files and/ or y axis 
   function update(xaxis, yaxis) {
-    // X axis
+
     x.domain(jsonData.map(function (d) {
       return d[xaxis];
     }));
@@ -52,19 +52,18 @@ function drawgraph(jsonData, xaxis, yaxis, id, color="#69b3a2") {
         return scaleFactor + "em";
       });
 
-    // Add Y axis
     y.domain([0, d3.max(jsonData, function (d) {
       return +d[yaxis];
     })]);
     yAxis.transition().duration(1000).call(d3.axisLeft(y));
   
-    // variable u: map data to existing bars
-    var u = bargraph_bus.selectAll("rect").data(jsonData);
+
+    var rect_bar_graph = bargraph_bus.selectAll("rect").data(jsonData);
   
     // update bars
-    u.enter()
+    rect_bar_graph.enter()
       .append("rect")
-      .merge(u)
+      .merge( rect_bar_graph )
       .transition()
       .duration(1000)
       .attr("x", function (d) {
@@ -84,6 +83,7 @@ function drawgraph(jsonData, xaxis, yaxis, id, color="#69b3a2") {
   update(xaxis, yaxis);
 }
 function drawTrends(jsonData, datasetLabels) {
+  // resize to parent container for dynamic sizing
   var parentContainer = d3.select("#my_dataviz").node().getBoundingClientRect();
   var margin = { top: 30, right: 30, bottom: 150, left: 60 },
       width = parentContainer.width - margin.left - margin.right,
@@ -97,7 +97,7 @@ function drawTrends(jsonData, datasetLabels) {
       .append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  // Function to filter data points based on graph width
+  // Function to filter data points based on graph width for diverse data
   function filterData(values, minDistance) {
     if (values.length < 2) return values;
 
@@ -115,7 +115,6 @@ function drawTrends(jsonData, datasetLabels) {
     return filtered;
   }
 
-  // Reformat the data: we need an array of arrays of {x, y} tuples
   var dataReady = datasetLabels.map(function (grpName) {
     return {
       name: grpName,
@@ -125,44 +124,32 @@ function drawTrends(jsonData, datasetLabels) {
     };
   });
 
-
-  // Define your custom color array
-  var customColors = ["#BF5002","#566C4B","#425469"];
-
-  // Create a scaleOrdinal scale with your custom color range
-  var myColor = d3.scaleOrdinal()
+  var colors = ["#BF5002","#566C4B","#425469"];
+  var timeColors = d3.scaleOrdinal()
     .domain(datasetLabels)
-    .range(customColors);
+    .range(colors);
 
-  // Add X axis --> it is a date format
+  // Add X axis and set domains
   var xDomain = d3.extent(jsonData, function(d) { return new Date(d.date); });
   var yMax = d3.max(dataReady, function (d) {
       return d3.max(d.values, function (v) {
           return v.value;
       });
   });
-
-  // Define scales with dynamic domains
   var x = d3.scaleTime().domain(xDomain).range([0, width]);
   var y = d3.scaleLinear().domain([0, yMax*1.1]).range([height, 0]);
 
-  // Add X axis
   trend.append("g")
       .attr("transform", "translate(0," + height + ")")
       .call(d3.axisBottom(x));
-
-  // Add Y axis
   trend.append("g")
       .call(d3.axisLeft(y));
 
   // Filter points based on minimum distance
-  var minDistance = 20; // Minimum distance between points in pixels
+  var minDistance = 20;
   dataReady.forEach(function(d) {
     d.values = filterData(d.values, minDistance);
   });
-
-
-  // Add the lines
   var line = d3
       .line()
       .x(function (d) {
@@ -184,7 +171,7 @@ function drawTrends(jsonData, datasetLabels) {
           return line(d.values);
       })
       .attr("stroke", function (d) {
-          return myColor(d.name);
+          return timeColors(d.name);
       })
       .style("stroke-width", 4)
       .style("fill", "none");
@@ -196,7 +183,7 @@ function drawTrends(jsonData, datasetLabels) {
       .enter()
       .append("g")
       .style("fill", function (d) {
-          return myColor(d.name);
+          return timeColors(d.name);
       })
       .attr("class", function (d) {
           return d.name;
@@ -217,7 +204,6 @@ function drawTrends(jsonData, datasetLabels) {
       .attr("r", 5)
       .attr("stroke", "white");
 
-  // Add a legend (interactive)
   trend
       .selectAll("myLegend")
       .data(dataReady)
@@ -232,13 +218,12 @@ function drawTrends(jsonData, datasetLabels) {
           return d.name;
       })
       .style("fill", function (d) {
-          return myColor(d.name);
+          return timeColors(d.name);
       })
       .style("font-size", 15)
       .on("click", function (d) {
-          // is the element currently visible ?
+          // toggle opacity for lines
           var currentOpacity = d3.selectAll("." + d.name).style("opacity");
-          // Change the opacity: from 0 to 1 or from 1 to 0
           d3.selectAll("." + d.name)
               .transition()
               .style("opacity", currentOpacity == 1 ? 0 : 1);
@@ -255,11 +240,8 @@ function drawTrends(jsonData, datasetLabels) {
     var width = parentContainer.width - margin.left - margin.right;
     var height = parentContainer.height - margin.top - margin.bottom;
     var bargraph = d3.select(id);
-
-    // Remove existing SVG elements
     bargraph.selectAll("*").remove();
 
-    // Append SVG and set dimensions
     bargraph = bargraph
       .append("svg")
       .attr("width", "100%")
@@ -267,37 +249,30 @@ function drawTrends(jsonData, datasetLabels) {
       .append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    // Initialize the Y axis
     var y = d3.scaleBand().range([0, height]).padding(0.4);
     var yAxis = bargraph.append("g").attr("transform", "translate(0,0)");
 
-    // Initialize the X axis
     var x = d3.scaleLinear().range([0, width]);
     var xAxis = bargraph.append("g").attr("class", "myXaxis").attr("transform", `translate(0, ${height})`);
 
-    // Function to update the plot
     function update(selectedX, selectedY) {
-      // Update X axis domain
       x.domain([0, d3.max(jsonData, function (d) {
         return +d[selectedY];
       })]);
       xAxis.transition().duration(1000).call(d3.axisBottom(x));
 
-      // Update Y axis domain
       y.domain(jsonData.map(function (d) {
         return d[selectedX];
       }));
       yAxis.transition().duration(1000).call(d3.axisLeft(y))
         .selectAll("text")
-        .call(wrap, margin.left - 20); // Call wrap function for text wrapping with padding
+        .call(wrap, margin.left - 20); 
 
-      // Bind data to rectangles (bars)
-      var u = bargraph.selectAll("rect").data(jsonData);
+      var rect_bar_graph = bargraph.selectAll("rect").data(jsonData);
 
-      // Enter new data, update existing data, remove old data
-      u.enter()
+      rect_bar_graph.enter()
         .append("rect")
-        .merge(u)
+        .merge(rect_bar_graph)
         .transition()
         .duration(500)
         .attr("y", function (d) {
@@ -311,7 +286,7 @@ function drawTrends(jsonData, datasetLabels) {
         .attr("fill", color);
 
       // Remove old bars
-      u.exit().remove();
+      rect_bar_graph.exit().remove();
     }
 
     // Text wrapping function
@@ -322,7 +297,7 @@ function drawTrends(jsonData, datasetLabels) {
             word,
             line = [],
             lineNumber = 0,
-            lineHeight = 1.1, // ems
+            lineHeight = 1.1,
             y = text.attr("y"),
             dy = parseFloat(text.attr("dy")) || 0,
             tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
