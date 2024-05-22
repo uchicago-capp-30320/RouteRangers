@@ -22,44 +22,6 @@ body {
   /* 60px - 100px top and bottom */
   --sectionPadding: clamp(3.75rem, 7.82vw, 6.25rem) 1rem;
 }
-
-/* footer */
-#cs-footer {
-  width: 100%;
-  /* prevents padding and border from affecting height and width */
-  box-sizing: border-box;
-  background-color: #e5e5e5;
-  font-family: 'Inter', 'Roboto', 'Arial', sans-serif;
-  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
-  padding-bottom: 20px;
-  position: relative;
-  bottom: 0;
-}
-#cs-footer .cs-li-link {
-  /* Your existing styles for footer links */
-  width: 100%;
-  box-sizing: border-box;
-  font-family: 'Inter', 'Roboto', 'Arial', sans-serif;
-  color: #000000;
-  position: relative; /* Ensure relative positioning for the ::after pseudo-element */
-  text-decoration: none; /* Remove default underline */
-}
-
-#cs-footer .cs-li-link::after {
-  content: ''; /* Add the underline using the ::after pseudo-element */
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%; /* Full width of the link */
-  height: 1px; /* Height of the underline */
-  /* background-color: currentColor; Use the current text color for the underline */
-  transition: width 0.3s ease; /* Add a transition effect */
-}
-
-#cs-footer .cs-li-link:hover::after {
-  width: 100%; /* Expand the underline on hover */
-  background-color: var(--primary); /* Change the color of the underline on hover */
-}
 /* Imagegrid */
 .image-grid img {
   max-width: 100%;
@@ -121,11 +83,29 @@ body {
   body.cs-open {
     overflow: hidden;
   }
+  .unstyled-link{
+    text-align: center;
+  }
+  .grid-links{
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 10px;
+  }
+  .footer-multi-container{
+    width: 100%;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+  }
+  .justify-flex-center{
+    display: flex;
+    justify-content: center;
+  }
   #cs-navigation {
     width: 100%;
     /* prevents padding and border from affecting height and width */
     box-sizing: border-box;
-    padding: 0.75rem 1rem; 
+    padding: 0.75rem 2rem; 
     background-color: #e5e5e5;
     font-family: 'Roboto', 'Arial', sans-serif;
     box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
@@ -355,17 +335,74 @@ body {
   #cs-navigation .cs-button-solid {
     display: none;
   }
+  /* footer */
+  #cs-footer {
+    width: 100%;
+    /* prevents padding and border from affecting height and width */
+    box-sizing: border-box;
+    background-color: #e5e5e5;
+    font-family: 'Inter', 'Roboto', 'Arial', sans-serif;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+    padding: 2em;
+    bottom: 0;
+    min-height: 15vh;
+    display: flex;
+    justify-content: center;
+    flex-direction:column-reverse;
+  }
+  #cs-footer .cs-li-link {
+    /* Your existing styles for footer links */
+    width: 100%;
+    box-sizing: border-box;
+    font-family: 'Inter', 'Roboto', 'Arial', sans-serif;
+    color: #000000;
+    position: relative; /* Ensure relative positioning for the ::after pseudo-element */
+    text-decoration: none; /* Remove default underline */
+  }
+
+  #cs-footer .cs-li-link::after {
+    content: ''; /* Add the underline using the ::after pseudo-element */
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%; /* Full width of the link */
+    height: 1px; /* Height of the underline */
+    /* background-color: currentColor; Use the current text color for the underline */
+    transition: width 0.3s ease; /* Add a transition effect */
+  }
+
+  #cs-footer .cs-li-link:hover::after {
+    width: 100%; /* Expand the underline on hover */
+    background-color: var(--primary); /* Change the color of the underline on hover */
+  }
 }
 /*-- -------------------------- -->
-                                        <---     Desktop Navigation     -->
-                                        <--- -------------------------- -*/
+<---     Desktop Navigation     -->
+<--- -------------------------- -*/
 /* Small Desktop - 1024px */
 @media only screen and (min-width: 64rem) {
+  .grid-links{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .footer-multi-container{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .justify-flex-center{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+  }
   #cs-navigation {
     width: 100%;
     /* prevents padding and border from affecting height and width */
     box-sizing: border-box;
-    padding: 0 1rem;
+    padding: 0.75rem 3rem; 
     background-color: #e5e5e5;
     box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
     z-index: 10000;
@@ -480,6 +517,45 @@ body {
   }
   #cs-navigation .cs-button-solid:hover:before {
     width: 100%;
+  }
+  /* footer */
+  #cs-footer {
+    width: 100%;
+    /* prevents padding and border from affecting height and width */
+    box-sizing: border-box;
+    background-color: #e5e5e5;
+    font-family: 'Inter', 'Roboto', 'Arial', sans-serif;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+    padding: 2em;
+    bottom: 0;
+    min-height: 15vh;
+    display: flex;
+    justify-content: space-around;
+  }
+  #cs-footer .cs-li-link {
+    /* Your existing styles for footer links */
+    width: 100%;
+    box-sizing: border-box;
+    font-family: 'Inter', 'Roboto', 'Arial', sans-serif;
+    color: #000000;
+    position: relative; /* Ensure relative positioning for the ::after pseudo-element */
+    text-decoration: none; /* Remove default underline */
+  }
+
+  #cs-footer .cs-li-link::after {
+    content: ''; /* Add the underline using the ::after pseudo-element */
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%; /* Full width of the link */
+    height: 1px; /* Height of the underline */
+    /* background-color: currentColor; Use the current text color for the underline */
+    transition: width 0.3s ease; /* Add a transition effect */
+  }
+
+  #cs-footer .cs-li-link:hover::after {
+    width: 100%; /* Expand the underline on hover */
+    background-color: var(--primary); /* Change the color of the underline on hover */
   }
 }
 
@@ -599,6 +675,23 @@ h2 {
   border: 1px solid #ccc;
   box-shadow: 0 2px 4px #555;
 }
+
+.header-footer-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.footer-multi-logo{
+  padding: 1em;
+}
+
+.unstyled-link{
+  text-decoration: none;
+  color: inherit;
+}
+
 
 
 
