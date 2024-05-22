@@ -4,12 +4,10 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.http import Http404, JsonResponse
 from django.urls import reverse
-from django.views import generic
-from django.utils import timezone
 from django.core.serializers import serialize
 from django.templatetags.static import static
-from django.contrib.gis.geos import GEOSGeometry, MultiLineString, LineString, Point
-
+from django.contrib.gis.geos import GEOSGeometry, MultiLineString, LineString
+from django.views.decorators.cache import cache_page
 import uuid
 import json
 
@@ -50,6 +48,8 @@ def about(request):
     return render(request, "about.html", context)
 
 
+# caching for 6 hours since the data doesn't change often
+@cache_page(60 * 60 * 6)
 def dashboard(request, city: str):
     # get paths
     routes = TransitRoute.objects.filter(city=CITY_CONTEXT[city]["DB_Name"])

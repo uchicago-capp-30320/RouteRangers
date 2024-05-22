@@ -43,7 +43,6 @@
     </ul>
   </div>
 </div>
-
 <div class="card-container row mx-3">
   <div class="col-12 col-md-4 col-lg-4" id="totalRidersCard">
     <div class="card">
@@ -70,6 +69,16 @@
     </div>
   </div>
 </div>
+<script>
+  cityData = {{ citydata | safe }};
+  var type= "All";
+  document.getElementById("totalRidersText").textContent =
+    cityData[type]["TotalRiders"];
+  document.getElementById("totalRoutesText").textContent =
+    cityData[type]["TotalRoutes"];
+  document.getElementById("pctOfCommutersText").textContent =
+    cityData[type]["PercentOfCommuters"];
+</script>
 
 <div class="headers">
   <h2>Transit Map</h2>
@@ -193,16 +202,5 @@ var k= ["valueA","valueB","valueC"]
   var heatmap_titles_reversed = {{ heatmap_titles_reversed | safe }};
 
   heatmaps("{{geojsonfilepath}}", {{coordinates}}, '{{heatmaplabel}}', heatmap_categories, heatmap_units, heatmap_titles, heatmap_titles_reversed);
-</script>
-<script>
-  // Card update variables
-  cityData = {{ citydata | safe }};
-  var type= "All";
-  document.getElementById("totalRidersText").textContent =
-    cityData[type]["TotalRiders"];
-  document.getElementById("totalRoutesText").textContent =
-    cityData[type]["TotalRoutes"];
-  document.getElementById("pctOfCommutersText").textContent =
-    cityData[type]["PercentOfCommuters"];
 </script>
 {% endblock %}
