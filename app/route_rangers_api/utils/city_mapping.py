@@ -20,8 +20,8 @@ CITY_CONTEXT = {
         "geojsonfilepath": "ChicagoCensus_2020.geojson",
         "fips_county": CITY_FIPS["chicago"]["county"],
         "subway_mode": 1,
-        "bus_level" : "route",
-        "subway_level" : "stations"
+        "bus_level": "route",
+        "subway_level": "stations",
     },
     "NewYork": {
         "CityName": "New York",
@@ -33,8 +33,8 @@ CITY_CONTEXT = {
         "geojsonfilepath": "NewYorkCensus_2020.geojson",
         "fips_county": CITY_FIPS["nyc"]["county"],
         "subway_mode": 1,
-        "bus_level" : "route",
-        "subway_level" : "stations"
+        "bus_level": "route",
+        "subway_level": "stations",
     },
     "Portland": {
         "CityName": "Portland",
@@ -46,8 +46,8 @@ CITY_CONTEXT = {
         "geojsonfilepath": "PortlandCensus_2020.geojson",
         "fips_county": CITY_FIPS["portland"]["county"],
         "subway_mode": 0,
-        "bus_level" : "stations",
-        "subway_level" : "stations"
+        "bus_level": "stations",
+        "subway_level": "stations",
     },
 }
 
