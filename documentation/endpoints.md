@@ -13,6 +13,9 @@ These are the endpoints that users will engage with via the web app. Since we ar
 * `/survey/<city>/`
     * returns: survey form for riders to fill out and map to provide routes they would use
 
+* `/about/`
+    * returns: description of the project and listing of project members with cute pictures
+
 
 ## Backend Endpoints (likely not to be implemented for now)
 The following routes are RESTful routes scoped for if the web app was built/deployed separately from the django app and was ingesting the data via WebAPI routes instead of directly from views (the way it is now)
