@@ -5,7 +5,7 @@ export function initializeMap(coordinates, stations, iconUrl, routes, userDrawn)
     // attribution:
     //   'Map data (c) <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, (c) <a href="https://carto.com/attribution">CARTO</a>',
     subdomains: 'abcd',
-    minZoom: 0,
+    minZoom: 8,
     maxZoom: 17,
   });
 
