@@ -161,13 +161,12 @@ def survey_p2(request, city: str, user_id: str = None):
         end_point = route.coords[-1]
 
         # Update row in database
-        obj = SurveyResponse.objects.filter(user_id_id=user_id, route_id=route_id)
+        obj = SurveyResponse.objects.get(user_id_id=user_id, route_id=route_id)
 
-        for item in obj:
-            item.route = route
-            item.starting_point = Point(starting_point)
-            item.end_point = Point(end_point)
-            item.save()
+        obj.route = route
+        obj.starting_point = Point(starting_point)
+        obj.end_point = Point(end_point)
+        obj.save()
 
         # return selected mode of transit from form
         selected_mode_index = update_survey.cleaned_data["modes_of_transit"]
