@@ -653,14 +653,16 @@ h1 {
 
 #map {
   /* Style the map container */
-  height: 50vh; /* Adjust the height as needed */
+  height: 70vh; /* Adjust the height as needed */
   padding: 10vh;
   margin: 10vh 5vw;
   position: relative;
   display: flex;
   z-index: 100;
 }
-
+.leaflet-control-geocoder{
+  display: none;
+}
 h2 {
   /* margin: 100px; */
   /* margin: 5vh 5vw 0 5vw; */
@@ -702,7 +704,67 @@ h3 {
   color: inherit;
 }
 
+.circular-image {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: blue;
+  /* commented for demo
+  float: left;
+  margin-left: 125px;
+  margin-top: 20px;
+  */
+  
+  /*for demo*/
+  display:inline-block;
+  vertical-align:middle;
+}
+.circular_image img{
+  width:100%;
+}
 
+.circular-image {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: blue;
+  /* commented for demo
+  float: left;
+  margin-left: 125px;
+  margin-top: 20px;
+  */
+  margin: 5px;
+
+  /*for demo*/
+  display:inline-block;
+  vertical-align:middle;
+}
+.circular_image img{
+  width:100%;
+}
+.profile-pic-div{
+  display: table-caption;
+  margin: 10px;
+}
+
+.profile-grid{
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.profile-text{
+  text-align: center;
+  color: #464444;
+}
+
+.title-page {
+  margin-top: 3vw;
+  margin-left: 20vw;
+  margin-right: 20vw;
+  margin-bottom: 2vw;
+}
 
 
 

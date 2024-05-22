@@ -61,7 +61,7 @@ function initializeUserRoute(coordinates) {
             if (!exportButton) {
                 exportButton = document.createElement('button');
                 exportButton.className = 'leaflet-bar export-button';
-                exportButton.innerText = 'Export Route';
+                exportButton.innerText = 'Save trip';
                 buttonContainer.appendChild(exportButton);
             }
             
@@ -75,6 +75,8 @@ function initializeUserRoute(coordinates) {
             exportButton.addEventListener('click', function() {
                 // Update the hidden input field value
                 hiddenInput.value = JSON.stringify(lineStringGeometry.coordinates);
+                // Add pop up
+                alert('Trip saved successfully! Please continue with the survey.');
             });
         } else {
             setTimeout(() => addExportButton(lineStringGeometry), 60);
