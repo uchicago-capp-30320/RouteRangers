@@ -10,7 +10,7 @@ This tool will help City Planners and Locals alike as they:
 ## How to run the App?
 See [Architecture and Deployment](./documentation/architecture-and-deployment.md)
 
-## Checkout our deployed version:
+## Check out our deployed version:
 
 [Plan-our-transit](https://plan-our-transit-d885a2a0d329.herokuapp.com/)
 
