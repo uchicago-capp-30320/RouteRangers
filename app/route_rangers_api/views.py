@@ -63,7 +63,7 @@ def about(request):
 
 
 # caching for 6 hours since the data doesn't change often
-# @cache_page(60 * 60 * 6)
+@cache_page(60 * 60 * 6)
 def dashboard(request, city: str):
     # Get existing routes and stations
     routes = TransitRoute.objects.filter(city=CITY_CONTEXT[city]["DB_Name"])
