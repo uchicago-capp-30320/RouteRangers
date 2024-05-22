@@ -47,7 +47,7 @@ function drawgraph(jsonData, xaxis, yaxis, id, color="#69b3a2") {
       .style("font-size", function() {
         // Scale font size based on available space
         var availableWidth = x.bandwidth();
-        var textWidth = this.getBBox().width*7;
+        var textWidth = this.getBBox().width*15;
         var scaleFactor = Math.min(1, availableWidth*.7 / textWidth);
         return scaleFactor + "em";
       });
@@ -268,7 +268,7 @@ function drawTrends(jsonData, datasetLabels) {
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     // Initialize the Y axis
-    var y = d3.scaleBand().range([0, height]).padding(0.2);
+    var y = d3.scaleBand().range([0, height]).padding(0.4);
     var yAxis = bargraph.append("g").attr("transform", "translate(0,0)");
 
     // Initialize the X axis
