@@ -12,7 +12,6 @@
     <div class="card">
       <div class="card-content">
         <p class="card-title">Total Number of Responses</p>
-        
         <p class="card-text">{{Response}}</p>
       </div>
     </div>
@@ -38,30 +37,38 @@
 <div class="headers">
   <h2>Rider Trips</h2>
   <p class="inline">Map showing all transit routes in your city</p>
-  
-  <div class="card col-12 col-md-6 col-lg-6">
-  <div class="mx-auto", id="tranform",
-  style="width: 90%; height: 600; margin-top: 5%"></div></div>
-  <div class="card col-12 col-md-6 col-lg-6"><div class="mx-auto", id="timeofday",
-style="width: 100%; height: 600; margin-top: 5%"></div></div>
+  <div class="row">
+    <div class="graphs container col-12 col-md-6 col-lg-6 standard-graph">
+      <div id="tranform" class="graph-container"></div>
+    </div>
+    <div class="graphs container col-12 col-md-6 col-lg-6 standard-graph">
+      <div id="timeofday" class="graph-container"></div>
+    </div>
+  </div>
 </div>
 
 <div class="headers">
   <h2>Feedback from Transit Riders</h2>
-  <p class="inline">Answers from people about trips on public transit.</p>
-
-  <div class="card col-12 col-md-6 col-lg-6">
-  <div class="mx-auto", id="dataviz",
-style="width: 90%; height: 50rem; margin-top: 5%"></div>
-</div></div>
-{% block transit_graphs%} {% endblock %}
-<div class="headers">
-  <h2>Feedback from driver</h2>
-  <p class="inline">Answers from people about trips in cars and rideshares.</p>
-  <div class="card col-12 col-md-6 col-lg-6">
-  <div class="mx-auto", id="my_dataviz", style="width: 100%; height : var(--starting-height, 50rem); margin-top: 5%"></div></div>
+  <p class="inline">Answers to the rider</p>
+  <div class="row">
+    <div class="graphs container col-12 col-md-6 col-lg-6 standard-graph">
+      <div id="dataviz" class="graph-container"></div>
+    </div>
+  </div>
 </div>
-<script>  
+
+{% block transit_graphs%} {% endblock %}
+
+<div class="headers">
+  <h2>Feedback from Drivers</h2>
+  <p class="inline">Answers from people about trips in cars and rideshares.</p>
+  <div class="row">
+    <div class="graphs container col-12 col-md-6 col-lg-6 standard-graph">
+      <div id="my_dataviz" class="graph-container"></div>
+    </div>
+  </div>
+</div>
+
 <style>
   .axis text {
     font-size: 12px;
@@ -71,7 +78,16 @@ style="width: 90%; height: 50rem; margin-top: 5%"></div>
     stroke: #000;
     fill: none;
   }
-</style></script>
+  .standard-graph {
+    height: 400px; /* Standard height */
+    width: 100%; /* Standard width */
+  }
+  .graph-container {
+    width: 100%;
+    height: 100%;
+  }
+</style>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://d3js.org/d3.v4.js"></script>
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
@@ -80,12 +96,12 @@ style="width: 90%; height: 50rem; margin-top: 5%"></div>
 <script>
   const driver_feedback = {{tranrideimprov_drivers | safe}};
   const tran_feedback = {{tranrideimprov_rider | safe}};
-  const transitform= {{ transit_mode_graph | safe }}
-  const tod = {{ toptengraph | safe }}
-  
-  drawhorizontalgraph(driver_feedback,"transit_type","count", "#my_dataviz", "#425469")
-  drawhorizontalgraph(tran_feedback,"transit_type","count", "#dataviz", "#566C4B")
-  drawgraph(transitform,"transit_type","count", "#tranform", "#6F8695")
-  drawgraph(tod,"tod","count", "#timeofday", "#BF5002")
-</script> 
+  const transitform = {{ transit_mode_graph | safe }};
+  const tod = {{ toptengraph | safe }};
+
+  drawhorizontalgraph(driver_feedback, "transit_type", "count", "#my_dataviz", "#425469");
+  drawhorizontalgraph(tran_feedback, "transit_type", "count", "#dataviz", "#566C4B");
+  drawgraph(transitform, "transit_type", "count", "#tranform", "#6F8695");
+  drawgraph(tod, "tod", "count", "#timeofday", "#BF5002");
+</script>
 {% endblock %}

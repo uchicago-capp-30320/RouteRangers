@@ -653,7 +653,7 @@ h1 {
 
 #map {
   /* Style the map container */
-  height: 70vh; /* Adjust the height as needed */
+  height: 70vh; 
   padding: 10vh;
   margin: 10vh 5vw;
   position: relative;
@@ -664,8 +664,6 @@ h1 {
   display: none;
 }
 h2 {
-  /* margin: 100px; */
-  /* margin: 5vh 5vw 0 5vw; */
   font-family: 'Inter', 'Roboto', Arial, sans-serif;
   position: relative;
   display: flex;
@@ -673,8 +671,6 @@ h2 {
   color: #555;
 }
 h3 {
-  /* margin: 100px; */
-  /* margin: 5vh 5vw 0 5vw; */
   font-family: 'Inter', 'Roboto', Arial, sans-serif;
   position: relative;
   display: flex;
