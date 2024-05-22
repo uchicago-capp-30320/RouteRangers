@@ -88,7 +88,17 @@
   <div id="map"></div>
 </div>
 
-<div class="card container">
+<div class="headers">
+  <button onclick="drawhorizontalgraph('{{csv}}','group','var1')">
+    Bus
+  </button>
+  <button onclick="drawhorizontalgraph('{{csv}}','group','var2')">
+    Train
+  </button>
+  <div id="horizontaldataviz"></div>
+</div>
+
+<!-- <div class="card container">
   <h2 class="card-content">Top 10 Stations/Stops</h2>
   <div class="card-content row">
     <div class="col-12 col-md-4 col-lg-4">
@@ -101,7 +111,7 @@
       <div id="horizontaldataviz"></div>
     </div>
   </div>
-</div>
+</div> -->
 
 <div class="headers">
   <h2>Heat Map</h2>

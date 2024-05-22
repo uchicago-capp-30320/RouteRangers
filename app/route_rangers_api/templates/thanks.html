@@ -1,15 +1,19 @@
 {% extends 'basetemplate_internal.html' %} {% load static %} {% block content %}
 <img
-  src="{% static 'trains.png' %}"
+  src="{% static 'images/thanks_photo.png' %}"
   alt="trains background image"
   style="width: 100%"
 />
 <div class="headers">
   <h1>Thank you for your feedback!</h1>
   <p class="inline">
-    This information will be shared with your city's transit agency and used \
-    in the planning process. We hope that this data exchnage can help make
-    transit \ better for all of us.
+    This information will be shared with your city's transit agency and used
+    in the planning process. We hope that this data exchange can help make
+    transit better for all of us.
+  </p>
+  <p class="inline">
+    You can also check out the results from your community's feedback &nbsp;<a href="/dashboard/{{ City_NoSpace}}" >
+      here!</a>
   </p>
 </div>
 
