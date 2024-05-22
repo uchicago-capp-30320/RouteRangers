@@ -87,7 +87,6 @@ def get_rider_satisfaction(city: str) -> float:
 
     return round(average, 1)
 
-
 def get_transit_mode(city: str) -> Dict:
     """
     Given a city, return a dictionary with a count
@@ -103,6 +102,7 @@ def get_transit_mode(city: str) -> Dict:
     }
 
     mode_count=[]
+
     for mode_id, mode_name in MODES_OF_TRANSIT.items():
         count_by_mode = SurveyResponse.objects.filter(
             city=CITY_CONTEXT[city]["DB_Name"], modes_of_transit=mode_id
@@ -117,8 +117,10 @@ def get_trip_top(city: str) -> Dict:
     Given a city, return a dictionary with a count
     of responses by time of day
     """
+
     TIME_OF_DAY = {1: "Peak Commute Hours", 2: "Daytime", 3: "Night"}
     tod_count=[]
+
     for tod_id, tod_name in TIME_OF_DAY.items():
         count_by_tod = SurveyResponse.objects.filter(
             city=CITY_CONTEXT[city]["DB_Name"], trip_tod=tod_id
@@ -140,6 +142,7 @@ def get_transit_improv_drivers_dict(city: str) -> Dict:
         4: "It feels safe at the station and onboard",
         5: "No improvement needed",
     }
+
     improv = []
     for improv_id, improv_name in TRANSIT_IMPROVEMENT.items():
         count_by_improv = SurveyResponse.objects.filter(
@@ -148,9 +151,7 @@ def get_transit_improv_drivers_dict(city: str) -> Dict:
             user_id_id__car_owner=1,  # Filter by car_owner
         ).count()
         improv.append({"transit_type": improv_name,"count": count_by_improv})
-
     return improv
-
 
 def get_transit_improv_riders_dict(city: str) -> Dict:
     """
@@ -164,14 +165,14 @@ def get_transit_improv_riders_dict(city: str) -> Dict:
         4: "It feels safe at the station and onboard",
         5: "No improvement needed",
     }
+
     improv = []
+
     for improv_id, improv_name in TRANSIT_IMPROVEMENT.items():
         count_by_improv = SurveyResponse.objects.filter(
             city=CITY_CONTEXT[city]["DB_Name"],
             transit_improvement=improv_id,
             user_id_id__car_owner=2,  # Filter by car_owner
         ).count()
-        improv.append({"transit_type": improv_name,"count": count_by_improv})
-
-
+        improv.append({"transit_type": improv_name,"count": count_by_improv}
     return improv

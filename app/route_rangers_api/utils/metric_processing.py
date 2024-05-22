@@ -157,6 +157,7 @@ def extract_top_ten(
             routes = routes.filter(date__week_day__in=[1, 2, 3, 4, 5])
         else:
             routes = routes.exclude(Q(date__week_day=1) | Q(date__week_day=7))
+
         top_ten_routes = (
             routes.values("route_id__route_name")
             .annotate(avg_ridership=Sum("ridership") / Count("ridership"))
