@@ -653,7 +653,7 @@ h1 {
 
 #map {
   /* Style the map container */
-  height: 50vh; /* Adjust the height as needed */
+  height: 70vh; /* Adjust the height as needed */
   padding: 10vh;
   margin: 10vh 5vw;
   position: relative;
@@ -690,6 +690,26 @@ h2 {
 .unstyled-link{
   text-decoration: none;
   color: inherit;
+}
+
+.circular-image {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: blue;
+  /* commented for demo
+  float: left;
+  margin-left: 125px;
+  margin-top: 20px;
+  */
+  
+  /*for demo*/
+  display:inline-block;
+  vertical-align:middle;
+}
+.circular_image img{
+  width:100%;
 }
 
 
