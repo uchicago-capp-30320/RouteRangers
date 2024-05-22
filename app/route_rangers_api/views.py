@@ -8,7 +8,6 @@ from django.core.serializers import serialize
 from django.templatetags.static import static
 from django.contrib.gis.geos import GEOSGeometry, MultiLineString, LineString, Point
 from django.views.decorators.cache import cache_page
-
 import uuid
 import json
 
@@ -22,6 +21,15 @@ from app.route_rangers_api.utils.city_mapping import (
     CITIES_CHOICES_SURVEY,
     MODES_OF_TRANSIT,
     CITY_RIDERSHIP_LEVEL,
+)
+from app.route_rangers_api.utils.survey_results_processing import (
+    get_number_of_responses,
+    get_transit_use_pct,
+    get_rider_satisfaction,
+    get_transit_mode,
+    get_trip_top,
+    get_transit_improv_drivers_dict,
+    get_transit_improv_riders_dict,
 )
 from route_rangers_api.models import (
     TransitRoute,
@@ -256,7 +264,6 @@ def survey_p2(request, city: str, user_id: str = None):
     route_id = request.session.get("route_id")
 
     if request.method == "POST":
-
         # post form data to database
         city_survey = CITIES_CHOICES_SURVEY[city]
         survey_answer = SurveyResponse(
@@ -420,15 +427,19 @@ def thanks(request, city: str):
 def responses(request, city: str):
     context = {
         "City": CITY_CONTEXT[city]["CityName"],
-        "Response": "567",
+        "Response": get_number_of_responses(city),
         "City_NoSpace": city,
-        "Riders": "30%",
-        "Cars": "270%",
+        "Riders": get_transit_use_pct(city),
         "cities_class": "cs-li-link",
         "policy_class": "cs-li-link ",
         "survey_class": "cs-li-link",
         "feedback_class": "cs-li-link cs-active",
         "coordinates": CITY_CONTEXT[city]["Coordinates"],
+        "ridersatisfaction": get_rider_satisfaction(city),
+        "transit_mode_graph": get_transit_mode(city),
+        "toptengraph": get_trip_top(city),
+        "tranrideimprov_rider": get_transit_improv_riders_dict(city),
+        "tranrideimprov_drivers": get_transit_improv_drivers_dict(city),
     }
     return render(request, "responses.html", context)
 
