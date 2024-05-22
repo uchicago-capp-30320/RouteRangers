@@ -153,11 +153,11 @@ def dashboard(request, city: str):
 
     # Get top transit stations:
     top_bus_weekend = extract_top_ten(
-        city=city, mode=3, transit_unit=CITY_RIDERSHIP_LEVEL[city]["bus"], weekday=True
+        city=city, mode=3, transit_unit=CITY_RIDERSHIP_LEVEL[city]["bus"], weekday=False
     )
     top_subway_weekend = extract_top_ten(
         city=city,
-        mode=1,
+        mode=CITY_CONTEXT[city]["subway_mode"],
         transit_unit=CITY_RIDERSHIP_LEVEL[city]["subway"],
         weekday=False,
     )
@@ -166,8 +166,8 @@ def dashboard(request, city: str):
     )
     top_subway_weekday = extract_top_ten(
         city=city,
-        mode=1,
-        transit_unit=CITY_RIDERSHIP_LEVEL[city]["subway"],
+        mode=CITY_CONTEXT[city]["subway_mode"],
+        transit_unit=CITY_CONTEXT[city]["subway_level"],
         weekday=True,
     )
 
