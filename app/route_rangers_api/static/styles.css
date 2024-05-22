@@ -636,7 +636,7 @@ h1 {
   color: #555;
 }
 .legend {
-  background-color: white; /* White background */
+  background-color: white; 
   padding: 10px;           /* Padding for inner content */
   border: 1px solid #ccc;  /* Light gray border */
   border-radius: 5px;      /* Rounded corners */
@@ -673,6 +673,16 @@ h2 {
   font-size-adjust: 2rem;
   color: #555;
 }
+h3 {
+  /* margin: 100px; */
+  /* margin: 5vh 5vw 0 5vw; */
+  font-family: 'Inter', 'Roboto', Arial, sans-serif;
+  position: relative;
+  display: flex;
+  font-size-adjust: 1.25rem;
+  color: #555;
+}
+
 
 .btn {
   border: 1px solid #ccc;
