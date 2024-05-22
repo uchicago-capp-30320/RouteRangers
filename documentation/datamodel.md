@@ -1,6 +1,6 @@
 # Datamodel prototype 
 
-A visual representation of the datamodel can be found in the following [lucidchart link](https://lucid.app/lucidchart/acedfe58-359d-42ba-8dc9-b9421517ead9/edit?invitationId=inv_a9fee266-b5b0-4243-bfa8-ccf7f44afd22&referringApp=slack&page=0_0#)
+A visual representation of the datamodel can be found in the following [link](https://lucid.app/lucidchart/acedfe58-359d-42ba-8dc9-b9421517ead9/edit?invitationId=inv_a9fee266-b5b0-4243-bfa8-ccf7f44afd22&referringApp=slack&page=0_0#)
 
 Relationships between tables are specified by the lines connecting multiple tables. In the diagram its specified the type of matching expected, where 1:1 represents a one to one matching, m:1 many to one, and m:m many to many. 
 
@@ -13,11 +13,12 @@ The datamodel is composed of the following tables:
 - RidershipStation
 - BikeStation
 - BikeRidership
-- Survey
-- SurveyAnswer
-- PlannedRoute
+- SurveyUser
+- SurveyResponse
 
-The **Demographics** table contains demographic information at the Census Tract level, containing information for the following variables: Population, Median Household Income, Means of Transportation to Work, Time of Departure to Go to Work, Travel Time to Work, Vehicles Available and Disability Status. The table is structured in the following way: 
+## Demographics
+
+The **Demographics** table contains demographic information at the Census Tract level obtained from the American Community Survey, containing information for the following variables: Population, Median Household Income, Means of Transportation to Work, Time of Departure to Go to Work, Travel Time to Work, Vehicles Available and Disability Status. The table is structured in the following way: 
 
 | Name                           | Type                 | Description                                          |
 | ------------------------------ | -------------------- | -----------------------------------------------------|
@@ -36,6 +37,8 @@ The **Demographics** table contains demographic information at the Census Tract 
 | work_commute_time_60_90              | integer              | Number of people that take between 60 and 90 minutes commuting to work |
 | work_commute_time_over_90              | integer              | Number of people that take over 90' commuting to work  |
 | geographic_representation             | Polygon              | Geographic representation of census tract        |
+
+## Public Transportation
 
 The public transportation system information from each city is stored in the **TransitStation** and **TransitRoute** tables. The TransitStation represent each bus stop and subway station while TransitRoute represents each bus route, subway line or any other route (i.e. rail line). The **TransitStation** table is structured of the following way:
 
@@ -95,6 +98,8 @@ The **RidershipStation** stores information of daily ridership data for a Statio
 
 For this table, as a constraint, there must be uniqueness in the combination of the fields station_id and date
 
+## Bike data
+
 The **BikeStations** and **BikeRidership** represent the stations and ridership data for publicly available bikes for rent (CitiBikes,Divvy and BIKETOWN). The **BikeStation** table is represented in the following way:
 
 | Name              | Type                 | Description                                          |
@@ -121,9 +126,11 @@ The **BikeRidership** table is structured in the following way:
 
 For this table, as a constraint, there must be uniqueness in the combination of the fields station_id and date
 
-For the survey information there are two tables that represent the necessary information **SurveyUser** and **SurveyResponse**. Survey stores a user id and basic transit information.
+## Survey
 
-The **Survey** table is represented by the following structure:
+For the survey information there are two tables that represent the necessary information **SurveyUser** and **SurveyResponse**. SurveyUser stores a user id and basic transit information.
+
+The **SurveyUser** table is represented by the following structure:
 
 | Name              | Type                 | Description                                                                         |
 | ----------------- | -------------------- | ----------------------------------------------------------------------------------- |
