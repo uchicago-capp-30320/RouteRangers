@@ -87,6 +87,7 @@ def get_rider_satisfaction(city: str) -> float:
 
     return round(average, 1)
 
+
 def get_transit_mode(city: str) -> Dict:
     """
     Given a city, return a dictionary with a count
@@ -101,13 +102,13 @@ def get_transit_mode(city: str) -> Dict:
         6: "Rideshare",
     }
 
-    mode_count=[]
+    mode_count = []
 
     for mode_id, mode_name in MODES_OF_TRANSIT.items():
         count_by_mode = SurveyResponse.objects.filter(
             city=CITY_CONTEXT[city]["DB_Name"], modes_of_transit=mode_id
         ).count()
-        mode_count.append({"transit_type": mode_name,"count": count_by_mode})
+        mode_count.append({"transit_type": mode_name, "count": count_by_mode})
 
     return mode_count
 
@@ -119,13 +120,13 @@ def get_trip_top(city: str) -> Dict:
     """
 
     TIME_OF_DAY = {1: "Peak Commute Hours", 2: "Daytime", 3: "Night"}
-    tod_count=[]
+    tod_count = []
 
     for tod_id, tod_name in TIME_OF_DAY.items():
         count_by_tod = SurveyResponse.objects.filter(
             city=CITY_CONTEXT[city]["DB_Name"], trip_tod=tod_id
         ).count()
-        tod_count.append({"tod":tod_name, "count":count_by_tod})
+        tod_count.append({"tod": tod_name, "count": count_by_tod})
 
     return tod_count
 
@@ -150,8 +151,9 @@ def get_transit_improv_drivers_dict(city: str) -> Dict:
             transit_improvement=improv_id,
             user_id_id__car_owner=1,  # Filter by car_owner
         ).count()
-        improv.append({"transit_type": improv_name,"count": count_by_improv})
+        improv.append({"transit_type": improv_name, "count": count_by_improv})
     return improv
+
 
 def get_transit_improv_riders_dict(city: str) -> Dict:
     """
@@ -174,5 +176,5 @@ def get_transit_improv_riders_dict(city: str) -> Dict:
             transit_improvement=improv_id,
             user_id_id__car_owner=2,  # Filter by car_owner
         ).count()
-        improv.append({"transit_type": improv_name,"count": count_by_improv}
+        improv.append({"transit_type": improv_name, "count": count_by_improv})
     return improv
