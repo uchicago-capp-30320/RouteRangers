@@ -1,22 +1,24 @@
 {% extends 'basetemplate_internal.html' %}
 {% load static %}
 {% block content %}
-
+<img src="{% static 'images/survey_image.png' %}" alt="trains background image" style="width: 100%;" />
     <div class="headers">
         <h1>{{ City }} Rider Survey</h1>
-        <p class="inline">Please enter the trips you frequently take on transit, bike, or by car.
+        <p class="inline">
+            Please enter the trips you frequently take on transit, bike, or by car.
             Click on the map to drop a start pin and then click to add a pin where the trip ends.
-            This feedback will be used to assess gaps in current transit routes. We will ask you some follow-up questions to better understand whether a new transit route would make this trip easier for you. Please enter up to three routes.</p>
+            This feedback will be used to assess gaps in current transit routes. We will ask you some follow-up questions to better understand whether a new transit route would make this trip easier for you. Please enter up to three routes.
+        </p>
     </div>
     {% block map %}
     {% endblock %}
     {% block survey %}
-    <div class="survey-block"></div>
-        <form method="post">
+    <div class="headers survey-block" style="font-size: 1em;">
+        <form method="post" style="color: #555">
             {% csrf_token %}
             {{ form }}
             <div style="text-align: right;">
-                <button type="submit" style="margin-top: 25px;">Next</button>
+                <button class="btn btn-secondary-subtle" type="submit" style="margin-top: 25px;">Next</button>
             </div>
         </form>
     </div>

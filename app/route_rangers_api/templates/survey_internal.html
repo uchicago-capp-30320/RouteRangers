@@ -7,10 +7,12 @@
   <h1>{{ City }} Rider Survey</h1>
 </div>
 {% block map %} {% endblock %} {% block survey %}
-<form method="post" action="{{url}}">
-  {% csrf_token %} {{ form }}
-  <div style="text-align: right">
-    <button type="submit" style="margin-top: 25px">Next</button>
-  </div>
-</form>
+<div class="headers survey-block">
+  <form method="post" style="color: #555">
+    {% csrf_token %} {{ form }}
+    <div style="text-align: right">
+      <button type="submit" class="btn btn-secondary-subtle" style="margin-top: 25px">Next</button>
+    </div>
+  </form>
+</div>
 {% endblock %} {% endblock %}

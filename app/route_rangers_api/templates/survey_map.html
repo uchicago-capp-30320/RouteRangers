@@ -5,19 +5,32 @@
 <div class="headers">
   <h1>{{ City }} Rider Survey</h1>
   <p class="inline">
-    Please enter the trips you frequently take on transit, bike, or by car.
-    Click on the map to drop a start pin and then click to add a pin where the
-    trip ends. This feedback will be used to assess gaps in current transit
-    routes. We will ask you some follow-up questions to better understand
-    whether a new transit route would make this trip easier for you. Please
-    enter up to three routes.
+    Please enter&nbsp;<strong>a trip</strong>&nbsp;you frequently take on transit, by bike, or by car.
   </p>
+  <ul style="color:rgba(0, 0, 0, 0.6)">
+    <li>Type in the the "Start" search bar and press Enter/Return to find or set a starting location. This will add a
+      pin where
+      the trip starts.</li>
+    <li>Type in the "End" search bar and press Enter/Return to find or set an ending location. This will add a pin where
+      the
+      trip ends.</li>
+    <li>The map will then find and show you route between your start and end points.
+      If it doesn't match your actual route, click and drag the route
+      until it looks right!</li>
+    <li><strong>Please click the "Save File" button <em>before</em> clicking "Next"! If you don't, your route
+        will not be saved!</strong></li>
+  </ul>
+  <p class="inline">We will ask you some follow-up questions to better understand
+    whether a new transit route would make this trip easier for you. This feedback will be used to assess gaps in
+    current transit
+    routes.</p>
+  <p class="inline">After that, you can enter a second or third route if you want.</p>
 </div>
 <style>
   .map {
       position: absolute;
-      width: 100%;
-      height: 100%;
+      /* width: 100%;
+      height: 100%; */
   }
   .leaflet-routing-alternatives-container {
       display: none;
@@ -46,13 +59,15 @@
 </script>
 {% endblock %}
 {% block survey %}
-<form method="post">
-  {% csrf_token %} 
-  {{ form }}
-  <input type="hidden" id="lineStringInput" name="lineString">
-  <div style="text-align: right">
-    <button type="submit" style="margin-top: 25px">Next</button>
-  </div>
-</form>
+<div class="headers survey-block">
+  <form method="post" style="color: #555">
+    {% csrf_token %} 
+    {{ form }}
+    <input type="hidden" id="lineStringInput" name="lineString">
+    <div style="text-align: right">
+      <button class="btn btn-secondary-subtle" type="submit" style="margin-top: 25px">Next</button>
+    </div>
+  </form>
+</div>
 {% endblock %}
 {% endblock %}
