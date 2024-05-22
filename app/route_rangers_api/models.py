@@ -1,12 +1,14 @@
 from django.contrib.gis.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 from app.route_rangers_api.utils.city_mapping import (
     CITIES_CHOICES,
     TRIP_FREQ,
-    MODES_OF_TRANIST,
+    MODES_OF_TRANSIT,
     SWITCH_TO_TRANSIT,
     TIME_OF_DAY,
     BOOL_CHOICES,
     SATISFIED,
+    TRANSIT_IMPROVEMENT,
 )
 
 #################################
@@ -221,43 +223,56 @@ class BikeRidership(models.Model):
 #################################
 
 
-class Survey(models.Model):
+class SurveyUser(models.Model):
     """
-    Class that represents surveys deployed
-    """
-
-    name = models.CharField(max_length=64, primary_key=True)
-    created_at = models.DateTimeField("Created at", auto_now_add=True)
-
-
-class SurveyAnswer(models.Model):
-    """
-    Class that represents answers to surveys
+    Class that represents users that answer a survey
     """
 
     user_id = models.CharField(max_length=128, primary_key=True)
+    city = models.CharField(max_length=30, choices=CITIES_CHOICES)
+
+    # Updated from page 1 of survey:
+    frequent_transit = models.IntegerField(choices=BOOL_CHOICES, null=True)
+    car_owner = models.IntegerField(choices=BOOL_CHOICES, null=True)
+
+
+class SurveyResponse(models.Model):
+    """
+    Class that represents answers to survey questions related to a route
+    """
+
+    id = models.AutoField(primary_key=True)
+
+    user_id = models.ForeignKey(SurveyUser, on_delete=models.PROTECT)
+    route_id = models.CharField(max_length=128)
     response_date = models.DateTimeField("Survey response date", auto_now_add=True)
     city = models.CharField(max_length=30, choices=CITIES_CHOICES)
 
-    # Page 1:
-    frequent_transit = models.IntegerField(choices=BOOL_CHOICES, null=True)
-    car_owner = models.IntegerField(choices=BOOL_CHOICES, null=True)
+    # Map:
+    route = models.LineStringField(null=True)
+    starting_point = models.PointField(null=True)
+    end_point = models.PointField(null=True)
 
     # Page 2:
     trip_frequency = models.IntegerField(choices=TRIP_FREQ, null=True)
     trip_tod = models.IntegerField(choices=TIME_OF_DAY, null=True)
-    trip_time = models.IntegerField(null=True)
-    modes_of_transit = models.IntegerField(choices=MODES_OF_TRANIST, null=True)
+    trip_time = models.PositiveIntegerField(
+        null=True, validators=[MinValueValidator(1), MaxValueValidator(240)]
+    )
+    modes_of_transit = models.IntegerField(choices=MODES_OF_TRANSIT, null=True)
 
     # Page 3:
     satisfied = models.IntegerField(choices=SATISFIED, null=True)
-    transit_improvement_service = models.IntegerField(choices=BOOL_CHOICES, null=True)
-    transit_improvement_schedule = models.IntegerField(choices=BOOL_CHOICES, null=True)
-    transit_improvement_transfers = models.IntegerField(choices=BOOL_CHOICES, null=True)
-    transit_improvement_safety = models.IntegerField(choices=BOOL_CHOICES, null=True)
+    transit_improvement = models.IntegerField(choices=TRANSIT_IMPROVEMENT, null=True)
+    transit_improvement_open = models.CharField(max_length=128, null=True)
 
     # Page 4:
     switch_to_transit = models.IntegerField(choices=SWITCH_TO_TRANSIT, null=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user_id", "route_id"], name="survey_route")
+        ]
 
 
 class PlannedRoute(models.Model):

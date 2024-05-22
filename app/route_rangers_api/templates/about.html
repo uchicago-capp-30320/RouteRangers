@@ -1,10 +1,57 @@
 {% extends 'basetemplate.html' %}
 {% load static %}
 {% block content %}
-    <img src="{% static 'trains.png' %}"  alt="trains background image" style="width:100%" >
-    <div class="headers">
-        <h1> About us</h1>
-        <p class="inline">The transit planning tool aims to revitalize public interest and participation in transit, driving increased ridership and creating more efficient networks that meet urban community needs. Learn about the City Transit Ecosystem! Show us routes that you would like in your neighborhood! Currently, we are working in New York, Chicago and Portland. </p>
-    </div>
+<img src="{% static 'trains.png' %}" alt="trains background image" style="width: 100%;" />
+<div class="headers">
+  <h2 style="color: #07063A;">About us</h2>
+  <p class="inline" style="color: #464444;">
+    We are "Route Rangers", a team of UChicago Computer Science and Public Policy students committed to
+    revitalizing public interest and participation in transit systems. Following the COVID-19 pandemic, ridership levels
+    have plummeted across the United States. This decline in ridership levels has led to service cuts, further
+    discouraging ridership and posing a significant challenge for cities striving to recover.
+  </p>
+  <p class="inline" style="color: #464444;">
+    Our mission is to address this critical issue by creating a platform that bridges the gap between policymakers and
+    the public. We believe providing a space for current and potential transit users to voice their ideas and feedback
+    is essential.
+  </p>
+
+  <h6 style="color: #07063A;">Our Goal:</h6>
+  <p class="inline" style="color: #464444;">
+    We aim to empower urban transit policymakers with data analytics and public feedback to inform and enhance transit
+    planning. We aim to improve the overall transit ecosystem by fostering this connection and encouraging greater
+    ridership.
+  </p>
+
+  <h6 style="color: #07063A">Route Rangers Team:</h6>
+  <ul style="color: #464444;">
+    <li>Megan Moore</li>
+    <li>Benjamin Leiva</li>
+    <li>Lisette Solís</li>
+    <li>JP Martínez</li>
+    <li>Katherine Dumais</li>
+    <li>Matt Jackson</li>
+    <li>Jimena Salinas</li>
+  </ul>
+
+  <h6 style="color: #07063A">Get Involved!</h6>
+  <p class="inline" style="color: #464444;">
+    Learn about the City Transit Ecosystem! Participate in our survey and share your thoughts on the routes you want to
+    see in your neighborhood. Currently, we are active in New York, Chicago, and Portland.
+    If you're a policymaker, dive into our data and explore new insights to improve your transit systems.
+  </p>
+</div>
+
+<div style="text-align: center;">
+  <h6 style="color: #07063A; display: inline-block;">
+    Checkout our <span style="text-decoration: underline;">GitHub repository</span>!
+  </h6>
+</div>
+
+
+<a href="https://github.com/uchicago-capp-30320/RouteRangers"
+  style="display: block; text-align: center; margin-bottom: 20px;">
+  <img src="{% static 'github-mark.png' %}" alt="github logo" style="width: 5%; margin: 0 auto;" />
+</a>
 
 {% endblock %}

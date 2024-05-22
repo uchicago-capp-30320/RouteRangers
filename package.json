@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "leaflet.markercluster": "^1.5.3"
+  },
+  "devDependencies": {
+    "prettier": "^3.2.5"
+  }
+}
