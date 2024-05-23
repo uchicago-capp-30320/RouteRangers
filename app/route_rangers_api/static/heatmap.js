@@ -15,7 +15,7 @@ function heatmaps(
     "#D7301F",
     "#B30000",
     "#7F0000",
-  ],
+  ]
 ) {
   // Initialize the map
   var heatmap = L.map("heatmap").setView(coordinates, 10);
@@ -25,9 +25,8 @@ function heatmaps(
     "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
     {
       maxZoom: 19,
-      attribution:
-        '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    },
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }
   ).addTo(heatmap);
 
   // Function to compute the dynamic scale and round to the nearest 10s
@@ -43,26 +42,19 @@ function heatmaps(
     return scale;
   }
 
-  // Define function to get color based on data
+  // Segment color by dynamically produced scale
   function getColor(d, scale) {
-    return d > scale[6]
-      ? colorscale[7]
-      : d > scale[5]
-        ? colorscale[6]
-        : d > scale[4]
-          ? colorscale[5]
-          : d > scale[3]
-            ? colorscale[4]
-            : d > scale[2]
-              ? colorscale[3]
-              : d > scale[1]
-                ? colorscale[2]
-                : d > scale[0]
-                  ? colorscale[1]
-                  : colorscale[0];
+    return d > scale[6] ? colorscale[7]
+      : d > scale[5] ? colorscale[6]
+      : d > scale[4] ? colorscale[5]
+      : d > scale[3] ? colorscale[4]
+      : d > scale[2] ? colorscale[3]
+      : d > scale[1] ? colorscale[2]
+      : d > scale[0] ? colorscale[1]
+      : colorscale[0];
   }
 
-  // Define controls for info boxes, one for each variable
+  // Define controls
   var infoControls = {};
   var currentVariable = variables[0];
 
@@ -82,16 +74,9 @@ function heatmaps(
     };
 
     info.update = function (props) {
-      this._div.innerHTML =
-        `<h4> ${label} - ${titles[variable]}</h4>` +
+      this._div.innerHTML = `<h4> ${label} - ${titles[variable]}</h4>` +
         (props
-          ? "<b>" +
-            "Census Tract " +
-            props["census_tract"] +
-            "</b><br />" +
-            props[variable] +
-            " " +
-            variableunits[variable]
+          ? "<b>" + "Census Tract " + props["census_tract"] + "</b><br />" + props[variable] + " " + variableunits[variable]
           : "Hover over a census tract");
     };
 
@@ -99,13 +84,10 @@ function heatmaps(
     infoControls[variable] = info;
   });
 
-  // Hide all info boxes initially
-  Object.values(infoControls).forEach(
-    (info) => (info._div.style.display = "none"),
-  );
+  // info controls
+  Object.values(infoControls).forEach((info) => (info._div.style.display = "none"));
   infoControls[currentVariable]._div.style.display = "block";
 
-  // Add legend control
   var legend = L.control({ position: "bottomright" });
 
   legend.onAdd = function () {
@@ -116,66 +98,62 @@ function heatmaps(
 
   legend.addTo(heatmap);
 
-  // Function to update the legend
+  // Function to populate legend
   function updateLegend(scale) {
     var div = legend.getContainer();
-    div.innerHTML = "<h4>Legend</h4>"; // Reset legend content
+    div.innerHTML = "<h4>Legend</h4>";
 
     for (var i = 0; i < scale.length; i++) {
-      div.innerHTML +=
-        '<i style="background:' +
-        getColor(scale[i] + 1, scale) +
-        '"></i> ' +
-        scale[i] +
-        (scale[i + 1] ? "&ndash;" + scale[i + 1] + "<br>" : "+");
+      var span = document.createElement("span");
+      span.innerHTML = scale[i] + (scale[i + 1] ? "&ndash;" + scale[i + 1] + "<br>" : "+");
+      var icon = document.createElement("i");
+      icon.style.width = "18px";
+      icon.style.height = "18px";
+      icon.style.float = "left";
+      icon.style.marginRight = "8px";
+      icon.style.opacity = "0.7";
+      icon.style.background = getColor(scale[i] + 1, scale);
+      div.appendChild(icon);
+      div.appendChild(span);
     }
   }
 
-  // Load GeoJSON data and add layers
   fetch(filepath)
     .then((response) => response.json())
     .then((data) => {
-      var baseLayers = {}; // Initialize an object to hold base layers
-      const layerNames = {
-        median_income: "Median Income",
-      };
+      var baseLayers = {}; 
+      var defaultLayer;
 
-      // Loop through variables to create base layers
+      //Create base layers
       for (var i = 0; i < variables.length; i++) {
         var variable = variables[i];
-        var scale = computeScale(data, variable); // Compute scale dynamically
+        var scale = computeScale(data, variable); 
         var geojson = L.geoJson(data, {
           style: createStyleFunction(variable, scale),
           onEachFeature: function (feature, layer) {
             onEachFeature(feature, layer, variable);
           },
         });
-        baseLayers[titles[variable]] = geojson; // Add each base layer to the baseLayers object
-        // Set the default layer to the first variable (or any condition you prefer)
+        baseLayers[titles[variable]] = geojson; 
+
+        // Set the default layer to the first variable
         if (i === 0) {
           defaultLayer = geojson;
-          updateLegend(scale); // Update legend for the default layer
+          updateLegend(scale); 
         }
       }
 
-      // Add the default layer to the map
       if (defaultLayer) {
         defaultLayer.addTo(heatmap);
       }
 
       // Create a single layer control with radio buttons
-      var layerControl = L.control
-        .layers(baseLayers, null, {
-          collapsed: true,
-        })
-        .addTo(heatmap);
+      var layerControl = L.control.layers(baseLayers, null, { collapsed: true }).addTo(heatmap);
 
       // Listen for the layerchange event to update the info box visibility and current variable
       heatmap.on("baselayerchange", function (event) {
         // Hide all info boxes
-        Object.values(infoControls).forEach(
-          (info) => (info._div.style.display = "none"),
-        );
+        Object.values(infoControls).forEach((info) => (info._div.style.display = "none"));
         // Show the selected info box
         currentVariable = titles_reversed[event.name];
         infoControls[currentVariable]._div.style.display = "block";
@@ -217,7 +195,6 @@ function heatmaps(
     infoControls[currentVariable].update(layer.feature.properties);
   }
 
-  // Function to reset feature highlight
   function resetHighlight(e) {
     var layer = e.target;
     layer.setStyle({
@@ -229,12 +206,11 @@ function heatmaps(
     infoControls[currentVariable].update(null);
   }
 
-  // Function to zoom to feature
+
   function zoomToFeature(e) {
     heatmap.fitBounds(e.target.getBounds());
   }
 
-  // Function to attach events to each feature
   function onEachFeature(feature, layer, variable) {
     layer.on({
       mouseover: highlightFeature,
