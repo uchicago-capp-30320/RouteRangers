@@ -56,4 +56,4 @@ Limited Public Input: Current feedback methods aren't attracting enough particip
 Inefficient Feedback Collection: Gathering and processing feedback through traditional channels like via email and via phone takes too long, delaying transit improvements.
 
 ### Design Guidelines
-Design Guidelines are saved [here] (https://uchicago.box.com/s/p76s5pptblh7kelb928la7k4mj9se9c9)
+Design Guidelines are saved [here](https://uchicago.box.com/s/p76s5pptblh7kelb928la7k4mj9se9c9)
