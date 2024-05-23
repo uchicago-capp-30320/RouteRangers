@@ -276,13 +276,18 @@ def survey_p2(request, city: str, user_id: str = None):
     if request.method == "POST":
         # post form data to database
         city_survey = CITIES_CHOICES_SURVEY[city]
-        survey_answer = SurveyResponse(
-            user_id_id=user_id, city=city_survey, route_id=route_id
-        )
-        print(f"survey answer pg 2: {survey_answer}")
-        update_survey = RiderSurvey2(request.POST, instance=survey_answer)
-        # update and save
-        update_survey.save()
+        try:
+            survey_answer = SurveyResponse.objects.get(
+                user_id_id=user_id, city=city_survey, route_id=route_id
+            )
+            survey_answer = RiderSurvey2(request.POST, instance=survey_answer)
+        except Exception as e:
+            print(e)
+            survey_answer = SurveyResponse(
+                user_id_id=user_id, city=city_survey, route_id=route_id
+            )
+            print(f"survey answer pg 2: {survey_answer}")
+            survey_answer = RiderSurvey2(request.POST, instance=survey_answer)
 
         # Get the line string data and update database
         post_line_string = request.POST.get("lineString")
@@ -295,15 +300,14 @@ def survey_p2(request, city: str, user_id: str = None):
         end_point = route.coords[-1]
 
         # Update row in database
-        obj = SurveyResponse.objects.get(user_id_id=user_id, route_id=route_id)
 
-        obj.route = route
-        obj.starting_point = Point(starting_point)
-        obj.end_point = Point(end_point)
-        obj.save()
+        survey_answer.route = route
+        survey_answer.starting_point = Point(starting_point)
+        survey_answer.end_point = Point(end_point)
+        survey_answer.save()
 
         # return selected mode of transit from form
-        selected_mode_index = update_survey.cleaned_data["modes_of_transit"]
+        selected_mode_index = survey_answer.cleaned_data["modes_of_transit"]
         selected_mode = MODES_OF_TRANSIT[selected_mode_index]
 
         if selected_mode == "Train" or selected_mode == "Bus":
