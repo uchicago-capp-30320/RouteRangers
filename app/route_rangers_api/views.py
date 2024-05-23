@@ -66,8 +66,11 @@ def about_internal(request, city: str):
     context = {
         "City": CITY_CONTEXT[city]["CityName"],
         "City_NoSpace": city,
-        "cities_class": "cs-li-link",
         "about_class": "cs-li-link cs-active",
+        "cities_class": "cs-li-link",
+        "policy_class": "cs-li-link",
+        "survey_class": "cs-li-link",
+        "feedback_class": "cs-li-link",
     }
     return render(request, "about_internal.html", context)
 
@@ -186,6 +189,7 @@ def dashboard(request, city: str):
         "City_NoSpace": city,
         "citydata": dashboard_dict,
         "heatmaplabel": f"{city_name} By Census Tract",
+        "about_class": "cs-li-link",
         "cities_class": "cs-li-link",
         "policy_class": "cs-li-link cs-active",
         "survey_class": "cs-li-link",
@@ -428,6 +432,7 @@ def thanks(request, city: str):
     context = {
         "City": CITY_CONTEXT[city]["CityName"],
         "City_NoSpace": city,
+        "about_class": "cs-li-link",
         "cities_class": "cs-li-link",
         "policy_class": "cs-li-link ",
         "survey_class": "cs-li-link cs-active",
@@ -444,6 +449,7 @@ def responses(request, city: str):
         "Response": get_number_of_responses(city),
         "City_NoSpace": city,
         "Riders": get_transit_use_pct(city),
+        "about_class": "cs-li-link",
         "cities_class": "cs-li-link",
         "policy_class": "cs-li-link ",
         "survey_class": "cs-li-link",
@@ -462,6 +468,7 @@ def get_survey_context(city, form):
     context = {
         "City": CITY_CONTEXT[city]["CityName"],
         "City_NoSpace": city,
+        "about_class": "cs-li-link",
         "cities_class": "cs-li-link",
         "policy_class": "cs-li-link ",
         "survey_class": "cs-li-link cs-active",
