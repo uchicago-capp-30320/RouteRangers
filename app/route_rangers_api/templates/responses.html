@@ -35,24 +35,31 @@
 </div>
 
 <div class="headers">
-  <h2>Rider Trips</h2>
-  <p class="inline">Map showing all transit routes in your city</p>
-  <div class="row">
-    <div class="graphs container col-12 col-md-6 col-lg-6 standard-graph">
-      <div id="tranform" class="graph-container"></div>
-    </div>
-    <div class="graphs container col-12 col-md-6 col-lg-6 standard-graph">
-      <div id="timeofday" class="graph-container"></div>
-    </div>
+  <h4>Rider Trips</h4>
+  <p class="inline">See user reported trips on the map on the main dashboard.</p>
+  <a class="dashboard-link" href="/dashboard/{{ City_NoSpace}}">Dashboard > </a>
+
+<style>
+  .dashboard-link {
+    color: #14213d; /* Set the color of the link */
+    text-decoration: none; /* Remove underline */
+  }
+</style>
+
+  
+  <div class="headers"></div>
+  <h4>When do you usually make this trip?</h4>
+  <div id="tranform" class="graph-container" style="width: 90%; height: 400px; margin-top: 5%"></div>
+  
+  <div class="headers"></div>
+  <h4>What time of day you usually make this trip?</h4>
+  <div id="timeofday" class="graph-container" style="width: 90%; height: 400px; margin-top: 5%"></div>
   </div>
 </div>
 
 <div class="headers">
-  <h2>Feedback from Transit Riders</h2>
-  <p class="inline">Answers to the rider</p>
-  <div class="row">
-    <div class="graphs container col-12 col-md-6 col-lg-6 standard-graph">
-      <div id="dataviz" class="graph-container"></div>
+  <h4>How could your public transit route be improved?</h4>
+  <div id="dataviz" class="graph-container" style="width: 90%; height: 400px; margin-top: 5%"></div>
     </div>
   </div>
 </div>
@@ -60,33 +67,10 @@
 {% block transit_graphs%} {% endblock %}
 
 <div class="headers">
-  <h2>Feedback from Drivers</h2>
-  <p class="inline">Answers from people about trips in cars and rideshares.</p>
-  <div class="row">
-    <div class="graphs container col-12 col-md-6 col-lg-6 standard-graph">
-      <div id="my_dataviz" class="graph-container"></div>
-    </div>
+  <h4>What factor would most motivate you to take public transit more?</h4>
+      <div id="my_dataviz" class="graph-container" style="width: 90%; height: 400px; margin-top: 5%"></div>
   </div>
 </div>
-
-<style>
-  .axis text {
-    font-size: 12px;
-  }
-  .axis line, .axis path {
-    shape-rendering: crispEdges;
-    stroke: #000;
-    fill: none;
-  }
-  .standard-graph {
-    height: 400px; /* Standard height */
-    width: 100%; /* Standard width */
-  }
-  .graph-container {
-    width: 100%;
-    height: 100%;
-  }
-</style>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://d3js.org/d3.v4.js"></script>

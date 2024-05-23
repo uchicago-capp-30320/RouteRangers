@@ -549,7 +549,6 @@ body {
     left: 0;
     width: 100%; /* Full width of the link */
     height: 1px; /* Height of the underline */
-    /* background-color: currentColor; Use the current text color for the underline */
     transition: width 0.3s ease; /* Add a transition effect */
   }
 
@@ -671,6 +670,13 @@ h2 {
   color: #555;
 }
 h3 {
+  font-family: 'Inter', 'Roboto', Arial, sans-serif;
+  position: relative;
+  display: flex;
+  font-size-adjust: 1.25rem;
+  color: #555;
+}
+h4 {
   font-family: 'Inter', 'Roboto', Arial, sans-serif;
   position: relative;
   display: flex;
