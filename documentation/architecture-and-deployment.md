@@ -18,24 +18,19 @@ To load the database tables:
 1. Make sure you have all of the python dependencies installed
 2. Make sure you have all of the database (and other) credentials in your `.env` folder
 3. Install [gdal](https://gdal.org/index.html) in your machine
-    - If working on an Intel chip Mac you can run `brew install gdal`
-    - TODO update for otherr use cases
+    - Run `brew install gdal` if using `homebrew`
+    - If working on an Intel chip Mac, setup should be completed
+    - If working on an M2 chip, on `app/geodajngo/settings.py` you'll need to import from a `.env` file (or manually) the `GDAL_LIBRARY_PATH` and `GEOS_LIBRARY_PATH` variables. If using `homebrew` head to `/opt/homebrew/Cellar` and identify the files `libgdal.dylib` and `libgeos_c.dylib` and set the path to the path of those files. 
 4. Run:
-```
-$ cd app
-# python -m manage makemigrations
-$ python -m manage migrate
-```
+
+For testing that the set up is correct we recomend launching the server locally as explained in `Frontend` below
+
 5. Database tables should be established, you can double check by logging into the database using postico or some other postgres login tool
 
 ### Ingestion
-Ingestion scripts are not finalized.
+The ingestion files are stored in `app.scripts/`. To ingest the data of one file with its default values run on the terminal in the `app/` directory `python -m manage runscript <module_name>`. Running it in this manner allows to use `django-extensions`, which deals with some of the Django settings necessary, particularly geographic data dependencies.
 
-To get data from cities' GTFS and ingest it to PostGIS database backend, navigate to the
-`app` folder and run `python -m manage runscript extract_scheduled_gtfs`.
-As of now, it is only a "test" script that runs a process to ingest the transit
-stations from Chicago's Metra system; it will be expanded out to ingest more kinds
-of data in the coming days.
+Some of the files can accept additional parameters, for these cases, the command is `python -m manage runscript <module_name> --script-args <arg_1> <arg_2> ...`
 
 ### Frontend
 To run the webserver locally (again make sure you have dependencies installed and `.env` up to date)

@@ -1,4 +1,5 @@
 from django.contrib.gis.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 from app.route_rangers_api.utils.city_mapping import (
     CITIES_CHOICES,
     TRIP_FREQ,
@@ -255,13 +256,15 @@ class SurveyResponse(models.Model):
     # Page 2:
     trip_frequency = models.IntegerField(choices=TRIP_FREQ, null=True)
     trip_tod = models.IntegerField(choices=TIME_OF_DAY, null=True)
-    trip_time = models.IntegerField(null=True)
+    trip_time = models.PositiveIntegerField(
+        null=True, validators=[MinValueValidator(1), MaxValueValidator(240)]
+    )
     modes_of_transit = models.IntegerField(choices=MODES_OF_TRANSIT, null=True)
 
     # Page 3:
     satisfied = models.IntegerField(choices=SATISFIED, null=True)
     transit_improvement = models.IntegerField(choices=TRANSIT_IMPROVEMENT, null=True)
-    transit_improvement_open = models.CharField(max_length=128)
+    transit_improvement_open = models.CharField(max_length=128, null=True)
 
     # Page 4:
     switch_to_transit = models.IntegerField(choices=SWITCH_TO_TRANSIT, null=True)
