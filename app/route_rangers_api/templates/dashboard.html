@@ -1,7 +1,12 @@
 {% extends 'basetemplate_internal.html' %} {% load static %} {% block content %}
 <div class="headers">
   <h1>{{ City }} Transit Ecosystem</h1>
-  <p class="inline">Overview of Transit in Your City</p>
+  <p class="inline">
+    Dashboard compiling data from publicly available data sources from the city's 
+    transit agencies, the census, and user reported feedback from census. The goal 
+    goal of this dashboard is to give policy makers and community members an overview 
+    of transit in their city. 
+  </p>
 </div>
 <div class="card-container row">
   <div class="col-12 col-md-3 col-lg-3">
@@ -19,7 +24,6 @@
       <li>
         <a class="dropdown-item" href="#" onclick="updateCards('typeDropdown', this)">Train</a>
       </li>
-      <!-- Add more months as needed -->
     </ul>
   </div>
 </div>
@@ -64,11 +68,16 @@
 
 <div class="headers">
   <h2>Transit Map</h2>
-  <p class="inline">Map showing all transit routes in your city</p>
+  <p class="inline">
+    Map of all the transit routes and stops in your city. You can include different
+    datasets by toggling layers off and on with the menu on the top right corner of the map. 
+    You can also include the user reported data on this map. User drawn routes that are 
+    shaded darker have been requested multiple times. 
+  </p>
   <div id="map"></div>
 </div>
 
-<div class="card container">
+<div class="graphs container">
   <h2 class="card-content">Top 10 Stations/Stops</h2>
   <div class="card-content row">
     <div class="col-12 col-md-6 col-lg-6">
@@ -103,8 +112,10 @@
 <div class="headers">
   <h2>Heat Map</h2>
   <p class="inline">
-    Maps of showing variation in transit, environmental, and socio-economic
-    variables across census tracts <br />
+    Heat maps show variation in census data across the city. You can include different
+    datasets by toggling layers off and on with the menu on the top right corner of the map.
+    Hover over a census tract to see the data for that tract.
+    <br />
   </p>
   <div id="heatmap" class="mx-auto" style="width: 90%; height: 600px; margin-top: 5%"></div>
 </div>
@@ -112,9 +123,8 @@
 <div class="headers">
   <h2>Trends Over Time</h2>
   <p class="inline">
-    The following show evolution of trends in ridership and other key variables
-    over time. This is critical as we continue to understand the impact of the
-    pandemic.
+    Trends in ridership throught the year. You can select the name in legend to include 
+    or hide different modes of transit.
   </p>
 </div>
 
@@ -135,7 +145,6 @@
 </div>
 
 <!-- Map Scripts -->
-<!-- <script>src="{% static 'map.js' %}"</script> -->
 <script type="module">
   import { initializeMap } from "{% static 'map.js' %}";
   var coordinates = {{ coordinates }};

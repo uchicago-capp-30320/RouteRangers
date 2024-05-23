@@ -62,6 +62,16 @@ def about(request):
     return render(request, "about.html", context)
 
 
+def about_internal(request, city: str):
+    context = {
+        "City": CITY_CONTEXT[city]["CityName"],
+        "City_NoSpace": city,
+        "cities_class": "cs-li-link",
+        "about_class": "cs-li-link cs-active",
+    }
+    return render(request, "about_internal.html", context)
+
+
 # caching for 6 hours since the data doesn't change often
 @cache_page(60 * 60 * 6)
 def dashboard(request, city: str):
