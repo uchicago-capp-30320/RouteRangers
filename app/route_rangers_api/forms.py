@@ -53,7 +53,7 @@ QUESTIONS = {
         "trip_tod": "What time of day you usually make this trip?",
         "trip_time": "How long does this trip currently take in minutes?",
         "modes_of_transit": "What mode of transit do you usually use to make \
-            this trip? Select all that apply",
+            this trip?",
     },
     "p3": {
         "satisfied": "How satisfied are you with the public transit options \
