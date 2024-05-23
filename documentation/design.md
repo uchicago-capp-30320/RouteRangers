@@ -3,7 +3,7 @@
 ### Prototypes 
 You can view prototypes [here](https://www.figma.com/proto/bXKQi5P1RpGKSb1Ao6w0V5/Community-Transit-Tool?node-id=90-70&t=mejb94ZIzXd2Ov3v-1&scaling=scale-down&page-id=0%3A1&starting-point-node-id=90%3A70)
 
-###Problem Statement 
+### Problem Statement 
 
 Following the pandemic ridership decreased on public transit. This prevents a funding threat to public transit agencies, so increasing ridership is a top priority; however, transit agencies often lack the data to deeply understand rider behaviors and needs. We need an innovative solution to bridge the gap between policy makers and the public across the US, enabling urban transit policy makers to utilize data analytics while incorporating public feedback in transit planning. This solution should:
 
